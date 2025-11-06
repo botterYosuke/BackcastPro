@@ -1,15 +1,8 @@
-<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" style="background: transparent; background-color: transparent;" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="140px" height="80px" viewBox="-0.5 -0.5 140 80" content="&lt;mxfile&gt;&lt;diagram id=&quot;H52P_jv-h0m6UGO-Uphw&quot; name=&quot;ページ1&quot;&gt;1VVNb4MwDP013Pno6HotbbfLpEk97JyBC9ECQWk6YL9+TnEK6YdWaVul5oCcZ8fx80uCFyVl+6RYXbzIDIQX+lnrRQsvDKM4wK8BOgLCWQ/kimc9FAzAmn8BgT6hO57B1gnUUgrNaxdMZVVBqh2MKSUbN2wjhbtrzXI4AdYpE6foG890QWj8MBkcz8Dzwm4dxESwZDaaqGwLlslmBEVLL0qUlLq3yjYBYZpnG9OvW13wHipTUOmrFlAdn0zsiB0VpjtLN1dyV1MYKA3tuSazdxvun9YQHJjhkQBZglYdhlCiMKYldBzCKc2bUXMnhBWjvj4SxkjP/JB6YIwGkT7fgIef+aNGtTGRERMChMwVK71oXoPiuB+oY9/r4Jg3BdewrllqMjR4HRArdInlLAI0N7wFe8LNfNubyNb4hEikkGpfRpTgWK1MjFbyA6ynkhWumKNGVQaZTWOPlclzUTpHIv+8RmMNwjMaxH+gQXw3GsxwXKvBr9rees717NzpLUSZ3o0oMY7bXwz7eB29Xf+nEE6H/8LeN/q7Rstv&lt;/diagram&gt;&lt;/mxfile&gt;">
+<svg host="65bd71144e" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="456px" height="261px" viewBox="-0.5 -0.5 456 261" content="&lt;mxfile&gt;&lt;diagram id=&quot;H52P_jv-h0m6UGO-Uphw&quot; name=&quot;ページ1&quot;&gt;zVVNb4MwDP01XCsg5eta2m6XSZN62DkDF6IFgtK00P36mZIUGK1WqVrVXHDesx3bLxEWiYvmRdIqfxMpcMu108YiS8t1HduZ46dFjh0SumEHZJKl2qkHNuwbTKRG9yyF3chRCcEVq8ZgIsoSEjXCqJSiHrttBR+fWtEMJsAmoXyKfrBU5Rr1vXlPvALLcnO040cdU1DjrVvZ5TQV9QAiK4vEUgjVWUUTA2+nZwbTxa2vsOfKJJTqpgBdx4Hyve5OF6aOpt1Min01TazPOoBU0FyaO/00GfrO8E6AKEDJI/rpKNfXRejr4AZ6X/fDnXteh+WDuZ4DqRY0O+fuW0ZDd315At7fA0CRqtbE7innwEUmaWGRRQWS4Xkgf3PvPbGoc6ZgU9GkzVDjg0AsVwWWs3TQ3LIGzBVv97vOjOwTx3ksuJCnMkiMa71ufZQUX2CYUpQYsUCRyhRSk8bcqzbPBe3sK+JNRRqIQCJ7KoITefeL4D+lCGE4C7ypDhGuW3W4a/SaJe7MGz2QHniIOMFzihPMLmjj43r8G9GsP5bJ/0eRcNv/JE7c4F9LVj8=&lt;/diagram&gt;&lt;/mxfile&gt;">
     <defs/>
     <g>
-        <g/>
-        <g>
-            <path d="M 40 60 L 10 60 Q 0 60 5.55 51.68 L 34.45 8.32 Q 40 0 50 0 L 110 0 Q 120 0 114.45 8.32 L 85.55 51.68 Q 80 60 70 60 Z" fill="#ccccff" stroke="none" pointer-events="all" style="fill: light-dark(rgb(204, 204, 255), rgb(56, 56, 100));"/>
-        </g>
-        <g>
-            <path d="M 50 70 L 20 70 Q 10 70 15.55 61.68 L 44.45 18.32 Q 50 10 60 10 L 120 10 Q 130 10 124.45 18.32 L 95.55 61.68 Q 90 70 80 70 Z" fill="#9999ff" stroke="none" pointer-events="all" style="fill: light-dark(rgb(153, 153, 255), rgb(93, 93, 181));"/>
-        </g>
-        <g>
-            <path d="M 60 80 L 30 80 Q 20 80 25.55 71.68 L 54.45 28.32 Q 60 20 70 20 L 130 20 Q 140 20 134.45 28.32 L 105.55 71.68 Q 100 80 90 80 Z" fill="#6666ff" stroke="none" pointer-events="all" style="fill: light-dark(rgb(102, 102, 255), rgb(130, 130, 255));"/>
-        </g>
+        <path d="M 150 195 L 10 195 Q 0 195 4.19 185.92 L 85.81 9.08 Q 90 0 100 0 L 380 0 Q 390 0 385.81 9.08 L 304.19 185.92 Q 300 195 290 195 Z" fill="#ccccff" stroke="none" pointer-events="none"/>
+        <path d="M 183.13 227.5 L 42.5 227.5 Q 32.5 227.5 36.64 218.4 L 117.11 41.6 Q 121.25 32.5 131.25 32.5 L 412.5 32.5 Q 422.5 32.5 418.36 41.6 L 337.89 218.4 Q 333.75 227.5 323.75 227.5 Z" fill="#9999ff" stroke="none" pointer-events="none"/>
+        <path d="M 216.25 260 L 75 260 Q 65 260 69.09 250.88 L 148.41 74.12 Q 152.5 65 162.5 65 L 445 65 Q 455 65 450.91 74.12 L 371.59 250.88 Q 367.5 260 357.5 260 Z" fill="#6666ff" stroke="none" pointer-events="none"/>
     </g>
 </svg>
