@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['orders_0',['orders',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#abc13f2a58aecc75490633194a2622a31',1,'src::BackcastPro::_broker::_Broker']]]
+  ['index_0',['index',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#aea2e5b002435207a3730e808d9b63e50',1,'src::BackcastPro::backtest::Backtest']]]
 ];

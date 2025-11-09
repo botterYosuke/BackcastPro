@@ -32,5 +32,6 @@ var searchData=
   ['_5fstats_2epy_29',['_stats.py',['../__stats_8py.html',1,'']]],
   ['_5fstrategy_30',['_strategy',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a74bb1e6cd13f9fa40f0add8065237dc6',1,'src::BackcastPro::backtest::Backtest']]],
   ['_5ftp_5forder_31',['_tp_order',['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#a49d0760f145e77e5907ddee24697b54e',1,'src::BackcastPro::trade::Trade']]],
-  ['_5ftrade_5fon_5fclose_32',['_trade_on_close',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#ae2a7562d3b20cc4c48563ca4e1de5046',1,'src::BackcastPro::_broker::_Broker']]]
+  ['_5ftqdm_5fenabled_32',['_TQDM_ENABLED',['../namespacesrc_1_1BackcastPro_1_1backtest.html#abb602b799e96b9498a2a77df7ac8bc3b',1,'src::BackcastPro::backtest']]],
+  ['_5ftrade_5fon_5fclose_33',['_trade_on_close',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#ae2a7562d3b20cc4c48563ca4e1de5046',1,'src::BackcastPro::_broker::_Broker']]]
 ];

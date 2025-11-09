@@ -29,7 +29,8 @@ var NAVTREE =
       [ "名前空間一覧", "namespaces.html", "namespaces_dup" ],
       [ "名前空間メンバ", "namespacemembers.html", [
         [ "全て", "namespacemembers.html", null ],
-        [ "関数", "namespacemembers_func.html", null ]
+        [ "関数", "namespacemembers_func.html", null ],
+        [ "変数", "namespacemembers_vars.html", null ]
       ] ]
     ] ],
     [ "クラス", "annotated.html", [

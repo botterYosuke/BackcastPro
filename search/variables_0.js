@@ -16,5 +16,6 @@ var searchData=
   ['_5fresults_13',['_results',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a801f40087845261d0e7a1a2d130b9769',1,'src::BackcastPro::backtest::Backtest']]],
   ['_5fspread_14',['_spread',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#a9ecc55c6d284b43925074921f919249b',1,'src::BackcastPro::_broker::_Broker']]],
   ['_5fstrategy_15',['_strategy',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a74bb1e6cd13f9fa40f0add8065237dc6',1,'src::BackcastPro::backtest::Backtest']]],
-  ['_5ftrade_5fon_5fclose_16',['_trade_on_close',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#ae2a7562d3b20cc4c48563ca4e1de5046',1,'src::BackcastPro::_broker::_Broker']]]
+  ['_5ftqdm_5fenabled_16',['_TQDM_ENABLED',['../namespacesrc_1_1BackcastPro_1_1backtest.html#abb602b799e96b9498a2a77df7ac8bc3b',1,'src::BackcastPro::backtest']]],
+  ['_5ftrade_5fon_5fclose_17',['_trade_on_close',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#ae2a7562d3b20cc4c48563ca4e1de5046',1,'src::BackcastPro::_broker::_Broker']]]
 ];
