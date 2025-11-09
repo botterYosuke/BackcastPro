@@ -2,6 +2,7 @@
 バックテスト管理モジュール。
 """
 
+import os
 import warnings
 from functools import partial
 from numbers import Number
@@ -9,10 +10,22 @@ from typing import Optional, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm # プログレスバー
+from tqdm import tqdm  # プログレスバー
 
 from ._broker import _Broker
 from ._stats import compute_stats
+
+
+_TQDM_ENABLED = os.environ.get("BACKCASTPRO_TQDM_DISABLE", "").lower() not in {"1", "true", "yes"}
+
+
+def set_tqdm_enabled(enabled: bool) -> None:
+    """
+    tqdm ベースの進捗バー表示を有効 / 無効にします。
+    Pyodide や非TTY環境では False を指定して抑止してください。
+    """
+    global _TQDM_ENABLED
+    _TQDM_ENABLED = bool(enabled)
 
 
 class Backtest:
@@ -244,13 +257,16 @@ class Backtest:
         # np.nan >= 3は無効ではない；Falseです。
         with np.errstate(invalid='ignore'):
 
-            # プログレスバーを表示
-            progress_bar = tqdm(self.index, 
-                              desc="バックテスト実行中", 
-                              unit="step",
-                              ncols=120,
-                              leave=True,
-                              dynamic_ncols=True)
+            # プログレスバーを表示（無効化フラグに対応）
+            progress_bar = tqdm(
+                self.index,
+                desc="バックテスト実行中",
+                unit="step",
+                ncols=120,
+                leave=True,
+                dynamic_ncols=True,
+                disable=not _TQDM_ENABLED
+            )
             count = 0
             for current_time in progress_bar:
 
