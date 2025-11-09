@@ -56,12 +56,12 @@ print(results)
 
 ```mermaid
 flowchart TD
-    A[データ取得] --> B[Backtest 初期化]
-    B --> C[Strategy.init 前処理]
-    C --> D[Strategy.next(current_time) ループ]
-    D --> E[_Broker.next(current_time) 注文/約定]
-    E --> F[_stats 統計計算]
-    F --> G[結果 pd.Series]
+    A["データ取得"] --> B["Backtest 初期化"]
+    B --> C["Strategy.init 前処理"]
+    C --> D["Strategy.next(current_time) ループ"]
+    D --> E["_Broker.next(current_time) 注文/約定"]
+    E --> F["_stats 統計計算"]
+    F --> G["結果 pd.Series"]
 ```
 
 ## サポート
