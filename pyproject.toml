@@ -12,6 +12,11 @@ classifiers = [
     "Operating System :: OS Independent",
     "License :: OSI Approved :: MIT License",
 ]
+dependencies = [
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "tqdm>=4.64",
+]
 
 [project.urls]
 Homepage = "https://github.com/botterYosuke/BackcastPro/"
