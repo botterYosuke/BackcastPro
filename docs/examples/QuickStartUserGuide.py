@@ -3,13 +3,11 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
-import pandas as pd
-from BackcastPro import *
+from BackcastPro import BackcastPro
 
-df = chart('2371', '2025-01-01', '2025-01-31')
-print(df)
+# BackcastProインスタンスを作成
+bp = BackcastPro()
 
+# 株価データを取得
+df = bp.set_chart('9885', '2025-01-01', '2025-01-31')
 
-# next()
-# next_day()
-# chart()
