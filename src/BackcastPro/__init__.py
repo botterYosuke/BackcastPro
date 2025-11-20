@@ -10,7 +10,6 @@ BackcastPro をご利用いただきありがとうございます。
 
 ※ 使い始めはチュートリアル → 詳細はAPIリファレンスをご参照ください。
 """
-from .main import BackcastPro
+from .chart import chart
 
-__all__ = ['BackcastPro']
 
