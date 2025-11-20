@@ -30,7 +30,7 @@ python -m pip install -r requirements.txt
 ## 使用方法
 
 ```python
-from BackcastPro import Strategy, Backtest
+from BackcastPro import *
 
 # ここにトレーディング戦略の実装を記述
 ```
