@@ -27,7 +27,6 @@ def set_tqdm_enabled(enabled: bool) -> None:
     global _TQDM_ENABLED
     _TQDM_ENABLED = bool(enabled)
 
-
 class Backtest:
     """
     特定のデータに対して特定の（パラメータ化された）戦略をバックテストします。
@@ -88,27 +87,22 @@ class Backtest:
     `finalize_trades`が`True`の場合、バックテスト終了時に
     まだ[アクティブで継続中]の取引は最後のバーでクローズされ、
     計算されたバックテスト統計に貢献します。
-    """  
+    """
 
     def __init__(self,
-                 data: dict[str, pd.DataFrame],
-                 strategy: Type,
-                 *,
-                 cash: float = 10_000,
-                 spread: float = .0,
-                 commission: Union[float, Tuple[float, float]] = .0,
-                 margin: float = 1.,
-                 trade_on_close=False,
-                 hedging=False,
-                 exclusive_orders=False,
-                 finalize_trades=False,
-                 ):
-        # 循環インポートを避けるためにここでインポート
-        from .strategy import Strategy
-        
-        if not (isinstance(strategy, type) and issubclass(strategy, Strategy)):
-            raise TypeError('`strategy` must be a Strategy sub-type')
-    
+                data: dict[str, pd.DataFrame] = None,
+                strategy: Type = None,
+                *,
+                cash: float = 10_000,
+                spread: float = .0,
+                commission: Union[float, Tuple[float, float]] = .0,
+                margin: float = 1.,
+                trade_on_close=False,
+                hedging=False,
+                exclusive_orders=False,
+                finalize_trades=False,
+                ):
+
         if not isinstance(spread, Number):
             raise TypeError('`spread` must be a float value, percent of '
                             'entry order price')
@@ -118,12 +112,47 @@ class Backtest:
                             'or a function that takes `(order_size, price)`'
                             'and returns commission dollar value')
 
+        self.set_data(data)
+
+        # partialとは、関数の一部の引数を事前に固定して、新しい関数を作成します。
+        # これにより、後で残りの引数だけを渡せば関数を実行できるようになります。
+        # 1. _Brokerクラスのコンストラクタの引数の一部（cash, spread, commissionなど）を事前に固定
+        # 2. 新しい関数（実際には呼び出し可能オブジェクト）を作成
+        # 3. 後で残りの引数（おそらくdataなど）を渡すだけで_Brokerのインスタンスを作成できるようにする
+        self._broker = partial[_Broker](
+            _Broker, cash=cash, spread=spread, commission=commission, margin=margin,
+            trade_on_close=trade_on_close, hedging=hedging,
+            exclusive_orders=exclusive_orders
+        )
+
+        self.set_strategy(strategy)
+        self._results: Optional[pd.Series] = None
+        self._finalize_trades = bool(finalize_trades)
+
+
+    def set_strategy(self, strategy):
+        self._strategy = None
+        if strategy is None:
+            return
+
+        # 循環インポートを避けるためにここでインポート
+        from .strategy import Strategy
+        if not (isinstance(strategy, type) and issubclass(strategy, Strategy)):
+            raise TypeError('`strategy` must be a Strategy sub-type')
+
+        self._strategy = strategy
+
+
+    def set_data(self, data):
+        self._data = None
+        if data is None:
+            return
+
         k0, v0 = next(iter(data.items()))
         len0 = len(v0)
         for k, v in list(data.items())[1:]:
             if not len0 == len(v):
                 raise TypeError(f"`data[{k}]` 数が、{k0}と合致していません。")
-
 
         data = data.copy()
 
@@ -154,12 +183,6 @@ class Backtest:
                 raise ValueError('Some OHLC values are missing (NaN). '
                                 'Please strip those lines with `df.dropna()` or '
                                 'fill them in with `df.interpolate()` or whatever.')
-            if np.any(df['Close'] > cash):
-                warnings.warn('Some prices are larger than initial cash value. Note that fractional '
-                            'trading is not supported by this class. If you want to trade Bitcoin, '
-                            'increase initial cash, or trade μBTC or satoshis instead (see e.g. class '
-                            '`backtesting.lib.FractionalBacktest`.',
-                            stacklevel=2)
             if not df.index.is_monotonic_increasing:
                 warnings.warn(f'data[{code}] index is not sorted in ascending order. Sorting.',
                             stacklevel=2)
@@ -176,21 +199,6 @@ class Backtest:
 
         self._data: dict[str, pd.DataFrame] = data
 
-        # partialとは、関数の一部の引数を事前に固定して、新しい関数を作成します。
-        # これにより、後で残りの引数だけを渡せば関数を実行できるようになります。
-        # 1. _Brokerクラスのコンストラクタの引数の一部（cash, spread, commissionなど）を事前に固定
-        # 2. 新しい関数（実際には呼び出し可能オブジェクト）を作成
-        # 3. 後で残りの引数（おそらくdataなど）を渡すだけで_Brokerのインスタンスを作成できるようにする
-        self._broker = partial(
-            _Broker, cash=cash, spread=spread, commission=commission, margin=margin,
-            trade_on_close=trade_on_close, hedging=hedging,
-            exclusive_orders=exclusive_orders
-        )
-
-        self._strategy = strategy
-        self._results: Optional[pd.Series] = None
-        self._finalize_trades = bool(finalize_trades)
-        
 
     def run(self) -> pd.Series:
         """
@@ -244,7 +252,9 @@ class Backtest:
         """
         # 循環インポートを避けるためにここでインポート
         from .strategy import Strategy
-        
+        if not (isinstance(self._strategy, type) and issubclass(self._strategy, Strategy)):
+            raise TypeError('`strategy` must be a Strategy sub-type')
+
         broker: _Broker = self._broker(data=self._data)
         strategy: Strategy = self._strategy(broker, self._data)
 
