@@ -1,9 +1,13 @@
 var classsrc_1_1BackcastPro_1_1backtest_1_1Backtest =
 [
     [ "__init__", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a6f6890f1d5a8a2c8c277bad0fc33bda1", null ],
+    [ "_validate_and_prepare_df", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#ab96382270d90a5c0a3b9c515150aa550", null ],
+    [ "add_data", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a28f064f883665317c52ec5182a129fb3", null ],
     [ "cash", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a87f86b5d5d67cc814f0d65e76a7754fe", null ],
     [ "commission", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#afba2bb478aac7fd719e61cdbdbc03ea6", null ],
+    [ "remove_data", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#ad5cfed8345b808c5588a067d3d9a132d", null ],
     [ "run", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#ab2f892bba5cbe9ecaeb9aee56fb63c0a", null ],
+    [ "set_cash", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a4ddc436133dd94e106ad112114487a7f", null ],
     [ "set_data", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a54269d64ffcf5d60ca3b28c01275bd69", null ],
     [ "set_strategy", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a73213d968937baa39517ac64fd47ccc2", null ],
     [ "_broker", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a19c98637dc3e3595abfea915e4e8fea7", null ],

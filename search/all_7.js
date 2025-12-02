@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['last_5fprice_0',['last_price',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#a5ebf2a73b0453082fd1cd0f163b1e310',1,'src::BackcastPro::_broker::_Broker']]],
-  ['limit_1',['limit',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html#a2c59a63fb76416221099924d04755a02',1,'src::BackcastPro::order::Order']]]
+  ['index_0',['index',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#aea2e5b002435207a3730e808d9b63e50',1,'src::BackcastPro::backtest::Backtest']]],
+  ['init_1',['init',['../classsrc_1_1BackcastPro_1_1strategy_1_1Strategy.html#a1bed2b1ce05eb5ffbc3e4bd53f63f282',1,'src::BackcastPro::strategy::Strategy']]],
+  ['is_5fcontingent_2',['is_contingent',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html#a01ec9a37f6fc7c7ff0c510404d7527bc',1,'src::BackcastPro::order::Order']]],
+  ['is_5flong_3',['is_long',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html#aed3e6980f5005f7d1098e3e0d693237e',1,'src.BackcastPro.order.Order.is_long()'],['../classsrc_1_1BackcastPro_1_1position_1_1Position.html#a2fa82a09efc2b4b79e6251d2b02c9e06',1,'src.BackcastPro.position.Position.is_long()'],['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#ac9d16a0bcad6eca4e35c7e613f62252d',1,'src.BackcastPro.trade.Trade.is_long()']]],
+  ['is_5fshort_4',['is_short',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html#ad3ffb06d2d9649379535aaea03a6453f',1,'src.BackcastPro.order.Order.is_short()'],['../classsrc_1_1BackcastPro_1_1position_1_1Position.html#a0267f4dde64903caedc4bab17acdb2d1',1,'src.BackcastPro.position.Position.is_short()'],['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#a188902029a1104f0dad159eca23e6eed',1,'src.BackcastPro.trade.Trade.is_short()']]]
 ];
