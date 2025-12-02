@@ -129,6 +129,71 @@ class Backtest:
         self._results: Optional[pd.Series] = None
         self._finalize_trades = bool(finalize_trades)
 
+    def _validate_and_prepare_df(self, df: pd.DataFrame, code: str) -> pd.DataFrame:
+        """
+        単一のDataFrameをバリデーションし、準備します。
+        
+        Args:
+            df: バリデーションするDataFrame
+            code: データの識別子（エラーメッセージ用）
+        
+        Returns:
+            バリデーション済みのDataFrame（コピー）
+        
+        Raises:
+            TypeError: DataFrameでない場合
+            ValueError: 必要な列がない場合、またはNaN値が含まれる場合
+        """
+        if not isinstance(df, pd.DataFrame):
+            raise TypeError(f"`data[{code}]` must be a pandas.DataFrame with columns")
+        
+        # データフレームのコピーを作成
+        df = df.copy()
+        
+        # インデックスをdatetimeインデックスに変換
+        if (not isinstance(df.index, pd.DatetimeIndex) and
+            not isinstance(df.index, pd.RangeIndex) and
+            # 大部分が大きな数値の数値インデックス
+            (df.index.is_numeric() and
+            (df.index > pd.Timestamp('1975').timestamp()).mean() > .8)):
+            try:
+                df.index = pd.to_datetime(df.index, infer_datetime_format=True)
+            except ValueError:
+                pass
+        
+        # Volume列がない場合は追加
+        if 'Volume' not in df:
+            df['Volume'] = np.nan
+        
+        # 空のDataFrameチェック
+        if len(df) == 0:
+            raise ValueError(f'OHLC `data[{code}]` is empty')
+        
+        # 必要な列の確認
+        if len(df.columns.intersection({'Open', 'High', 'Low', 'Close', 'Volume'})) != 5:
+            raise ValueError(f"`data[{code}]` must be a pandas.DataFrame with columns "
+                            "'Open', 'High', 'Low', 'Close', and (optionally) 'Volume'")
+        
+        # NaN値の確認
+        if df[['Open', 'High', 'Low', 'Close']].isnull().values.any():
+            raise ValueError('Some OHLC values are missing (NaN). '
+                            'Please strip those lines with `df.dropna()` or '
+                            'fill them in with `df.interpolate()` or whatever.')
+        
+        # インデックスのソート確認
+        if not df.index.is_monotonic_increasing:
+            warnings.warn(f'data[{code}] index is not sorted in ascending order. Sorting.',
+                        stacklevel=3)
+            df = df.sort_index()
+        
+        # インデックスの型警告
+        if not isinstance(df.index, pd.DatetimeIndex):
+            warnings.warn(f'data[{code}] index is not datetime. Assuming simple periods, '
+                        'but `pd.DateTimeIndex` is advised.',
+                        stacklevel=3)
+        
+        return df
+
 
     def set_strategy(self, strategy):
         self._strategy = None
@@ -156,42 +221,9 @@ class Backtest:
 
         data = data.copy()
 
+        # 各DataFrameをバリデーションして準備
         for code, df in data.items():
-            if not isinstance(df, pd.DataFrame):
-                raise TypeError(f"`data[{code}]` must be a pandas.DataFrame with columns")
-
-            # インデックスをdatetimeインデックスに変換
-            if (not isinstance(df.index, pd.DatetimeIndex) and
-                not isinstance(df.index, pd.RangeIndex) and
-                # 大部分が大きな数値の数値インデックス
-                (df.index.is_numeric() and
-                (df.index > pd.Timestamp('1975').timestamp()).mean() > .8)):
-                try:
-                    df.index = pd.to_datetime(df.index, infer_datetime_format=True)
-                except ValueError:
-                    pass
-
-            if 'Volume' not in df:
-                df['Volume'] = np.nan
-
-            if len(df) == 0:
-                raise ValueError(f'OHLC `data[{code}]` is empty')
-            if len(df.columns.intersection({'Open', 'High', 'Low', 'Close', 'Volume'})) != 5:
-                raise ValueError(f"`data[{code}]` must be a pandas.DataFrame with columns "
-                                "'Open', 'High', 'Low', 'Close', and (optionally) 'Volume'")
-            if df[['Open', 'High', 'Low', 'Close']].isnull().values.any():
-                raise ValueError('Some OHLC values are missing (NaN). '
-                                'Please strip those lines with `df.dropna()` or '
-                                'fill them in with `df.interpolate()` or whatever.')
-            if not df.index.is_monotonic_increasing:
-                warnings.warn(f'data[{code}] index is not sorted in ascending order. Sorting.',
-                            stacklevel=2)
-                df = df.sort_index()
-                data[code] = df  # 重要：ソート後のDataFrameを辞書に再代入
-            if not isinstance(df.index, pd.DatetimeIndex):
-                warnings.warn(f'data[{code}] index is not datetime. Assuming simple periods, '
-                            'but `pd.DateTimeIndex` is advised.',
-                            stacklevel=2)
+            data[code] = self._validate_and_prepare_df(df, code)
 
         # 辞書dataに含まれる全てのdf.index一覧を作成
         # df.indexが不一致の場合のために、どれかに固有値があれば抽出しておくため
@@ -199,6 +231,65 @@ class Backtest:
 
         self._data: dict[str, pd.DataFrame] = data
 
+    def add_data(self, id: str, df: pd.DataFrame):
+        """
+        単一のDataFrameを`self._data`に追加します。
+        
+        Args:
+            id: データフレームの識別子（キー）
+            df: 追加するpandas DataFrame（OHLCVデータ）
+        
+        Raises:
+            TypeError: `df`がDataFrameでない場合、または既存データと長さが一致しない場合
+            ValueError: DataFrameに必要な列がない場合、またはNaN値が含まれる場合
+        """
+        # 既存のデータがある場合、長さの一致を確認
+        if self._data is not None and len(self._data) > 0:
+            existing_length = len(next(iter(self._data.values())))
+            if not len(df) == existing_length:
+                existing_id = next(iter(self._data.keys()))
+                raise TypeError(f"`df`の行数が既存データ（{existing_id}）と一致していません。"
+                              f"既存: {existing_length}行, 新規: {len(df)}行")
+        
+        # _dataがNoneの場合は初期化
+        if self._data is None:
+            self._data = {}
+        
+        # バリデーションして準備
+        df = self._validate_and_prepare_df(df, id)
+        
+        # データを追加
+        self._data[id] = df
+        
+        # インデックスを更新（全てのデータフレームのインデックスを統合）
+        self.index = pd.DatetimeIndex(sorted({idx for df in self._data.values() for idx in df.index}))
+
+    def remove_data(self, id: str):
+        """
+        指定されたIDのDataFrameを`self._data`から削除します。
+        
+        Args:
+            id: 削除するデータフレームの識別子（キー）
+        
+        Raises:
+            KeyError: 指定されたIDが存在しない場合
+        """
+        if self._data is None or id not in self._data:
+            raise KeyError(f"データID '{id}' が見つかりません。")
+        
+        # データを削除
+        del self._data[id]
+        
+        # データが空になった場合はNoneに設定
+        if len(self._data) == 0:
+            self._data = None
+            self.index = pd.DatetimeIndex([])
+        else:
+            # インデックスを更新（残りのデータフレームのインデックスを統合）
+            self.index = pd.DatetimeIndex(sorted({idx for df in self._data.values() for idx in df.index}))
+
+    def set_cash(self, cash):
+        self._broker.keywords['cash'] = cash
 
     def run(self) -> pd.Series:
         """
