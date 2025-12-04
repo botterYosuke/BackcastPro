@@ -1,0 +1,29 @@
+name: Trigger MarketingSystem
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  trigger-marketing-system:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Trigger MarketingSystem repository_dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: botterYosuke/MarketingSystem
+          event-type: post-to-x
+          client-payload: |
+            {
+              "source": "BackcastPro",
+              "source_repository": "${{ github.repository }}",
+              "triggered_by": "${{ github.actor }}",
+              "commit_sha": "${{ github.sha }}",
+              "ref": "${{ github.ref }}"
+            }
+
