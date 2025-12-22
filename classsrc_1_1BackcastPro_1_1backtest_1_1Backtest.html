@@ -113,10 +113,6 @@ $(document).ready(function(){initNavTree('classsrc_1_1BackcastPro_1_1backtest_1_
 <tr class="separator:a73213d968937baa39517ac64fd47ccc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54269d64ffcf5d60ca3b28c01275bd69" id="r_a54269d64ffcf5d60ca3b28c01275bd69"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a54269d64ffcf5d60ca3b28c01275bd69">set_data</a> (self, data)</td></tr>
 <tr class="separator:a54269d64ffcf5d60ca3b28c01275bd69"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28f064f883665317c52ec5182a129fb3" id="r_a28f064f883665317c52ec5182a129fb3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a28f064f883665317c52ec5182a129fb3">add_data</a> (self, str id, pd.DataFrame df)</td></tr>
-<tr class="separator:a28f064f883665317c52ec5182a129fb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad5cfed8345b808c5588a067d3d9a132d" id="r_ad5cfed8345b808c5588a067d3d9a132d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#ad5cfed8345b808c5588a067d3d9a132d">remove_data</a> (self, str id)</td></tr>
-<tr class="separator:ad5cfed8345b808c5588a067d3d9a132d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ddc436133dd94e106ad112114487a7f" id="r_a4ddc436133dd94e106ad112114487a7f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a4ddc436133dd94e106ad112114487a7f">set_cash</a> (self, <a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a87f86b5d5d67cc814f0d65e76a7754fe">cash</a>)</td></tr>
 <tr class="separator:a4ddc436133dd94e106ad112114487a7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2f892bba5cbe9ecaeb9aee56fb63c0a" id="r_ab2f892bba5cbe9ecaeb9aee56fb63c0a"><td class="memItemLeft" align="right" valign="top">pd.Series&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#ab2f892bba5cbe9ecaeb9aee56fb63c0a">run</a> (self)</td></tr>
@@ -346,49 +342,6 @@ Raises:
 </pre> 
 </div>
 </div>
-<a id="a28f064f883665317c52ec5182a129fb3" name="a28f064f883665317c52ec5182a129fb3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a28f064f883665317c52ec5182a129fb3">&#9670;&#160;</a></span>add_data()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">src.BackcastPro.backtest.Backtest.add_data </td>
-          <td>(</td>
-          <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>self</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">str&#160;</td>
-          <td class="paramname"><em>id</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">pd.DataFrame&#160;</td>
-          <td class="paramname"><em>df</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<pre class="fragment">単一のDataFrameを`self._data`に追加します。
-
-Args:
-    id: データフレームの識別子（キー）
-    df: 追加するpandas DataFrame（OHLCVデータ）
-
-Raises:
-    TypeError: `df`がDataFrameでない場合、または既存データと長さが一致しない場合
-    ValueError: DataFrameに必要な列がない場合、またはNaN値が含まれる場合
-</pre> 
-</div>
-</div>
 <a id="a87f86b5d5d67cc814f0d65e76a7754fe" name="a87f86b5d5d67cc814f0d65e76a7754fe"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a87f86b5d5d67cc814f0d65e76a7754fe">&#9670;&#160;</a></span>cash()</h2>
 
@@ -423,41 +376,6 @@ Raises:
       </table>
 </div><div class="memdoc">
 
-</div>
-</div>
-<a id="ad5cfed8345b808c5588a067d3d9a132d" name="ad5cfed8345b808c5588a067d3d9a132d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad5cfed8345b808c5588a067d3d9a132d">&#9670;&#160;</a></span>remove_data()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">src.BackcastPro.backtest.Backtest.remove_data </td>
-          <td>(</td>
-          <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>self</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">str&#160;</td>
-          <td class="paramname"><em>id</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<pre class="fragment">指定されたIDのDataFrameを`self._data`から削除します。
-
-Args:
-    id: 削除するデータフレームの識別子（キー）
-
-Raises:
-    KeyError: 指定されたIDが存在しない場合
-</pre> 
 </div>
 </div>
 <a id="ab2f892bba5cbe9ecaeb9aee56fb63c0a" name="ab2f892bba5cbe9ecaeb9aee56fb63c0a"></a>
