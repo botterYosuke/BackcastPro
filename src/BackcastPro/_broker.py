@@ -279,9 +279,20 @@ class _Broker:
                 # 手数料（またはビッドアスクスプレッド）を含むように価格を調整
                 # ロングポジションでは調整価格が少し高くなり、その逆も同様
                 adjusted_price = self._adjusted_price(code=order.code, size=order.size, price=price)
+                
+                # 調整済み価格がゼロまたは負の場合、注文をスキップ
+                if adjusted_price <= 0:
+                    warnings.warn(
+                        f'{self._current_time}: {order.code} の調整済み価格が無効です（{adjusted_price}）。注文をキャンセルしました。'
+                        f'価格データが正常か確認してください。', 
+                        category=UserWarning)
+                    self.orders.remove(order)
+                    continue
+                
                 adjusted_price_plus_commission = \
                     adjusted_price + self._commission(order.size, price) / abs(order.size)
-
+                
+ 
                 # 注文サイズが比例的に指定された場合、
                 # マージンとスプレッド/手数料を考慮して、単位での真のサイズを事前計算
                 size = order.size
