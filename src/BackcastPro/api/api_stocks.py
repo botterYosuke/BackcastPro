@@ -28,22 +28,22 @@ def get_stock_price(code, from_: datetime = None, to: datetime = None) -> pd.Dat
     Returns:
         DataFrame: 株価データ（Date列がindexとして設定されている）
     """
-    from ..api.stocks_daily import stocks_price
+    from .stocks_daily import stocks_price
     __sp__ = stocks_price()
 
     # 株価データを取得（内部で自動的にデータベースに保存される）
     df = __sp__.get_japanese_stock_price_data(code=code, from_=from_, to=to)
     
-    # Date列が存在する場合、indexとして設定する（Backtestで使用するため）
+    # Date列がindexとして設定されている場合、indexから解除する
     if df is not None and not df.empty:
-        if 'Date' in df.columns:
-            # Date列をdatetime型に変換してindexに設定
+        if isinstance(df.index, pd.DatetimeIndex):
+            # indexがDatetimeIndexの場合、Date列として追加してindexをリセット
             df = df.copy()  # 元のDataFrameを変更しないようにコピー
-            df['Date'] = pd.to_datetime(df['Date'])
-            df.set_index('Date', inplace=True)
-            # indexをソート（Backtestで必要）
-            df.sort_index(inplace=True)
-        elif not isinstance(df.index, pd.DatetimeIndex):
+            df['Date'] = df.index
+            df.reset_index(drop=True, inplace=True)
+            # Date列でソート（Backtestで必要）
+            df.sort_values('Date', inplace=True)
+        elif 'Date' not in df.columns and not isinstance(df.index, pd.DatetimeIndex):
             # Date列がなく、indexもDatetimeIndexでない場合の警告
             import warnings
             warnings.warn(
@@ -58,7 +58,7 @@ def get_stock_board(code) -> pd.DataFrame:
     """
     板情報を取得する
     """
-    from ..api.stocks_board import stocks_board
+    from .stocks_board import stocks_board
     __sb__ = stocks_board()
 
     return __sb__.get_japanese_stock_board_data(code=code)
@@ -67,7 +67,7 @@ def get_stock_info(code="", date: datetime = None) -> pd.DataFrame:
     """
     銘柄の情報を取得する
     """
-    from ..api.stocks_info import stocks_info
+    from .stocks_info import stocks_info
     __si__ = stocks_info()    
 
     return __si__.get_japanese_listed_info(code=code, date=date)

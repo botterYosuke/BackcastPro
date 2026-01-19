@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 import duckdb
-from datetime import datetime
 import logging
+import inspect
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -15,12 +15,57 @@ class db_manager:
     """
 
     def __init__(self):
-        # DuckDBファイルのパスを設定
-        self.cache_dir = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 
-            "db"
-        )
-        self.isEnable = True if os.path.exists(self.cache_dir) else False
+        # 1. 環境変数をチェック
+        env_cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR')
+        if env_cache_dir:
+            self.cache_dir = os.path.abspath(env_cache_dir)
+        else:
+            # 2. 実行中のスクリプト/ノートブックのディレクトリを検出
+            try:
+                # 呼び出し元のファイルパスを取得
+                frame = inspect.currentframe()
+                caller_frame = frame.f_back
+                script_dir = None
+                
+                while caller_frame:
+                    filename = caller_frame.f_globals.get('__file__')
+                    if filename and filename != __file__:
+                        # ノートブックやスクリプトのディレクトリを取得
+                        try:
+                            script_dir = os.path.dirname(os.path.abspath(filename))
+                            break
+                        except Exception:
+                            pass
+                    caller_frame = caller_frame.f_back
+                
+                # フレームをクリーンアップ
+                del frame
+                del caller_frame
+                
+                if script_dir:
+                    self.cache_dir = os.path.join(script_dir, 'cache')
+                else:
+                    # フォールバック: カレントワーキングディレクトリを使用
+                    self.cache_dir = os.path.join(os.getcwd(), 'cache')
+            except Exception as e:
+                logger.warning(f"実行中のスクリプトの検出に失敗しました: {e}")
+                # フォールバック: 従来の動作
+                self.cache_dir = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), 
+                    "db"
+                )
+        
+        # 3. ディレクトリが存在しない場合は作成
+        if not os.path.exists(self.cache_dir):
+            try:
+                os.makedirs(self.cache_dir, exist_ok=True)
+                logger.info(f"キャッシュディレクトリを作成しました: {self.cache_dir}")
+                self.isEnable = True
+            except Exception as e:
+                logger.warning(f"キャッシュディレクトリの作成に失敗しました: {self.cache_dir}, エラー: {e}")
+                self.isEnable = False
+        else:
+            self.isEnable = True
         
         # デバッグ情報をログ出力
         logger.info(f"キャッシュディレクトリ: {self.cache_dir}")

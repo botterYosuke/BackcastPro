@@ -25,7 +25,7 @@ def board(code):
         ValueError: データが空の場合、または必要なカラムが存在しない場合
     """
     # 板情報データを取得
-    from ..api.stocks_board import stocks_board
+    from .stocks_board import stocks_board
     __sb__ = stocks_board()    
     df = __sb__.get_japanese_stock_board_data(code)
     
@@ -107,7 +107,7 @@ def board(code):
     # 銘柄名称を取得
     company_name = None
     try:
-        from ..api.stocks_info import stocks_info
+        from .stocks_info import stocks_info
         si = stocks_info()
         company_name = si.get_company_name(code)
     except:
