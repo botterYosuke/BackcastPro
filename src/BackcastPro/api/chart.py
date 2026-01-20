@@ -17,35 +17,17 @@ def chart(code: str = "", from_: datetime = None, to: datetime = None,
         title: チャートのタイトル（オプション）
     """
     if df is None:
-        return chart_by_code(code, from_, to, title=title)
+        # 株価データを取得
+        from .stocks_daily import stocks_price
+        __sp__ = stocks_price()
+        df = __sp__.get_japanese_stock_price_data(code, from_=from_, to=to)
+
+        chart_by_df(df, title=title)
+        return _prepare_chart_df(df)        
 
     chart_by_df(df, title=title)
     return None 
 
-
-def chart_by_code(code: str, from_: datetime = None, to: datetime = None, title: str = None) -> pd.DataFrame:
-    """
-    銘柄コードを指定して株価チャートを表示する（plotly使用）
-
-    Args:
-        code: 銘柄コード（例: "6723"）
-        from_: 開始日（datetime, オプション）
-        to: 終了日（datetime, オプション）
-        title: チャートのタイトル（オプション）
-
-    Raises:
-        NameError: get_stock_price関数が存在しない場合
-        ValueError: データが空の場合、または必要なカラムが存在しない場合
-    """
-
-    # 株価データを取得
-    from .stocks_daily import stocks_price
-    __sp__ = stocks_price()
-    df = __sp__.get_japanese_stock_price_data(code, from_=from_, to=to)
-
-    chart_by_df(df, title=title)
-
-    return df
 
 def _prepare_chart_df(df: pd.DataFrame) -> pd.DataFrame:
     """チャート表示用データを準備（plotly用）"""
