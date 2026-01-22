@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 
 def chart(code: str = "", from_: datetime = None, to: datetime = None,
-            df: pd.DataFrame = None, title: str = None) -> pd.DataFrame | None:
+            df: pd.DataFrame = None, title: str = None) -> None:
     """
     株価データを指定して株価チャートを表示する（plotly使用）
     
@@ -21,9 +21,6 @@ def chart(code: str = "", from_: datetime = None, to: datetime = None,
         from .stocks_daily import stocks_price
         __sp__ = stocks_price()
         df = __sp__.get_japanese_stock_price_data(code, from_=from_, to=to)
-
-        chart_by_df(df, title=title)
-        return _prepare_chart_df(df)        
 
     chart_by_df(df, title=title)
     return None 
