@@ -50,7 +50,7 @@ class e_api:
         # キャッシュファイルのパス設定
         temp_cache_dir = tempfile.mkdtemp()
         env_cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', temp_cache_dir)
-        self.cache_dir = Path(cache_dir_str)
+        self.cache_dir = Path(env_cache_dir)
         self.cache_file = self.cache_dir / "e_api_login_cache.json"
         self.failure_cache_file = self.cache_dir / "e_api_login_failures.json"
         

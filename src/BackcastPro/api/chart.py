@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 
 def chart(code: str = "", from_: datetime = None, to: datetime = None,
-            df: pd.DataFrame = None, title: str = None) -> None:
+            df: pd.DataFrame = None):
     """
     株価データを指定して株価チャートを表示する（plotly使用）
     
@@ -14,7 +14,6 @@ def chart(code: str = "", from_: datetime = None, to: datetime = None,
         from_: 開始日（datetime, オプション）
         to: 終了日（datetime, オプション）
         df: 株価データ（pandas DataFrame）
-        title: チャートのタイトル（オプション）
     """
     if df is None:
         # 株価データを取得
@@ -22,8 +21,12 @@ def chart(code: str = "", from_: datetime = None, to: datetime = None,
         __sp__ = stocks_price()
         df = __sp__.get_japanese_stock_price_data(code, from_=from_, to=to)
 
-    chart_by_df(df, title=title)
-    return None 
+
+    # データが空の場合のエラーハンドリング
+    if df.empty:
+        raise ValueError(f"銘柄コード '{code}' の株価が取得できませんでした。")
+            
+    return chart_by_df(df)
 
 
 def _prepare_chart_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -79,25 +82,17 @@ def _prepare_chart_df(df: pd.DataFrame) -> pd.DataFrame:
     
     return df.dropna()
 
-def chart_by_df(df: pd.DataFrame, title: str = None) -> None:
-    """株価データを指定して株価チャートを表示する（plotly使用）"""
-    # Codeを取得（データ整形前に取得）
-    code = None
-    if 'Code' in df.columns:
-        code = df.iloc[0]['Code']
-    elif 'code' in df.columns:
-        code = df.iloc[0]['code']
-    
+def chart_by_df(df: pd.DataFrame):
+    """
+    株価データを指定して株価チャートを表示する（plotly使用）
+
+    Args:
+        df: 株価データ（pandas DataFrame）
+    """
+
     # データを整形
-    df = _prepare_chart_df(df)
-    
-    if df.empty:
-        print("データが空です。")
-        return
-    
-    # チャートタイトルを決定
-    chart_title = title if title else (code if code else "Candlestick with Volume")
-    
+    df = _prepare_chart_df(df)    
+
     # plotlyのFigureを作成
     fig = go.Figure()
     
@@ -125,7 +120,6 @@ def chart_by_df(df: pd.DataFrame, title: str = None) -> None:
     
     # レイアウト設定
     fig.update_layout(
-        title=chart_title,
         yaxis=dict(title="Price"),
         yaxis2=dict(
             title="Volume",
@@ -136,4 +130,4 @@ def chart_by_df(df: pd.DataFrame, title: str = None) -> None:
         xaxis_rangeslider_visible=False,
     )
     
-    fig.show()
+    return fig

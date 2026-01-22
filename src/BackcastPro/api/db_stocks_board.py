@@ -147,7 +147,11 @@ class db_stocks_board(db_manager):
             df = df.copy()
 
             # Codeカラムを追加（存在しない場合）
-            if 'Code' not in df.columns:
+            # 小文字のcodeカラムが存在する場合は大文字のCodeにリネーム（APIからのデータに対応）
+            if 'code' in df.columns and 'Code' not in df.columns:
+                df = df.rename(columns={'code': 'Code'})
+                logger.info("小文字の'code'カラムを大文字の'Code'にリネームしました")
+            elif 'Code' not in df.columns:
                 df['Code'] = code
 
             # Timestampをdatetime型に変換

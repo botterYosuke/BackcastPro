@@ -44,6 +44,21 @@ def sample_board_data():
     return pd.DataFrame(data)
 
 
+@pytest.fixture
+def sample_board_data_from_api():
+    """実際のAPIレスポンスと同じ構造のサンプル板情報データを作成（小文字のcodeカラムを含む）"""
+    timestamps = pd.date_range(start='2024-01-01 09:00:00', periods=10, freq='1min')
+    data = {
+        'Timestamp': timestamps,
+        'Price': [100.0 + i for i in range(10)],
+        'Qty': [1000 + i * 10 for i in range(10)],
+        'Type': ['Bid'] * 5 + ['Ask'] * 5,
+        'source': ['kabu-station'] * 10,
+        'code': ['1234'] * 10  # 小文字のcodeカラム（APIからのレスポンス形式）
+    }
+    return pd.DataFrame(data)
+
+
 class TestDbStocksBoard:
     """db_stocks_boardクラスのテスト"""
 
@@ -353,3 +368,105 @@ class TestDbStocksBoard:
         # 全データが保存されていることを確認
         loaded_df = db_board.load_stock_board_from_cache(code)
         assert len(loaded_df) == len(sample_board_data)
+
+    def test_save_board_data_with_lowercase_code_column(self, db_board, sample_board_data_from_api):
+        """APIレスポンス形式（小文字codeカラム含む）の板情報保存テスト"""
+        code = "1234"
+
+        # APIから取得したような形式のデータを保存（小文字のcodeカラムを含む）
+        db_board.save_stock_board(code, sample_board_data_from_api)
+
+        # データを読み込んで確認
+        loaded_df = db_board.load_stock_board_from_cache(code)
+
+        assert len(loaded_df) == len(sample_board_data_from_api)
+        # 小文字のcodeカラムが大文字のCodeカラムにリネームされていることを確認
+        assert 'Code' in loaded_df.columns
+        assert all(loaded_df['Code'] == code)
+        # 小文字のcodeカラムは存在しないはず
+        assert 'code' not in loaded_df.columns
+
+    def test_save_board_data_from_kabu_station_api(self, db_board):
+        """kabuステーションAPI形式の板情報保存テスト"""
+        code = "6363"
+
+        # kabuステーションAPIのレスポンス形式を再現
+        timestamps = pd.date_range(start='2024-01-01 09:00:00', periods=5, freq='1min')
+        data = {
+            'Timestamp': timestamps,
+            'Price': [1500.0, 1501.0, 1499.0, 1502.0, 1498.0],
+            'Qty': [1000, 1100, 900, 1200, 800],
+            'Type': ['Bid', 'Ask', 'Bid', 'Ask', 'Bid'],
+            'source': ['kabu-station'] * 5,
+            'code': [code] * 5  # 小文字のcodeカラム
+        }
+        df = pd.DataFrame(data)
+
+        # データを保存
+        db_board.save_stock_board(code, df)
+
+        # データを読み込んで確認
+        loaded_df = db_board.load_stock_board_from_cache(code)
+
+        assert len(loaded_df) == len(df)
+        assert 'Code' in loaded_df.columns
+        assert all(loaded_df['Code'] == code)
+        assert 'source' in loaded_df.columns
+        assert all(loaded_df['source'] == 'kabu-station')
+
+    def test_save_board_data_from_e_shiten_api(self, db_board):
+        """立花証券e支店API形式の板情報保存テスト"""
+        code = "8306"
+
+        # 立花証券e支店APIのレスポンス形式を再現
+        timestamps = pd.date_range(start='2024-01-01 09:00:00', periods=5, freq='1min')
+        data = {
+            'Timestamp': timestamps,
+            'Price': [800.0, 801.0, 799.0, 802.0, 798.0],
+            'Qty': [2000, 2100, 1900, 2200, 1800],
+            'Type': ['Bid', 'Ask', 'Bid', 'Ask', 'Bid'],
+            'source': ['e-shiten'] * 5,
+            'code': [code] * 5  # 小文字のcodeカラム
+        }
+        df = pd.DataFrame(data)
+
+        # データを保存
+        db_board.save_stock_board(code, df)
+
+        # データを読み込んで確認
+        loaded_df = db_board.load_stock_board_from_cache(code)
+
+        assert len(loaded_df) == len(df)
+        assert 'Code' in loaded_df.columns
+        assert all(loaded_df['Code'] == code)
+        assert 'source' in loaded_df.columns
+        assert all(loaded_df['source'] == 'e-shiten')
+
+    def test_column_name_case_sensitivity(self, db_board):
+        """カラム名の大文字小文字の重複問題のテスト（バグ再現テスト）"""
+        code = "1234"
+
+        # 小文字のcodeカラムを持つDataFrameを作成
+        timestamps = pd.date_range(start='2024-01-01 09:00:00', periods=3, freq='1min')
+        data = {
+            'Timestamp': timestamps,
+            'Price': [100.0, 101.0, 102.0],
+            'Qty': [1000, 1100, 1200],
+            'Type': ['Bid', 'Bid', 'Ask'],
+            'code': [code] * 3  # 小文字のcodeカラム
+        }
+        df = pd.DataFrame(data)
+
+        # このテストは、以前はDuckDBのカラム重複エラー（Catalog Error: Column with name Code already exists!）を
+        # 発生させていたが、修正後は正常に保存できることを確認
+        try:
+            db_board.save_stock_board(code, df)
+            loaded_df = db_board.load_stock_board_from_cache(code)
+
+            # データが正常に保存・読み込みできることを確認
+            assert len(loaded_df) == len(df)
+            assert 'Code' in loaded_df.columns
+            # 小文字のcodeカラムは大文字のCodeにリネームされているはず
+            assert 'code' not in loaded_df.columns
+        except Exception as e:
+            pytest.fail(f"カラム名の大文字小文字問題が修正されていません: {e}")
