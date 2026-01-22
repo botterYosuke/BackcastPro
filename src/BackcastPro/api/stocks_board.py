@@ -59,3 +59,13 @@ class stocks_board:
                 return df
 
         raise ValueError(f"板情報の取得に失敗しました: {code}")
+
+
+def get_stock_board(code) -> pd.DataFrame:
+    """
+    板情報を取得する
+    """
+    from .stocks_board import stocks_board
+    __sb__ = stocks_board()
+
+    return __sb__.get_japanese_stock_board_data(code=code)

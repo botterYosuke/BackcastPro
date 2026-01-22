@@ -3,6 +3,7 @@ import pandas as pd
 import duckdb
 import logging
 import inspect
+import tempfile
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -16,7 +17,8 @@ class db_manager:
 
     def __init__(self):
         # 1. 環境変数をチェック
-        env_cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR')
+        temp_cache_dir = tempfile.mkdtemp()
+        env_cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', temp_cache_dir)
         if env_cache_dir:
             self.cache_dir = os.path.abspath(env_cache_dir)
         else:

@@ -73,3 +73,13 @@ class stocks_info:
             title = str(code)
 
         return title
+
+
+def get_stock_info(code="", date: datetime = None) -> pd.DataFrame:
+    """
+    銘柄の情報を取得する
+    """
+    from .stocks_info import stocks_info
+    __si__ = stocks_info()    
+
+    return __si__.get_japanese_listed_info(code=code, date=date)

@@ -78,3 +78,45 @@ class stocks_price:
             return df
 
         raise ValueError(f"日本株式銘柄の取得に失敗しました: {code}")
+
+
+def get_stock_price(code, from_: datetime = None, to: datetime = None) -> pd.DataFrame:
+    """
+    株価四本値（/prices/daily_quotes）
+
+    - 株価は分割・併合を考慮した調整済み株価（小数点第２位四捨五入）と調整前の株価を取得することができます。
+    - データの取得では、銘柄コード（code）または日付（date）の指定が必須となります。
+    
+    Args:
+        code: 銘柄コード（例: "7203.JP"）
+        from_: 開始日（datetime, str, または None）
+        to: 終了日（datetime, str, または None）
+    
+    Returns:
+        DataFrame: 株価データ（Date列がindexとして設定されている）
+    """
+    from .stocks_daily import stocks_price
+    __sp__ = stocks_price()
+
+    # 株価データを取得（内部で自動的にデータベースに保存される）
+    df = __sp__.get_japanese_stock_price_data(code=code, from_=from_, to=to)
+    
+    # Date列がindexとして設定されている場合、indexから解除する
+    if df is not None and not df.empty:
+        if isinstance(df.index, pd.DatetimeIndex):
+            # indexがDatetimeIndexの場合、Date列として追加してindexをリセット
+            df = df.copy()  # 元のDataFrameを変更しないようにコピー
+            df['Date'] = df.index
+            df.reset_index(drop=True, inplace=True)
+            # Date列でソート（Backtestで必要）
+            df.sort_values('Date', inplace=True)
+        elif 'Date' not in df.columns and not isinstance(df.index, pd.DatetimeIndex):
+            # Date列がなく、indexもDatetimeIndexでない場合の警告
+            import warnings
+            warnings.warn(
+                f"get_stock_price('{code}') が返したDataFrameに'Date'列がありません。"
+                "Backtestで使用するには、Date列が必要です。",
+                stacklevel=2
+            )
+    
+    return df

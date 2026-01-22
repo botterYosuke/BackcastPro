@@ -8,6 +8,7 @@ import pandas as pd
 import logging
 import threading
 from pathlib import Path
+import tempfile
 
 # 環境変数を読み込み
 from dotenv import load_dotenv
@@ -47,7 +48,8 @@ class e_api:
         self.token_expires_at = None
         
         # キャッシュファイルのパス設定
-        cache_dir_str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "db")
+        temp_cache_dir = tempfile.mkdtemp()
+        env_cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', temp_cache_dir)
         self.cache_dir = Path(cache_dir_str)
         self.cache_file = self.cache_dir / "e_api_login_cache.json"
         self.failure_cache_file = self.cache_dir / "e_api_login_failures.json"

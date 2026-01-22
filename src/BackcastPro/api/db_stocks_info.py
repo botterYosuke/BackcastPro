@@ -179,7 +179,7 @@ class db_stocks_info(db_manager):
         Yields:
             duckdb.DuckDBPyConnection: DuckDB接続オブジェクト
         """
-        db_path = os.path.join(self.cache_dir, "stocks", "listed_info.duckdb")
+        db_path = os.path.join(self.cache_dir, "listed_info.duckdb")
         if not os.path.exists(db_path):
             os.makedirs(os.path.dirname(db_path), exist_ok=True)
             # FTPからダウンロードを試行
@@ -204,7 +204,7 @@ class db_stocks_info(db_manager):
         FTP_USER = 'sasaco_worker'
         FTP_PASSWORD = 'S#1y9c%7o9'
         FTP_PORT = 21
-        REMOTE_DIR = '/StockData/jp/stocks'
+        REMOTE_DIR = '/StockData/jp'
         
         try:
             with ftplib.FTP() as ftp:
