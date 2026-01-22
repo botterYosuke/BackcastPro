@@ -129,18 +129,22 @@ class db_stocks_board(db_manager):
                 return
 
             # Timestampカラムの確認と処理
+            # まず、Timestampがインデックスになっている場合はカラムとして追加
+            if df.index.name == 'Timestamp' or isinstance(df.index, pd.DatetimeIndex):
+                if 'Timestamp' not in df.columns:
+                    df = df.reset_index()
+                    logger.info("TimestampインデックスをカラムとしてDataFrameに追加しました")
+                else:
+                    df = df.reset_index(drop=True)
+
+            # Timestampカラムがない場合は現在時刻を追加
             if 'Timestamp' not in df.columns:
-                # Timestampカラムがない場合は現在時刻を追加
                 df = df.copy()
                 df['Timestamp'] = datetime.now()
                 logger.info("Timestampカラムを追加しました")
 
-            # Timestampがインデックスになっている場合はカラムとして追加
-            if df.index.name == 'Timestamp' or isinstance(df.index, pd.DatetimeIndex):
-                if 'Timestamp' not in df.columns:
-                    df = df.reset_index()
-                else:
-                    df = df.reset_index(drop=True)
+            # この時点でdfのコピーを作成してSettingWithCopyWarningを回避
+            df = df.copy()
 
             # Codeカラムを追加（存在しない場合）
             if 'Code' not in df.columns:
@@ -324,15 +328,67 @@ class db_stocks_board(db_manager):
         if not os.path.exists(db_path):
             if len(code) > 4:
                 code_retry = code[:-1]
-                # 再帰呼び出しの結果を返す（ジェネレータなので yield from）
-                yield from self.get_db(code_retry)
+                # 再帰呼び出し: サフィックスを除去してリトライ
+                with self.get_db(code_retry) as db:
+                    yield db
                 return
 
             os.makedirs(os.path.dirname(db_path), exist_ok=True)
-            logger.info(f"DuckDBファイルを作成しました: {db_path}")
+            # FTPからダウンロードを試行
+            if self._download_from_ftp(code, db_path):
+                logger.info(f"DuckDBファイルをFTPからダウンロードしました: {db_path}")
+            else:
+                logger.info(f"DuckDBファイルを作成しました: {db_path}")
 
         db = duckdb.connect(db_path)
         try:
             yield db
         finally:
             db.close()
+
+    def _download_from_ftp(self, code: str, local_path: str) -> bool:
+        """
+        FTPサーバーからDuckDBファイルをダウンロード
+        """
+        import ftplib
+        
+        FTP_HOST = 'backcast.i234.me'
+        FTP_USER = 'sasaco_worker'
+        FTP_PASSWORD = 'S#1y9c%7o9'
+        FTP_PORT = 21
+        REMOTE_DIR = '/StockData/jp/stocks_board'
+        
+        try:
+            with ftplib.FTP() as ftp:
+                ftp.connect(FTP_HOST, FTP_PORT)
+                ftp.login(FTP_USER, FTP_PASSWORD)
+                
+                remote_file = f"{REMOTE_DIR}/{code}.duckdb"
+                
+                # ファイルサイズ確認（存在確認も兼ねる）
+                try:
+                    ftp.voidcmd(f"TYPE I")
+                    size = ftp.size(remote_file)
+                    if size is None: # sizeコマンドがサポートされていない場合のフォールバックは省略
+                        pass
+                except Exception:
+                    logger.debug(f"FTPサーバーにファイルが見つかりません: {remote_file}")
+                    return False
+
+                logger.info(f"FTPダウンロード開始: {remote_file} -> {local_path}")
+                
+                with open(local_path, 'wb') as f:
+                    ftp.retrbinary(f"RETR {remote_file}", f.write)
+                
+                logger.info(f"FTPダウンロード完了: {local_path}")
+                return True
+                
+        except Exception as e:
+            logger.warning(f"FTPダウンロード失敗: {e}")
+            # ダウンロード中の不完全なファイルが残っている場合は削除
+            if os.path.exists(local_path):
+                try:
+                    os.remove(local_path)
+                except:
+                    pass
+            return False
