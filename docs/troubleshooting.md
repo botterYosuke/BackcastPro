@@ -147,7 +147,7 @@ custom_data = pd.DataFrame({
 
 **解決方法:**
 ```python
-import pandas_datareader.data as web
+import yfinance as yf
 
 # 1. 期間を確認
 from datetime import datetime, timedelta
@@ -156,7 +156,7 @@ start_date = end_date - timedelta(days=365)
 print(f"期間: {start_date} から {end_date}")
 
 # 2. 異なる銘柄で試す
-data = web.DataReader('7203.JP', 'stooq')  # トヨタ
+data = yf.download('7203.T', period='1y')  # トヨタ
 if data is None or len(data) == 0:
     print("データが取得できませんでした")
 ```

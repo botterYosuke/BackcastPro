@@ -26,12 +26,12 @@ BackcastProは、トレーディング戦略のためのPythonバックテスト
 ## クイックスタート
 
 ```python
-import pandas_datareader.data as web
+import yfinance as yf
 from BackcastPro import Backtest
 
 # データを取得
-code = '7203.JP'  # トヨタ
-df = web.DataReader(code, 'stooq')
+code = '7203.T'  # トヨタ（東証）
+df = yf.download(code, period='1y')
 
 # バックテストを初期化
 bt = Backtest(data={code: df}, cash=10000)

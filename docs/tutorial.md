@@ -53,11 +53,11 @@ import pandas as pd
 ### 2. データの準備
 
 ```python
-import pandas_datareader.data as web
+import yfinance as yf
 
 # トヨタの株価データを取得
-code = '7203.JP'
-df = web.DataReader(code, 'stooq')
+code = '7203.T'  # 東証の銘柄コード
+df = yf.download(code, period='1y')
 print(df.head())
 ```
 
@@ -90,11 +90,11 @@ print(results)
 ### 日本株データの取得
 
 ```python
-import pandas_datareader.data as web
+import yfinance as yf
 
 # 特定の銘柄のデータを取得
-toyota_data = web.DataReader('7203.JP', 'stooq')  # トヨタ
-sony_data = web.DataReader('6758.JP', 'stooq')    # ソニー
+toyota_data = yf.download('7203.T', period='1y')  # トヨタ
+sony_data = yf.download('6758.T', period='1y')    # ソニー
 
 # 期間を指定してデータを取得
 from datetime import datetime, timedelta
@@ -102,7 +102,7 @@ from datetime import datetime, timedelta
 end_date = datetime.now()
 start_date = end_date - timedelta(days=365)  # 1年前
 
-data = web.DataReader('7203.JP', 'stooq', start_date, end_date)
+data = yf.download('7203.T', start=start_date, end=end_date)
 ```
 
 ### カスタムデータの使用
@@ -128,14 +128,14 @@ results = bt.run_with_strategy(buy_and_hold)
 
 ```python
 # 複数の銘柄データを取得
-toyota_data = web.DataReader('7203.JP', 'stooq')
-sony_data = web.DataReader('6758.JP', 'stooq')
+toyota_data = yf.download('7203.T', period='1y')
+sony_data = yf.download('6758.T', period='1y')
 
 # 複数銘柄でバックテストを初期化
 bt = Backtest(
     data={
-        '7203.JP': toyota_data,
-        '6758.JP': sony_data
+        '7203.T': toyota_data,
+        '6758.T': sony_data
     },
     cash=10000
 )

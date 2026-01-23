@@ -1,5 +1,4 @@
 import pandas as pd
-import pandas_datareader.data as web
 import requests
 from .util import PRICE_LIMIT_TABLE
 try:
@@ -19,44 +18,62 @@ logger.setLevel(logging.INFO)
 
 
 def stooq_daily_quotes(code: str, from_: datetime = None, to: datetime = None) -> pd.DataFrame:
+    """
+    株価データを取得する（Yahoo Finance API経由）
 
+    Args:
+        code (str): 銘柄コード（例: '7203'）
+        from_ (datetime): データ取得開始日
+        to (datetime): データ取得終了日
+
+    Returns:
+        pd.DataFrame: 株価データのDataFrame
+    """
     try:
-        # 日付の処理
-        start = None if from_ is None else from_.strftime('%Y-%m-%d')
-        end = None if to is None else to.strftime('%Y-%m-%d')
+        # yfinance ライブラリが利用可能な場合はそれを使用
+        if yf is not None:
+            start = None if from_ is None else from_.strftime('%Y-%m-%d')
+            end = None if to is None else to.strftime('%Y-%m-%d')
+            df = yf.download(f"{code}.T", start, end, progress=False)
+            if not df.empty:
+                # データを日付昇順に並び替え
+                df = df.sort_index()
 
-        # データ取得
-        df = web.DataReader(f"{code}.JP", 'stooq', start, end)
-        
-        if df.empty and yf is not None:
-            df = yf.download(f"{code}.T", start, end)
+                # インデックスが日付の場合は、Dateカラムを追加
+                if isinstance(df.index, pd.DatetimeIndex):
+                    df = df.reset_index()
+                    if len(df.columns) > 0 and df.columns[0] not in ['Open', 'High', 'Low', 'Close', 'Volume']:
+                        df = df.rename(columns={df.columns[0]: 'Date'})
+                    if 'Date' not in df.columns:
+                        df['Date'] = df.index
+                elif 'Date' not in df.columns:
+                    df['Date'] = df.index
 
-        if df.empty:
-            df = _get_yfinance_daily_quotes(code, from_, to)
+                return df
+
+        # yfinance が利用できない場合は直接 Yahoo Finance API を使用
+        df = _get_yfinance_daily_quotes(code, from_, to)
 
         if df.empty:
             return pd.DataFrame()
 
         # データを日付昇順に並び替え
         df = df.sort_index()
-        
+
         # インデックスが日付の場合は、Dateカラムを追加
         if isinstance(df.index, pd.DatetimeIndex):
             df = df.reset_index()
-            # インデックスカラムの名前を確認してDateにリネーム
             if len(df.columns) > 0 and df.columns[0] not in ['Open', 'High', 'Low', 'Close', 'Volume']:
                 df = df.rename(columns={df.columns[0]: 'Date'})
-            # Dateカラムが存在しない場合は、インデックスから作成
             if 'Date' not in df.columns:
                 df['Date'] = df.index
         elif 'Date' not in df.columns:
-            # インデックスが日付でない場合でも、Dateカラムがない場合は追加
             df['Date'] = df.index
-        
+
         return df
-        
+
     except Exception as e:
-        logger.error(f"Stooqからのデータ取得中にエラーが発生しました: {e}")
+        logger.error(f"データ取得中にエラーが発生しました: {e}")
         return pd.DataFrame()
 
 

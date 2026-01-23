@@ -42,12 +42,12 @@ class TestStooqDataRetrieval:
         df = pd.DataFrame(data, index=dates)
         return df
     
-    @patch('BackcastPro.api.lib.stooq.web.DataReader')
-    def test_stooq_daily_quotes_success(self, mock_datareader):
+    @patch('BackcastPro.api.lib.stooq.yf')
+    def test_stooq_daily_quotes_success(self, mock_yf):
         """正常にデータが取得できる場合のテスト"""
         # モックデータを準備
         mock_df = self.create_sample_stooq_dataframe()
-        mock_datareader.return_value = mock_df
+        mock_yf.download.return_value = mock_df
 
         # テスト実行
         result = stooq_daily_quotes('7203', datetime(2024, 1, 1), datetime(2024, 1, 5))
@@ -56,27 +56,27 @@ class TestStooqDataRetrieval:
         assert result is not None
         assert len(result) == 5
         assert 'Date' in result.columns or isinstance(result.index, pd.DatetimeIndex)
-        mock_datareader.assert_called_once()
+        mock_yf.download.assert_called_once()
     
-    @patch('BackcastPro.api.lib.stooq.web.DataReader')
+    @patch('BackcastPro.api.lib.stooq.yf')
     @patch('BackcastPro.api.lib.stooq._get_yfinance_daily_quotes')
-    def test_stooq_daily_quotes_empty(self, mock_yfinance, mock_datareader):
+    def test_stooq_daily_quotes_empty(self, mock_yfinance_api, mock_yf):
         """空のDataFrameが返される場合のテスト"""
         # 空のDataFrameを返すモック
-        mock_datareader.return_value = pd.DataFrame()
-        mock_yfinance.return_value = pd.DataFrame()
+        mock_yf.download.return_value = pd.DataFrame()
+        mock_yfinance_api.return_value = pd.DataFrame()
 
         # テスト実行
         result = stooq_daily_quotes('9999', datetime(2024, 1, 1), datetime(2024, 1, 5))
 
         # 検証（空のDataFrameが返される）
         assert result.empty
-    
-    @patch('BackcastPro.api.lib.stooq.web.DataReader')
-    def test_stooq_daily_quotes_error(self, mock_datareader):
+
+    @patch('BackcastPro.api.lib.stooq.yf')
+    def test_stooq_daily_quotes_error(self, mock_yf):
         """エラーが発生した場合のテスト"""
         # 例外を発生させるモック
-        mock_datareader.side_effect = Exception("API Error")
+        mock_yf.download.side_effect = Exception("API Error")
 
         # テスト実行
         result = stooq_daily_quotes('7203', datetime(2024, 1, 1), datetime(2024, 1, 5))

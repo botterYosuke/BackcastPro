@@ -17,19 +17,19 @@ app = marimo.App(width="full")
 def __():
     import marimo as mo
     import pandas as pd
-    import pandas_datareader.data as web
+    import yfinance as yf
     from datetime import datetime, timedelta
-    return datetime, mo, pd, timedelta, web
+    return datetime, mo, pd, timedelta, yf
 
 
 @app.cell
-def __(datetime, timedelta, web):
+def __(datetime, timedelta, yf):
     # データ取得
     end_date = datetime.now()
     start_date = end_date - timedelta(days=365)
 
-    code = "7203.JP"  # トヨタ
-    df = web.DataReader(code, "stooq", start_date, end_date)
+    code = "7203.T"  # トヨタ（東証）
+    df = yf.download(code, start=start_date, end=end_date, progress=False)
 
     print(f"データ取得完了: {code} ({len(df)} 件)")
     return code, df, end_date, start_date
