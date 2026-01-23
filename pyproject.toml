@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "BackcastPro"
-version = "0.2.1"
+version = "0.3.0"
 authors = [
   { name="botterYosuke" },
 ]
@@ -27,21 +27,17 @@ dependencies = [
     "scipy>=1.7.0",
     "python-dotenv>=0.19.0",
     "requests>=2.25.0",
-    "tqdm>=4.62.0",
     "duckdb>=0.9.0",
     "pandas-datareader>=0.10.0",
     "plotly>=5.0.0",
 ]
 
 [project.optional-dependencies]
-ui = [
-    "streamlit>=1.50.0",
-]
 yfinance = [
     "yfinance>=0.2.0",
 ]
 all = [
-    "BackcastPro[ui,yfinance]",
+    "BackcastPro[yfinance]",
 ]
 
 [project.urls]

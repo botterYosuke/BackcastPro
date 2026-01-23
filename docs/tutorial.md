@@ -9,8 +9,10 @@ BackcastProを使ったバックテストの基本的な使い方を学びます
 3. [最初の戦略](#最初の戦略)
 4. [データの取得](#データの取得)
 5. [バックテストの実行](#バックテストの実行)
-6. [結果の解釈](#結果の解釈)
-7. [次のステップ](#次のステップ)
+6. [リプレイ型シミュレーター](#リプレイ型シミュレーター)
+7. [結果の解釈](#結果の解釈)
+8. [marimo連携](#marimo連携)
+9. [次のステップ](#次のステップ)
 
 ## インストール（Windows）
 
@@ -20,44 +22,41 @@ python -m pip install BackcastPro
 
 ## 基本的な使い方
 
-BackcastProでは、バックテストの実行時に**TimeStomp管理**を使用して、各時点での戦略実行を行います。これにより、より正確な時系列での取引シミュレーションが可能になります。
+BackcastProは**リプレイ型シミュレーター**です。1バーずつ時間を進めながら、戦略を実行してチャートと売買を可視化できます。
 
 ```mermaid
 sequenceDiagram
     participant U as User
     participant D as DataReader
     participant B as Backtest
-    participant S as Strategy
+    participant S as Strategy Function
     participant R as Results
     U->>D: DataReader('7203.JP', 'stooq')
     D-->>U: OHLCV DataFrame
-    U->>B: Backtest({code: data}, Strategy)
-    B->>S: init()
+    U->>B: Backtest(data={code: df})
     loop 各タイムスタンプ
-        B->>S: next(current_time)
+        U->>S: my_strategy(bt)
         S->>B: buy()/sell()
+        U->>B: step()
     end
+    U->>B: finalize()
     B-->>R: pd.Series（統計含む）
 ```
-
-### TimeStomp管理の特徴
-
-- **正確な時系列処理**: 各タイムスタンプで戦略を実行
-- **リアルタイム感覚**: 実際の取引に近いタイミングでの判断
-- **プログレスバー表示**: バックテストの進行状況を視覚的に確認
 
 ### 1. 必要なライブラリのインポート
 
 ```python
-from BackcastPro import Strategy, Backtest
+from BackcastPro import Backtest
 import pandas as pd
 ```
 
 ### 2. データの準備
 
 ```python
+import pandas_datareader.data as web
+
 # トヨタの株価データを取得
-code='7203.JP'
+code = '7203.JP'
 df = web.DataReader(code, 'stooq')
 print(df.head())
 ```
@@ -66,27 +65,23 @@ print(df.head())
 
 ### シンプルな買い持ち戦略
 
-最初に、何もしない「買い持ち」戦略を作成してみましょう：
+最初に、一度だけ買う「買い持ち」戦略を作成してみましょう：
 
 ```python
-class BuyAndHold(Strategy):
-    def init(self):
-        # 戦略の初期化（今回は何もしない）
-        pass
-    
-    def next(self, current_time):
-        # 最初のバーで一度だけ買い
-        for code, df in self.data.items():
-            if len(df) == 1:
-                self.buy(code=code)
+def buy_and_hold(bt):
+    """最初のバーで一度だけ買う"""
+    if bt.position == 0:
+        bt.buy(tag="initial_buy")
 ```
 
 ### バックテストの実行
 
 ```python
-# バックテストを実行
-bt = Backtest({code: data}, BuyAndHold, cash=10000, commission=0.001)
-results = bt.run()
+# バックテストを初期化
+bt = Backtest(data={code: df}, cash=10000, commission=0.001)
+
+# 一括実行
+results = bt.run_with_strategy(buy_and_hold)
 print(results)
 ```
 
@@ -98,8 +93,8 @@ print(results)
 import pandas_datareader.data as web
 
 # 特定の銘柄のデータを取得
-toyota_data = web.DataReader('7203.JP', 'stooq') # トヨタ
-sony_data = web.DataReader('6758.JP', 'stooq')   # ソニー
+toyota_data = web.DataReader('7203.JP', 'stooq')  # トヨタ
+sony_data = web.DataReader('6758.JP', 'stooq')    # ソニー
 
 # 期間を指定してデータを取得
 from datetime import datetime, timedelta
@@ -125,8 +120,8 @@ custom_data = pd.DataFrame({
 }, index=pd.date_range('2023-01-01', periods=5))
 
 # バックテストで使用
-bt = Backtest({'CUSTOM': custom_data}, BuyAndHold)
-results = bt.run()
+bt = Backtest(data={'CUSTOM': custom_data}, cash=10000)
+results = bt.run_with_strategy(buy_and_hold)
 ```
 
 ### 複数銘柄の同時バックテスト
@@ -136,37 +131,97 @@ results = bt.run()
 toyota_data = web.DataReader('7203.JP', 'stooq')
 sony_data = web.DataReader('6758.JP', 'stooq')
 
-# 複数銘柄でバックテストを実行
-multi_data = {
-    '7203.JP': toyota_data,
-    '6758.JP': sony_data
-}
+# 複数銘柄でバックテストを初期化
+bt = Backtest(
+    data={
+        '7203.JP': toyota_data,
+        '6758.JP': sony_data
+    },
+    cash=10000
+)
 
-bt = Backtest(multi_data, BuyAndHold, cash=10000)
-results = bt.run()
+# 複数銘柄対応の戦略
+def multi_stock_strategy(bt):
+    for code in bt.data.keys():
+        pos = bt.position_of(code)  # ⚠️ 複数銘柄時は position_of を使用
+        if pos == 0:
+            bt.buy(code=code, tag="buy")
+
+results = bt.run_with_strategy(multi_stock_strategy)
 ```
 
 ## バックテストの実行
 
+### 方法1: 一括実行（推奨）
+
 ```python
 bt = Backtest(
-    {code: data},
-    BuyAndHold,
+    data={code: df},
     cash=10000,
     commission=0.001,
     finalize_trades=True,
 )
-results = bt.run()
+results = bt.run_with_strategy(my_strategy)
 ```
 
-> 複数戦略の比較や最適化の例は `examples/` と「高度な使い方」を参照してください。
+### 方法2: ステップ実行
+
+```python
+bt = Backtest(data={code: df}, cash=10000)
+
+while not bt.is_finished:
+    my_strategy(bt)
+    bt.step()
+
+results = bt.finalize()
+```
+
+## リプレイ型シミュレーター
+
+BackcastProの特徴は、**1バーずつ時間を進めながら可視化**できることです。
+
+### ステップ実行の基本
+
+```python
+bt = Backtest(data={code: df}, cash=10000)
+
+# 10バー進める
+for _ in range(10):
+    my_strategy(bt)
+    bt.step()
+
+    # 現在の状態を確認
+    print(f"時間: {bt.current_time}")
+    print(f"進捗: {bt.progress * 100:.1f}%")
+    print(f"資産: ${bt.equity:,.2f}")
+    print(f"ポジション: {bt.position}")
+    print("---")
+```
+
+### goto() で任意の位置へジャンプ
+
+```python
+# 100バー目まで進める（戦略を適用しながら）
+bt.goto(100, strategy=my_strategy)
+
+# チャートを確認
+chart = bt.make_chart()
+chart.show()
+```
+
+### reset() で最初からやり直し
+
+```python
+bt.reset()
+# 再度実行可能
+```
 
 ## 結果の解釈
 
 ### 基本的な統計情報
 
 ```python
-results = bt.run()
+results = bt.finalize()
 
 # 主要な統計情報を表示
 print(f"総リターン: {results['Return [%]']:.2f}%")
@@ -202,8 +257,66 @@ losing_trades = trades[trades['PnL'] < 0]
 
 print(f"勝ちトレード数: {len(winning_trades)}")
 print(f"負けトレード数: {len(losing_trades)}")
-print(f"平均勝ち: {winning_trades['PnL'].mean():.2f}")
-print(f"平均負け: {losing_trades['PnL'].mean():.2f}")
+```
+
+## marimo連携
+
+marimoと連携して、スライダーで時間を操作しながらリアルタイムで可視化できます。
+
+### 基本的なmarimo連携
+
+```python
+import marimo as mo
+from BackcastPro import Backtest
+
+# データ準備
+bt = Backtest(data={"AAPL": df_aapl}, cash=100000)
+
+# 戦略定義
+def my_strategy(bt):
+    df = bt.data.get("AAPL")
+    if df is None or len(df) < 2:
+        return
+
+    c0 = df["Close"].iloc[-2]
+    c1 = df["Close"].iloc[-1]
+
+    if bt.position == 0 and c1 < c0:
+        bt.buy(tag="dip_buy")
+    elif bt.position > 0 and c1 > c0:
+        bt.sell(tag="profit_take")
+```
+
+### UIコントロール
+
+```python
+# 時間スライダー
+slider = mo.ui.slider(
+    start=1,
+    stop=len(bt.index),
+    value=1,
+    label="📅 時間",
+    show_value=True
+)
+
+# スライダー位置まで進める
+bt.goto(slider.value, strategy=my_strategy)
+
+# チャート描画（tag 表示付き）
+chart = bt.make_chart(height=500, show_tags=True)
+
+# 情報パネル
+info = mo.md(f"""
+### 📊 状況
+| 項目 | 値 |
+|------|-----|
+| 日時 | {bt.current_time} |
+| 進捗 | {bt.progress * 100:.1f}% |
+| 資産 | ${bt.equity:,.2f} |
+| ポジション | {bt.position} 株 |
+""")
+
+mo.vstack([slider, chart, info])
 ```
 
 ## 次のステップ
@@ -211,28 +324,38 @@ print(f"平均負け: {losing_trades['PnL'].mean():.2f}")
 ### 1. より複雑な戦略の実装
 
 ```python
-class MovingAverageCross(Strategy):
-    def init(self):
-        # 移動平均を計算
-        for code, df in self.data.items():
-            df['SMA_short'] = df.Close.rolling(10).mean()
-            df['SMA_long'] = df.Close.rolling(20).mean()
-    
-    def next(self, current_time):
-        # ゴールデンクロスで買い、デッドクロスで売り
-        for code, df in self.data.items():
-            if (df.SMA_short.iloc[-1] > df.SMA_long.iloc[-1] and
-                df.SMA_short.iloc[-2] <= df.SMA_long.iloc[-2]):
-                self.buy(code=code)
-            
-            elif (df.SMA_short.iloc[-1] < df.SMA_long.iloc[-1] and
-                  df.SMA_short.iloc[-2] >= df.SMA_long.iloc[-2]):
-                self.sell(code=code)
+def moving_average_cross(bt):
+    """移動平均クロス戦略"""
+    df = bt.data.get("AAPL")
+    if df is None or len(df) < 20:
+        return
+
+    sma_short = df["Close"].rolling(10).mean().iloc[-1]
+    sma_long = df["Close"].rolling(20).mean().iloc[-1]
+    sma_short_prev = df["Close"].rolling(10).mean().iloc[-2]
+    sma_long_prev = df["Close"].rolling(20).mean().iloc[-2]
+
+    # ゴールデンクロスで買い
+    if bt.position == 0 and sma_short > sma_long and sma_short_prev <= sma_long_prev:
+        bt.buy(tag="golden_cross")
+
+    # デッドクロスで売り
+    elif bt.position > 0 and sma_short < sma_long and sma_short_prev >= sma_long_prev:
+        bt.sell(tag="dead_cross")
 ```
 
 ### 2. リスク管理の追加
 
-`buy()` / `sell()` の `sl` と `tp` を活用できます（詳細は API リファレンス参照）。
+```python
+def strategy_with_risk_management(bt):
+    if bt.position == 0:
+        price = bt.data["AAPL"]["Close"].iloc[-1]
+        bt.buy(
+            sl=price * 0.95,  # 5%下落でストップロス
+            tp=price * 1.10,  # 10%上昇でテイクプロフィット
+            tag="entry_with_sl_tp"
+        )
+```
 
 ### 3. パフォーマンスの可視化
 
@@ -242,6 +365,7 @@ import matplotlib.pyplot as plt
 # エクイティカーブをプロット
 equity_curve = results['_equity_curve']
 plt.figure(figsize=(12, 6))
+
 plt.subplot(2, 1, 1)
 plt.plot(equity_curve.index, equity_curve['Equity'])
 plt.title('エクイティカーブ')
@@ -251,27 +375,9 @@ plt.subplot(2, 1, 2)
 plt.plot(equity_curve.index, equity_curve['DrawdownPct'])
 plt.title('ドローダウン')
 plt.ylabel('ドローダウン (%)')
-plt.xlabel('日付')
 
 plt.tight_layout()
 plt.show()
-```
-
-### 4. Streamlitでの可視化
-
-```python
-# Streamlitアプリの作成
-import streamlit as st
-
-st.title('バックテスト結果')
-st.write('戦略:', 'MovingAverageCross')
-st.write('総リターン:', f"{results['Return [%]']:.2f}%")
-
-# エクイティカーブを表示
-st.line_chart(equity_curve[['Equity']])
-
-# トレード履歴を表示
-st.dataframe(trades)
 ```
 
 ## よくある質問
@@ -287,17 +393,17 @@ A: 以下の点を確認してください：
 
 A: 以下の方法を試してください：
 1. データ期間を短くする
-2. 複雑な計算を`init()`で事前計算する
+2. 複雑な計算を事前に行っておく
 3. 不要なデータを削除する
 
-### Q: 結果が期待と異なる場合はどうすればいいですか？
+### Q: 複数銘柄で position がおかしい
 
-A: 以下の点を確認してください：
-1. データの品質
-2. 戦略ロジックの正確性
-3. パラメータ設定の妥当性
+A: 複数銘柄を扱う場合は `bt.position` ではなく `bt.position_of(code)` を使用してください。
+`position` は全銘柄合計のため、個別銘柄のポジションを正確に取得できません。
 
 ## まとめ
 
-- インストール → データ取得 → 戦略実装 → 実行 → 分析、の順に進めます
-- 詳細は「APIリファレンス」「高度な使い方」「サンプルコード」を参照してください
+- **データ準備** → **Backtest初期化** → **戦略関数定義** → **実行** → **分析** の順に進めます
+- `run_with_strategy()` で一括実行、または `step()` でステップ実行
+- `make_chart()` で売買マーカー付きチャートを生成
+- marimo連携でインタラクティブな可視化が可能

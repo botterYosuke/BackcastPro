@@ -2,38 +2,30 @@
 バックテスト管理モジュール。
 """
 
-import os
+import sys
 import warnings
 from functools import partial
 from numbers import Number
-from typing import Optional, Tuple, Type, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm  # プログレスバー
+try:
+    import plotly.graph_objects as go
+    HAS_PLOTLY = True
+except ImportError:
+    HAS_PLOTLY = False
 
 from ._broker import _Broker
 from ._stats import compute_stats
 
 
-_TQDM_ENABLED = os.environ.get("BACKCASTPRO_TQDM_DISABLE", "").lower() not in {"1", "true", "yes"}
-
-
-def set_tqdm_enabled(enabled: bool) -> None:
-    """
-    tqdm ベースの進捗バー表示を有効 / 無効にします。
-    Pyodide や非TTY環境では False を指定して抑止してください。
-    """
-    global _TQDM_ENABLED
-    _TQDM_ENABLED = bool(enabled)
-
 class Backtest:
     """
-    特定のデータに対して特定の（パラメータ化された）戦略をバックテストします。
+    特定のデータに対してバックテストを実行します。
 
-    バックテストを初期化します。テストするデータと戦略が必要です。
-    初期化後、バックテストインスタンスを実行するために
-    `Backtest.run`メソッドを呼び出す。
+    バックテストを初期化します。
+    初期化後、`Backtest.run_with_strategy`メソッドを呼び出して実行します。
 
     `data`は以下の列を持つ`pd.DataFrame`です：
     `Open`, `High`, `Low`, `Close`, および（オプションで）`Volume`。
@@ -46,9 +38,6 @@ class Backtest:
     （例：センチメント情報）を含めることができます。
     DataFrameのインデックスは、datetimeインデックス（タイムスタンプ）または
     単調増加の範囲インデックス（期間のシーケンス）のいずれかです。
-
-    `strategy`は`Strategy`の
-    _サブクラス_（インスタンスではありません）です。
 
     `cash`は開始時の初期現金です。
 
@@ -91,7 +80,6 @@ class Backtest:
 
     def __init__(self,
                 data: dict[str, pd.DataFrame] = None,
-                strategy: Type = None,
                 *,
                 cash: float = 10_000,
                 spread: float = .0,
@@ -119,15 +107,28 @@ class Backtest:
         # 1. _Brokerクラスのコンストラクタの引数の一部（cash, spread, commissionなど）を事前に固定
         # 2. 新しい関数（実際には呼び出し可能オブジェクト）を作成
         # 3. 後で残りの引数（おそらくdataなど）を渡すだけで_Brokerのインスタンスを作成できるようにする
-        self._broker = partial[_Broker](
+        self._broker_factory = partial[_Broker](
             _Broker, cash=cash, spread=spread, commission=commission, margin=margin,
             trade_on_close=trade_on_close, hedging=hedging,
             exclusive_orders=exclusive_orders
         )
 
-        self.set_strategy(strategy)
         self._results: Optional[pd.Series] = None
         self._finalize_trades = bool(finalize_trades)
+
+        # ステップ実行用の状態管理
+        self._broker_instance: Optional[_Broker] = None
+        self._step_index = 0
+        self._is_started = False
+        self._is_finished = False
+        self._current_data: dict[str, pd.DataFrame] = {}
+
+        # パフォーマンス最適化: 各銘柄の index position マッピング
+        self._index_positions: dict[str, dict] = {}
+
+        # 自動的にstart()を呼び出す
+        if data is not None:
+            self.start()
 
     def _validate_and_prepare_df(self, df: pd.DataFrame, code: str) -> pd.DataFrame:
         """
@@ -195,19 +196,6 @@ class Backtest:
         return df
 
 
-    def set_strategy(self, strategy):
-        self._strategy = None
-        if strategy is None:
-            return
-
-        # 循環インポートを避けるためにここでインポート
-        from .strategy import Strategy
-        if not (isinstance(strategy, type) and issubclass(strategy, Strategy)):
-            raise TypeError('`strategy` must be a Strategy sub-type')
-
-        self._strategy = strategy
-
-
     def set_data(self, data):
         self._data = None
         if data is None:
@@ -226,148 +214,437 @@ class Backtest:
         self._data: dict[str, pd.DataFrame] = data
 
     def set_cash(self, cash):
-        self._broker.keywords['cash'] = cash
+        self._broker_factory.keywords['cash'] = cash
 
-    def run(self) -> pd.Series:
+    # =========================================================================
+    # ステップ実行 API
+    # =========================================================================
+
+    def start(self) -> 'Backtest':
+        """バックテストを開始準備する"""
+        if self._data is None:
+            raise ValueError("data が設定されていません")
+
+        self._broker_instance = self._broker_factory(data=self._data)
+        self._step_index = 0
+        self._is_started = True
+        self._is_finished = False
+        self._current_data = {}
+        self._results = None
+
+        # パフォーマンス最適化: 各銘柄の index → position マッピングを事前計算
+        self._index_positions = {}
+        for code, df in self._data.items():
+            self._index_positions[code] = {
+                ts: i for i, ts in enumerate(df.index)
+            }
+
+        return self
+
+    def step(self) -> bool:
         """
-        バックテストを実行します。結果と統計を含む `pd.Series` を返します。
+        1ステップ（1バー）進める。
 
-        キーワード引数は戦略パラメータとして解釈されます。
+        【タイミング】
+        - step(t) 実行時、data[:t] が見える状態になる
+        - 注文は broker.next(t) 内で処理される
 
-            >>> Backtest(GOOG, SmaCross).run()
-            Start                     2004-08-19 00:00:00
-            End                       2013-03-01 00:00:00
-            Duration                   3116 days 00:00:00
-            Exposure Time [%]                    96.74115
-            Equity Final [$]                     51422.99
-            Equity Peak [$]                      75787.44
-            Return [%]                           414.2299
-            Buy & Hold Return [%]               703.45824
-            Return (Ann.) [%]                    21.18026
-            Volatility (Ann.) [%]                36.49391
-            CAGR [%]                             14.15984
-            Sharpe Ratio                          0.58038
-            Sortino Ratio                         1.08479
-            Calmar Ratio                          0.44144
-            Alpha [%]                           394.37391
-            Beta                                  0.03803
-            Max. Drawdown [%]                   -47.98013
-            Avg. Drawdown [%]                    -5.92585
-            Max. Drawdown Duration      584 days 00:00:00
-            Avg. Drawdown Duration       41 days 00:00:00
-            # Trades                                   66
-            Win Rate [%]                          46.9697
-            Best Trade [%]                       53.59595
-            Worst Trade [%]                     -18.39887
-            Avg. Trade [%]                        2.53172
-            Max. Trade Duration         183 days 00:00:00
-            Avg. Trade Duration          46 days 00:00:00
-            Profit Factor                         2.16795
-            Expectancy [%]                        3.27481
-            SQN                                   1.07662
-            Kelly Criterion                       0.15187
-            _strategy                            SmaCross
-            _equity_curve                           Eq...
-            _trades                       Size  EntryB...
-            dtype: object
-
-        .. warning::
-            異なる戦略パラメータに対して異なる結果が得られる場合があります。
-            例：50本と200本のSMAを使用する場合、取引シミュレーションは
-            201本目から開始されます。実際の遅延の長さは、最も遅延する
-            `Strategy.I`インジケーターのルックバック期間に等しくなります。
-            明らかに、これは結果に影響を与える可能性があります。
+        Returns:
+            bool: まだ続行可能なら True、終了なら False
         """
-        # 循環インポートを避けるためにここでインポート
-        from .strategy import Strategy
-        if not (isinstance(self._strategy, type) and issubclass(self._strategy, Strategy)):
-            raise TypeError('`strategy` must be a Strategy sub-type')
+        if not self._is_started:
+            raise RuntimeError("start() を呼び出してください")
 
-        broker: _Broker = self._broker(data=self._data)
-        strategy: Strategy = self._strategy(broker, self._data)
+        if self._is_finished:
+            return False
 
-        strategy.init()
+        if self._step_index >= len(self.index):
+            self._is_finished = True
+            return False
 
-        # strategy.init()で加工されたdataを登録
-        data = self._data.copy()
-        
-        # "invalid value encountered in ..."警告を無効化。比較
-        # np.nan >= 3は無効ではない；Falseです。
+        current_time = self.index[self._step_index]
+
         with np.errstate(invalid='ignore'):
+            # パフォーマンス最適化: iloc ベースで slicing
+            for code, df in self._data.items():
+                if current_time in self._index_positions[code]:
+                    pos = self._index_positions[code][current_time]
+                    self._current_data[code] = df.iloc[:pos + 1]
+                # current_time がこの銘柄に存在しない場合は前の状態を維持
 
-            # プログレスバーを表示（無効化フラグに対応）
-            progress_bar = tqdm(
-                self.index,
-                desc="バックテスト実行中",
-                unit="step",
-                ncols=120,
-                leave=True,
-                dynamic_ncols=True,
-                disable=not _TQDM_ENABLED
-            )
-            count = 0
-            for current_time in progress_bar:
+            # ブローカー処理（注文の約定）
+            try:
+                self._broker_instance._data = self._current_data
+                self._broker_instance.next(current_time)
+            except Exception:
+                self._is_finished = True
+                return False
 
-                # 注文処理とブローカー関連の処理
-                for k, value in self._data.items():
-                    # time以前のデータをフィルタリング
-                    data[k] = value[value.index <= current_time]
+        self._step_index += 1
 
-                # brokerに更新したdateを再登録
-                try:
-                    broker._data = data
-                    broker.next(current_time)
-                except:
-                    break
+        if self._step_index >= len(self.index):
+            self._is_finished = True
 
-                # 次のティック、バークローズ直前
-                strategy._data = data
-                strategy.next(current_time)
-                
-                count += 1
+        return not self._is_finished
 
-                # プログレスバーの説明を更新（現在の日付を表示）
-                if data:
-                    try:
-                        progress_bar.set_postfix({"日付": current_time.strftime('%Y-%m-%d')})
-                    except:
-                        pass
+    def reset(self) -> 'Backtest':
+        """バックテストをリセットして最初から"""
+        self._broker_instance = self._broker_factory(data=self._data)
+        self._step_index = 0
+        self._is_finished = False
+        self._current_data = {}
+        self._results = None
+        return self
+
+    def goto(self, step: int, strategy: Callable[['Backtest'], None] = None) -> 'Backtest':
+        """
+        指定ステップまで進める（スライダー連携用）
+
+        Args:
+            step: 目標のステップ番号（1-indexed、0以下は1に丸められる）
+            strategy: 各ステップで呼び出す戦略関数（省略可）
+                      ※ strategy は step() の **前** に呼ばれます
+
+        Note:
+            step < 現在位置 の場合、reset() してから再実行します。
+        """
+        step = max(1, min(step, len(self.index)))
+
+        # 現在より前に戻る場合はリセット
+        if step < self._step_index:
+            self.reset()
+
+        # 目標まで進める（戦略を適用しながら）
+        while self._step_index < step and not self._is_finished:
+            if strategy:
+                strategy(self)
+            self.step()
+
+        return self
+
+    # =========================================================================
+    # 売買 API
+    # =========================================================================
+
+    def buy(self, *,
+            code: str = None,
+            size: float = None,
+            limit: Optional[float] = None,
+            stop: Optional[float] = None,
+            sl: Optional[float] = None,
+            tp: Optional[float] = None,
+            tag: object = None):
+        """
+        買い注文を発注する。
+
+        Args:
+            code: 銘柄コード（1銘柄のみの場合は省略可）
+            size: 注文数量（省略時は利用可能資金の99.99%）
+            limit: 指値価格
+            stop: 逆指値価格
+            sl: ストップロス価格
+            tp: テイクプロフィット価格
+            tag: 注文理由（例: "dip_buy", "breakout"）→ チャートに表示可能
+        """
+        if not self._is_started:
+            raise RuntimeError("start() を呼び出してください")
+
+        if code is None:
+            if len(self._data) == 1:
+                code = list(self._data.keys())[0]
             else:
-                if self._finalize_trades is True:
-                    # 統計を生成するために残っているオープン取引をクローズ
-                    for trade in reversed(broker.trades):
-                        trade.close()
+                raise ValueError("複数銘柄がある場合はcodeを指定してください")
 
-                    # HACK: 最後の戦略イテレーションで配置されたクローズ注文を処理するために
-                    #  ブローカーを最後にもう一度実行。最後のブローカーイテレーションと同じOHLC値を使用。
-                    broker.next(self.index[count-1])
-                elif len(broker.trades):
-                    warnings.warn(
-                        'バックテスト終了時に一部の取引がオープンのままです。'
-                        '`Backtest(..., finalize_trades=True)`を使用してクローズし、'
-                        '統計に含めてください。', stacklevel=2)
+        if size is None:
+            size = 1 - sys.float_info.epsilon
 
-            equity = pd.Series(broker._equity).bfill().fillna(broker._cash).values
-            self._results = compute_stats(
-                trades=broker.closed_trades,
-                equity=np.array(equity),
-                index=self.index,
-                strategy_instance=strategy,
-                risk_free_rate=0.0,
-            )
+        return self._broker_instance.new_order(code, size, limit, stop, sl, tp, tag)
+
+    def sell(self, *,
+             code: str = None,
+             size: float = None,
+             limit: Optional[float] = None,
+             stop: Optional[float] = None,
+             sl: Optional[float] = None,
+             tp: Optional[float] = None,
+             tag: object = None):
+        """
+        売り注文を発注する。
+
+        Args:
+            code: 銘柄コード（1銘柄のみの場合は省略可）
+            size: 注文数量（省略時は利用可能資金の99.99%）
+            limit: 指値価格
+            stop: 逆指値価格
+            sl: ストップロス価格
+            tp: テイクプロフィット価格
+            tag: 注文理由（例: "profit_take", "stop_loss"）→ チャートに表示可能
+        """
+        if not self._is_started:
+            raise RuntimeError("start() を呼び出してください")
+
+        if code is None:
+            if len(self._data) == 1:
+                code = list(self._data.keys())[0]
+            else:
+                raise ValueError("複数銘柄がある場合はcodeを指定してください")
+
+        if size is None:
+            size = 1 - sys.float_info.epsilon
+
+        return self._broker_instance.new_order(code, -size, limit, stop, sl, tp, tag)
+
+    # =========================================================================
+    # 可視化
+    # =========================================================================
+
+    def make_chart(self, code: str = None, height: int = 500, show_tags: bool = True):
+        """
+        現在時点までのローソク足チャートを生成（売買マーカー付き）
+
+        Args:
+            code: 銘柄コード
+            height: チャートの高さ
+            show_tags: 売買理由（tag）をチャートに表示するか
+
+        Returns:
+            plotly.graph_objects.Figure
+        """
+        if not HAS_PLOTLY:
+            raise ImportError("plotly がインストールされていません。pip install plotly を実行してください。")
+
+        if code is None:
+            if len(self._data) == 1:
+                code = list(self._data.keys())[0]
+            else:
+                raise ValueError("複数銘柄がある場合はcodeを指定してください")
+
+        if not self._is_started or self._broker_instance is None:
+            return go.Figure()
+
+        if code not in self._current_data or len(self._current_data[code]) == 0:
+            return go.Figure()
+
+        df = self._current_data[code]
+
+        fig = go.Figure()
+
+        # ローソク足
+        fig.add_trace(go.Candlestick(
+            x=df.index,
+            open=df["Open"],
+            high=df["High"],
+            low=df["Low"],
+            close=df["Close"],
+            name=code
+        ))
+
+        # 売買マーカー
+        all_trades = list(self._broker_instance.closed_trades) + list(self._broker_instance.trades)
+        for trade in all_trades:
+            if trade.code != code:
+                continue
+
+            is_long = trade.size > 0
+
+            # エントリーマーカー
+            hover_text = f"{'BUY' if is_long else 'SELL'}<br>Price: {trade.entry_price:.2f}"
+            if show_tags and trade.tag:
+                hover_text += f"<br>Reason: {trade.tag}"
+
+            fig.add_trace(go.Scatter(
+                x=[trade.entry_time],
+                y=[trade.entry_price],
+                mode="markers+text" if show_tags and trade.tag else "markers",
+                marker=dict(
+                    color="green" if is_long else "red",
+                    size=12,
+                    symbol="triangle-up" if is_long else "triangle-down",
+                ),
+                text=[trade.tag] if show_tags and trade.tag else None,
+                textposition="top center" if is_long else "bottom center",
+                textfont=dict(size=10),
+                hovertext=hover_text,
+                hoverinfo="text",
+                name="BUY" if is_long else "SELL",
+                showlegend=False
+            ))
+
+            # イグジットマーカー（決済済みの場合）
+            if trade.exit_time is not None:
+                pnl = (trade.exit_price - trade.entry_price) * trade.size
+                fig.add_trace(go.Scatter(
+                    x=[trade.exit_time],
+                    y=[trade.exit_price],
+                    mode="markers",
+                    marker=dict(
+                        color="blue",
+                        size=10,
+                        symbol="x",
+                    ),
+                    hovertext=f"EXIT<br>Price: {trade.exit_price:.2f}<br>PnL: {pnl:+.2f}",
+                    hoverinfo="text",
+                    name="EXIT",
+                    showlegend=False
+                ))
+
+        fig.update_layout(
+            title=f"{code} - {self.current_time}",
+            xaxis_title="Date",
+            yaxis_title="Price",
+            height=height,
+            xaxis_rangeslider_visible=False,
+        )
+
+        return fig
+
+    # =========================================================================
+    # ステップ実行用プロパティ
+    # =========================================================================
+
+    @property
+    def data(self) -> dict[str, pd.DataFrame]:
+        """現在時点までのデータ"""
+        return self._current_data
+
+    @property
+    def position(self) -> int:
+        """
+        現在のポジションサイズ（全銘柄合計）
+
+        ⚠️ 注意: 複数銘柄を扱う場合は position_of(code) を使用してください。
+        このプロパティは後方互換性のために残されています。
+        """
+        if not self._is_started or self._broker_instance is None:
+            return 0
+        return self._broker_instance.position.size
+
+    def position_of(self, code: str) -> int:
+        """
+        指定銘柄のポジションサイズ（推奨）
+
+        Args:
+            code: 銘柄コード
+
+        Returns:
+            int: ポジションサイズ（正: ロング、負: ショート、0: ノーポジ）
+        """
+        if not self._is_started or self._broker_instance is None:
+            return 0
+        return sum(t.size for t in self._broker_instance.trades if t.code == code)
+
+    @property
+    def equity(self) -> float:
+        """現在の資産"""
+        if not self._is_started or self._broker_instance is None:
+            return self._broker_factory.keywords.get('cash', 0)
+        return self._broker_instance.equity
+
+    @property
+    def is_finished(self) -> bool:
+        """完了したかどうか"""
+        return self._is_finished
+
+    @property
+    def current_time(self) -> Optional[pd.Timestamp]:
+        """現在の日時"""
+        if self._step_index == 0:
+            return None
+        return self.index[self._step_index - 1]
+
+    @property
+    def progress(self) -> float:
+        """進捗率（0.0〜1.0）"""
+        if len(self.index) == 0:
+            return 0.0
+        return self._step_index / len(self.index)
+
+    @property
+    def trades(self) -> List:
+        """アクティブな取引リスト"""
+        if not self._is_started or self._broker_instance is None:
+            return []
+        return list(self._broker_instance.trades)
+
+    @property
+    def closed_trades(self) -> List:
+        """決済済み取引リスト"""
+        if not self._is_started or self._broker_instance is None:
+            return []
+        return list(self._broker_instance.closed_trades)
+
+    @property
+    def orders(self) -> List:
+        """未約定の注文リスト"""
+        if not self._is_started or self._broker_instance is None:
+            return []
+        return list(self._broker_instance.orders)
+
+    # =========================================================================
+    # finalize / run
+    # =========================================================================
+
+    def finalize(self) -> pd.Series:
+        """統計を計算して結果を返す"""
+        if self._results is not None:
+            return self._results
+
+        if not self._is_started:
+            raise RuntimeError("バックテストが開始されていません")
+
+        broker = self._broker_instance
+
+        if self._finalize_trades:
+            for trade in reversed(broker.trades):
+                trade.close()
+            if self._step_index > 0:
+                broker.next(self.index[self._step_index - 1])
+        elif len(broker.trades):
+            warnings.warn(
+                'バックテスト終了時に一部の取引がオープンのままです。'
+                '`Backtest(..., finalize_trades=True)`を使用してクローズし、'
+                '統計に含めてください。', stacklevel=2)
+
+        # インデックスが空の場合のガード
+        result_index = self.index[:self._step_index] if self._step_index > 0 else self.index[:1]
+
+        equity = pd.Series(broker._equity).bfill().fillna(broker._cash).values
+        self._results = compute_stats(
+            trades=broker.closed_trades,
+            equity=np.array(equity),
+            index=result_index,
+            strategy_instance=None,
+            risk_free_rate=0.0,
+        )
 
         return self._results
 
+    def run_with_strategy(self, strategy_func: Callable[['Backtest'], None] = None) -> pd.Series:
+        """
+        バックテストを最後まで実行（ステップ実行API版）
+
+        Args:
+            strategy_func: 各ステップで呼び出す関数 (bt) -> None
+        """
+        if not self._is_started:
+            self.start()
+
+        while not self._is_finished:
+            if strategy_func:
+                strategy_func(self)
+            self.step()
+
+        return self.finalize()
 
     @property
     def cash(self):
+        """現在の現金残高"""
+        if self._is_started and self._broker_instance is not None:
+            return self._broker_instance.cash
         # partialで初期化されている場合、初期化時のcash値を返す
-        return self._broker.keywords.get('cash', 0)
+        return self._broker_factory.keywords.get('cash', 0)
 
-   
     @property
     def commission(self):
         # partialで初期化されている場合、初期化時のcommission値を返す
-        return self._broker.keywords.get('commission', 0)   
-
-
+        return self._broker_factory.keywords.get('commission', 0)

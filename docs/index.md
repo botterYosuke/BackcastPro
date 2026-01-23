@@ -1,6 +1,7 @@
 # <img src="img/logo.drawio.svg" alt="BackcastPro Logo" width="40" height="24"> BackcastPro ドキュメント
 
 BackcastProは、トレーディング戦略のためのPythonバックテストライブラリです。
+**リプレイ型シミュレーター**で、1バーずつ時間を進めながらチャートと売買を可視化できます。
 
 ## ドキュメント一覧
 
@@ -19,50 +20,84 @@ BackcastProは、トレーディング戦略のためのPythonバックテスト
 ### サンプルコード
 
 - **[サンプル集](examples/)** - 実用的な戦略の例
-  - [クイックスタートガイド](examples/QuickStartUserGuide.py)
-  - [SMAクロス戦略](examples/SmaCross.py)
-  - [Streamlitアプリ](examples/Streamlit.py)
+  - [marimoリプレイシミュレーター](examples/marimo_replay.py) - スライダーで時間操作
+  - [SMAクロス戦略ユーティリティ](examples/SmaCross.py) - 移動平均計算
 
 ## クイックスタート
 
 ```python
 import pandas_datareader.data as web
-from BackcastPro import Strategy, Backtest
+from BackcastPro import Backtest
 
-# シンプルな買い持ち戦略
-class BuyAndHold(Strategy):
-    def init(self):
-        pass
-    
-    def next(self, current_time):
-        for code, df in self.data.items():
-            if len(df) == 1:
-                self.buy(code=code)
-
-# データを取得してバックテストを実行
-code='7203.JP' # トヨタ
+# データを取得
+code = '7203.JP'  # トヨタ
 df = web.DataReader(code, 'stooq')
-bt = Backtest({code: df}, BuyAndHold, cash=10000)
-results = bt.run()
+
+# バックテストを初期化
+bt = Backtest(data={code: df}, cash=10000)
+
+# 戦略関数を定義
+def my_strategy(bt):
+    if bt.position == 0:
+        bt.buy(tag="entry")
+
+# 一括実行
+results = bt.run_with_strategy(my_strategy)
 print(results)
 ```
 
 ## 主な機能
 
-- **シンプルな戦略実装**: `Strategy` を継承して `init` と `next` を実装
+- **リプレイ型シミュレーター**: `step()` で1バーずつ進めながらチャート確認
+- **シンプルな戦略実装**: 関数ベースで `buy()` / `sell()` を呼ぶだけ
 - **統計の自動計算**: 代表的なパフォーマンス指標を同梱
 - **リスク管理**: `sl` と `tp` に標準対応
-- **可視化**: Streamlit 連携の例を提供
+- **可視化**: `make_chart()` で plotly ローソク足チャート生成
+- **marimo連携**: スライダーで時間を操作しながらリアルタイム可視化
 
 ```mermaid
 flowchart TD
-    A["データ取得"] --> B["Backtest 初期化"]
-    B --> C["Strategy.init 前処理"]
-    C --> D["Strategy.next(current_time) ループ"]
-    D --> E["_Broker.next(current_time) 注文/約定"]
-    E --> F["_stats 統計計算"]
-    F --> G["結果 pd.Series"]
+    A["データ準備"] --> B["Backtest 初期化"]
+    B --> C["start() 開始"]
+    C --> D["strategy(bt) 戦略実行"]
+    D --> E["step() 1バー進める"]
+    E --> F{"is_finished?"}
+    F -->|No| D
+    F -->|Yes| G["finalize() 統計計算"]
+    G --> H["結果 pd.Series"]
 ```
+
+## API 概要
+
+### メソッド
+
+| メソッド | 説明 |
+|---------|------|
+| `start()` | バックテスト開始 |
+| `step()` | 1バー進める |
+| `reset()` | 最初からやり直し |
+| `goto(step, strategy)` | 指定位置まで進める |
+| `buy(code, size, tag, ...)` | 買い注文 |
+| `sell(code, size, tag, ...)` | 売り注文 |
+| `make_chart(code)` | チャート生成 |
+| `finalize()` | 統計計算 |
+| `run_with_strategy(func)` | 一括実行 |
+
+### プロパティ
+
+| プロパティ | 説明 |
+|-----------|------|
+| `data` | 現在時点までのデータ |
+| `position` | ポジションサイズ（全銘柄合計） |
+| `position_of(code)` | 指定銘柄のポジション |
+| `equity` | 現在の資産 |
+| `cash` | 現在の現金 |
+| `current_time` | 現在の日時 |
+| `progress` | 進捗率（0.0〜1.0） |
+| `is_finished` | 完了フラグ |
+| `trades` | アクティブな取引 |
+| `closed_trades` | 決済済み取引 |
+| `orders` | 未約定の注文 |
 
 ## サポート
 
