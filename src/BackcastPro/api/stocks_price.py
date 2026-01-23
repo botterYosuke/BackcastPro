@@ -80,7 +80,7 @@ class stocks_price:
         raise ValueError(f"日本株式銘柄の取得に失敗しました: {code}")
 
 
-def get_stock_price(code, from_: datetime = None, to: datetime = None) -> pd.DataFrame:
+def get_stock_daily(code, from_: datetime = None, to: datetime = None) -> pd.DataFrame:
     """
     株価四本値（/prices/daily_quotes）
 
@@ -95,7 +95,7 @@ def get_stock_price(code, from_: datetime = None, to: datetime = None) -> pd.Dat
     Returns:
         DataFrame: 株価データ（Date列がindexとして設定されている）
     """
-    from .stocks_daily import stocks_price
+    from .stocks_price import stocks_price
     __sp__ = stocks_price()
 
     # 株価データを取得（内部で自動的にデータベースに保存される）
@@ -114,7 +114,7 @@ def get_stock_price(code, from_: datetime = None, to: datetime = None) -> pd.Dat
             # Date列がなく、indexもDatetimeIndexでない場合の警告
             import warnings
             warnings.warn(
-                f"get_stock_price('{code}') が返したDataFrameに'Date'列がありません。"
+                f"get_stock_daily('{code}') が返したDataFrameに'Date'列がありません。"
                 "Backtestで使用するには、Date列が必要です。",
                 stacklevel=2
             )

@@ -406,7 +406,7 @@ class db_stocks_daily(db_manager):
         Yields:
             duckdb.DuckDBPyConnection: DuckDB接続オブジェクト
         """
-        db_path = os.path.join(self.cache_dir, "stocks", f"{code}.duckdb")
+        db_path = os.path.join(self.cache_dir, "stocks_daily", f"{code}.duckdb")
         if not os.path.exists(db_path):
             if len(code) > 4:
                 code_retry = code[:-1]
@@ -438,7 +438,7 @@ class db_stocks_daily(db_manager):
         FTP_USER = 'sasaco_worker'
         FTP_PASSWORD = 'S#1y9c%7o9'
         FTP_PORT = 21
-        REMOTE_DIR = '/StockData/jp/stocks'
+        REMOTE_DIR = '/StockData/jp/stocks_daily'
         
         try:
             with ftplib.FTP() as ftp:
