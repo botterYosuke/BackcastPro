@@ -1,0 +1,54 @@
+name: Publish to PyPI
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: uvをインストール
+        uses: astral-sh/setup-uv@v5
+
+      - name: pyproject.tomlからバージョンを取得
+        id: get_version
+        run: |
+          VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION"
+
+      - name: PyPIで既存バージョンを確認
+        id: check_pypi
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://pypi.org/pypi/BackcastPro/$VERSION/json)
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Version $VERSION already exists on PyPI. Skipping..."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Version $VERSION not found on PyPI. Will publish."
+          fi
+
+      - name: パッケージをビルド
+        if: steps.check_pypi.outputs.exists == 'false'
+        run: uv build
+
+      - name: TestPyPIにパブリッシュ
+        if: steps.check_pypi.outputs.exists == 'false'
+        run: uv publish --publish-url https://test.pypi.org/legacy/
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.TEST_PYPI_TOKEN }}
+
+      - name: PyPIにパブリッシュ
+        if: steps.check_pypi.outputs.exists == 'false'
+        run: uv publish
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
