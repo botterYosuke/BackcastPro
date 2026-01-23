@@ -1,5 +1,19 @@
 var searchData=
 [
-  ['last_5fprice_0',['last_price',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#a5ebf2a73b0453082fd1cd0f163b1e310',1,'src::BackcastPro::_broker::_Broker']]],
-  ['limit_1',['limit',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html#a2c59a63fb76416221099924d04755a02',1,'src::BackcastPro::order::Order']]]
+  ['geometric_5fmean_0',['geometric_mean',['../namespacesrc_1_1BackcastPro_1_1__stats.html#a74fe18f75212e419125fa4f5d1629433',1,'src::BackcastPro::_stats']]],
+  ['get_5fboard_1',['get_board',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1kabusap_1_1kabusap.html#a5cfc5d173cdf5c876fc85846500d969a',1,'src.BackcastPro.api.lib.kabusap.kabusap.get_board()'],['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1e__api_1_1e__api.html#aedfa8187e1cf6456d60c98d8fa72b919',1,'src.BackcastPro.api.lib.e_api.e_api.get_board()']]],
+  ['get_5fcompany_5fname_2',['get_company_name',['../classsrc_1_1BackcastPro_1_1api_1_1stocks__info_1_1stocks__info.html#a4c4e3dda2b3563de19c910bec6e4267c',1,'src::BackcastPro::api::stocks_info::stocks_info']]],
+  ['get_5fdaily_5fquotes_3',['get_daily_quotes',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1e__api_1_1e__api.html#a94385737275d5ed599a72fcd6983faa4',1,'src.BackcastPro.api.lib.e_api.e_api.get_daily_quotes()'],['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#aad8ece15e3350a9690d266eab352ca5a',1,'src.BackcastPro.api.lib.jquants.jquants.get_daily_quotes()']]],
+  ['get_5fdb_4',['get_db',['../classsrc_1_1BackcastPro_1_1api_1_1db__stocks__board_1_1db__stocks__board.html#a2d4a4e88af385f289c7f0e478df2c10a',1,'src.BackcastPro.api.db_stocks_board.db_stocks_board.get_db()'],['../classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#a706ff53368740b385b380d3caa61e478',1,'src.BackcastPro.api.db_stocks_daily.db_stocks_daily.get_db()'],['../classsrc_1_1BackcastPro_1_1api_1_1db__stocks__info_1_1db__stocks__info.html#a9dd4f0f2a0a267e866c310c2b95b2c94',1,'src.BackcastPro.api.db_stocks_info.db_stocks_info.get_db()']]],
+  ['get_5ffins_5fannouncement_5',['get_fins_announcement',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#acf42c9ae537d1d640beab97a3cd06831',1,'src::BackcastPro::api::lib::jquants::jquants']]],
+  ['get_5ffins_5fstatements_6',['get_fins_statements',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#abbfced5e5cfb2dba1e999cff195eb95f',1,'src::BackcastPro::api::lib::jquants::jquants']]],
+  ['get_5fjapanese_5flisted_5finfo_7',['get_japanese_listed_info',['../classsrc_1_1BackcastPro_1_1api_1_1stocks__info_1_1stocks__info.html#a47c34aef362be3ddd131462535b166ec',1,'src::BackcastPro::api::stocks_info::stocks_info']]],
+  ['get_5fjapanese_5fstock_5fboard_5fdata_8',['get_japanese_stock_board_data',['../classsrc_1_1BackcastPro_1_1api_1_1stocks__board_1_1stocks__board.html#a49da81a82520985791c56e149b804156',1,'src::BackcastPro::api::stocks_board::stocks_board']]],
+  ['get_5fjapanese_5fstock_5fprice_5fdata_9',['get_japanese_stock_price_data',['../classsrc_1_1BackcastPro_1_1api_1_1stocks__price_1_1stocks__price.html#ad2ba5fed4e65a5608701e63181e22bf0',1,'src::BackcastPro::api::stocks_price::stocks_price']]],
+  ['get_5flisted_5finfo_10',['get_listed_info',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#a23a0961c84732c8a7553664f9b89bfc1',1,'src::BackcastPro::api::lib::jquants::jquants']]],
+  ['get_5fmarket_5ftrading_5fcalendar_11',['get_market_trading_calendar',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#a5a4518bf753af25f6c401cef8a374dc5',1,'src::BackcastPro::api::lib::jquants::jquants']]],
+  ['get_5fstock_5fboard_12',['get_stock_board',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__board.html#a5dc682ea6392acab2fa4d114d6a6ad64',1,'src::BackcastPro::api::stocks_board']]],
+  ['get_5fstock_5fdaily_13',['get_stock_daily',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price.html#af5a0cb1d432b57b925842ec068f74dcb',1,'src::BackcastPro::api::stocks_price']]],
+  ['get_5fstock_5finfo_14',['get_stock_info',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__info.html#a8b984d1c888803f80e239797ff244731',1,'src::BackcastPro::api::stocks_info']]],
+  ['goto_15',['goto',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a6c291f80f53ff0c665ac269b1a95949f',1,'src::BackcastPro::backtest::Backtest']]]
 ];

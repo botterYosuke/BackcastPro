@@ -1,0 +1,620 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>BackcastPro - APIリファレンス: src.BackcastPro.api.db_stocks_daily.db_stocks_daily クラス</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+  $(document).ready(function() { init_search(); });
+/* @license-end */
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">BackcastPro - APIリファレンス
+   </div>
+  </td>
+    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
+          <input type="text" id="MSearchField" value="" placeholder="検索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 構築: Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">読み取り中…</div>
+<div class="SRStatus" id="Searching">検索中…</div>
+<div class="SRStatus" id="NoMatches">一致する文字列を見つけられません</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">公開メンバ関数</a> &#124;
+<a href="#pro-methods">限定公開メンバ関数</a> &#124;
+<a href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily-members.html">全メンバ一覧</a>  </div>
+  <div class="headertitle"><div class="title">src.BackcastPro.api.db_stocks_daily.db_stocks_daily クラス</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="dynheader">
+src.BackcastPro.api.db_stocks_daily.db_stocks_daily の継承関係図</div>
+<div class="dyncontent">
+ <div class="center">
+  <img src="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.png" usemap="#src.BackcastPro.api.db_5Fstocks_5Fdaily.db_5Fstocks_5Fdaily_map" alt=""/>
+  <map id="src.BackcastPro.api.db_5Fstocks_5Fdaily.db_5Fstocks_5Fdaily_map" name="src.BackcastPro.api.db_5Fstocks_5Fdaily.db_5Fstocks_5Fdaily_map">
+<area href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html" alt="src.BackcastPro.api.db_manager.db_manager" shape="rect" coords="0,0,314,24"/>
+  </map>
+</div></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+公開メンバ関数</h2></td></tr>
+<tr class="memitem:ac7b32ba3ae40575f84b13c9fd8d414f9" id="r_ac7b32ba3ae40575f84b13c9fd8d414f9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#ac7b32ba3ae40575f84b13c9fd8d414f9">__init__</a> (self)</td></tr>
+<tr class="separator:ac7b32ba3ae40575f84b13c9fd8d414f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae787fc91a3825f65235e43d15cb01f59" id="r_ae787fc91a3825f65235e43d15cb01f59"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#ae787fc91a3825f65235e43d15cb01f59">save_stock_prices</a> (self, str code, pd.DataFrame df, datetime from_=None, datetime to=None)</td></tr>
+<tr class="separator:ae787fc91a3825f65235e43d15cb01f59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15d0b18cdfde3abb2714cd105636082a" id="r_a15d0b18cdfde3abb2714cd105636082a"><td class="memItemLeft" align="right" valign="top">pd.DataFrame&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#a15d0b18cdfde3abb2714cd105636082a">load_stock_prices_from_cache</a> (self, str code, datetime from_=None, datetime to=None)</td></tr>
+<tr class="separator:a15d0b18cdfde3abb2714cd105636082a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab41cb56f62f0f9d12c682199afa3e4ce" id="r_ab41cb56f62f0f9d12c682199afa3e4ce"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#ab41cb56f62f0f9d12c682199afa3e4ce">ensure_db_ready</a> (self, str code)</td></tr>
+<tr class="separator:ab41cb56f62f0f9d12c682199afa3e4ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a706ff53368740b385b380d3caa61e478" id="r_a706ff53368740b385b380d3caa61e478"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#a706ff53368740b385b380d3caa61e478">get_db</a> (self, str code)</td></tr>
+<tr class="separator:a706ff53368740b385b380d3caa61e478"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager')"><img src="closed.png" alt="-"/>&#160;基底クラス <a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html">src.BackcastPro.api.db_manager.db_manager</a> に属する継承公開メンバ関数</td></tr>
+<tr class="memitem:a5fa225342caf114a01f1c983643c5a4a inherit pub_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager" id="r_a5fa225342caf114a01f1c983643c5a4a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a5fa225342caf114a01f1c983643c5a4a">__add_db__</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name, pd.DataFrame df, str key)</td></tr>
+<tr class="separator:a5fa225342caf114a01f1c983643c5a4a inherit pub_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab69de8759fc0c8bb26e1924286559b9e inherit pub_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager" id="r_ab69de8759fc0c8bb26e1924286559b9e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#ab69de8759fc0c8bb26e1924286559b9e">__create_db__</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name, pd.DataFrame df, str key)</td></tr>
+<tr class="separator:ab69de8759fc0c8bb26e1924286559b9e inherit pub_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+限定公開メンバ関数</h2></td></tr>
+<tr class="memitem:a78d7ea6bfd9bdd0723187d844722d7ef" id="r_a78d7ea6bfd9bdd0723187d844722d7ef"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#a78d7ea6bfd9bdd0723187d844722d7ef">_ensure_metadata_table</a> (self, duckdb.DuckDBPyConnection db)</td></tr>
+<tr class="separator:a78d7ea6bfd9bdd0723187d844722d7ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09b11729db4bbe26b2cd2fde3406b940" id="r_a09b11729db4bbe26b2cd2fde3406b940"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#a09b11729db4bbe26b2cd2fde3406b940">_save_metadata</a> (self, duckdb.DuckDBPyConnection db, str code, str from_date, str to_date, int record_count)</td></tr>
+<tr class="separator:a09b11729db4bbe26b2cd2fde3406b940"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85c3fd05815bcc91a9add69929a10657" id="r_a85c3fd05815bcc91a9add69929a10657"><td class="memItemLeft" align="right" valign="top">Optional[Dict]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#a85c3fd05815bcc91a9add69929a10657">_get_metadata</a> (self, duckdb.DuckDBPyConnection db, str code)</td></tr>
+<tr class="separator:a85c3fd05815bcc91a9add69929a10657"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45b341917d534cf1b9453c95f03dadd3" id="r_a45b341917d534cf1b9453c95f03dadd3"><td class="memItemLeft" align="right" valign="top">Dict&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#a45b341917d534cf1b9453c95f03dadd3">_check_period_coverage</a> (self, Optional[Dict] metadata, Optional[datetime] from_, Optional[datetime] to)</td></tr>
+<tr class="separator:a45b341917d534cf1b9453c95f03dadd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe087a8bc22a16cad9104f911bbb1b7a" id="r_abe087a8bc22a16cad9104f911bbb1b7a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#abe087a8bc22a16cad9104f911bbb1b7a">_download_from_ftp</a> (self, str code, str local_path)</td></tr>
+<tr class="separator:abe087a8bc22a16cad9104f911bbb1b7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager')"><img src="closed.png" alt="-"/>&#160;基底クラス <a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html">src.BackcastPro.api.db_manager.db_manager</a> に属する継承限定公開メンバ関数</td></tr>
+<tr class="memitem:a350f98dacae2483caa17612cedae4e16 inherit pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager" id="r_a350f98dacae2483caa17612cedae4e16"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a350f98dacae2483caa17612cedae4e16">_table_exists</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name)</td></tr>
+<tr class="separator:a350f98dacae2483caa17612cedae4e16 inherit pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a098ad4567d6395780f4e0f3289467d09 inherit pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager" id="r_a098ad4567d6395780f4e0f3289467d09"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a098ad4567d6395780f4e0f3289467d09">_create_table_from_dataframe</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name, pd.DataFrame df, list primary_keys=None)</td></tr>
+<tr class="separator:a098ad4567d6395780f4e0f3289467d09 inherit pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4647b513737e96ca9c36cb96f282289a inherit pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager" id="r_a4647b513737e96ca9c36cb96f282289a"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a4647b513737e96ca9c36cb96f282289a">_convert_df_to_list</a> (self, pd.DataFrame df)</td></tr>
+<tr class="separator:a4647b513737e96ca9c36cb96f282289a inherit pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdf857adc30f884a6782da8eb0a44d85 inherit pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager" id="r_acdf857adc30f884a6782da8eb0a44d85"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#acdf857adc30f884a6782da8eb0a44d85">_validate_table_schema</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name, pd.DataFrame df, str key)</td></tr>
+<tr class="separator:acdf857adc30f884a6782da8eb0a44d85 inherit pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55517943242517532778d1b2a0aa91c9 inherit pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager" id="r_a55517943242517532778d1b2a0aa91c9"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a55517943242517532778d1b2a0aa91c9">_batch_insert_data</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name, pd.DataFrame df, int batch_size=1000)</td></tr>
+<tr class="separator:a55517943242517532778d1b2a0aa91c9 inherit pro_methods_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+その他の継承メンバ</h2></td></tr>
+<tr class="inherit_header pub_attribs_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td colspan="2" onclick="javascript:toggleInherit('pub_attribs_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager')"><img src="closed.png" alt="-"/>&#160;基底クラス <a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html">src.BackcastPro.api.db_manager.db_manager</a> に属する継承公開変数類</td></tr>
+<tr class="memitem:a34e5bf1e6e1ed03ba4810ed7f28e7681 inherit pub_attribs_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager" id="r_a34e5bf1e6e1ed03ba4810ed7f28e7681"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a34e5bf1e6e1ed03ba4810ed7f28e7681">cache_dir</a></td></tr>
+<tr class="separator:a34e5bf1e6e1ed03ba4810ed7f28e7681 inherit pub_attribs_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acce5c141183edbf357840a349ad41da2 inherit pub_attribs_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager" id="r_acce5c141183edbf357840a349ad41da2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#acce5c141183edbf357840a349ad41da2">isEnable</a></td></tr>
+<tr class="separator:acce5c141183edbf357840a349ad41da2 inherit pub_attribs_classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">構築子と解体子</h2>
+<a id="ac7b32ba3ae40575f84b13c9fd8d414f9" name="ac7b32ba3ae40575f84b13c9fd8d414f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7b32ba3ae40575f84b13c9fd8d414f9">&#9670;&#160;</a></span>__init__()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">src.BackcastPro.api.db_stocks_daily.db_stocks_daily.__init__ </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a2b4f0aa01d607cb85d26381386595870">src.BackcastPro.api.db_manager.db_manager</a>を再実装しています。</p>
+
+</div>
+</div>
+<h2 class="groupheader">関数詳解</h2>
+<a id="a45b341917d534cf1b9453c95f03dadd3" name="a45b341917d534cf1b9453c95f03dadd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45b341917d534cf1b9453c95f03dadd3">&#9670;&#160;</a></span>_check_period_coverage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> Dict src.BackcastPro.api.db_stocks_daily.db_stocks_daily._check_period_coverage </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Optional[Dict]&#160;</td>
+          <td class="paramname"><em>metadata</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Optional[datetime]&#160;</td>
+          <td class="paramname"><em>from_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Optional[datetime]&#160;</td>
+          <td class="paramname"><em>to</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">要求された期間が保存済み期間内かをチェック
+
+Args:
+    metadata: メタデータ辞書
+    from_: 要求開始日
+    to: 要求終了日
+
+Returns:
+    カバレッジ情報の辞書
+</pre> 
+</div>
+</div>
+<a id="abe087a8bc22a16cad9104f911bbb1b7a" name="abe087a8bc22a16cad9104f911bbb1b7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abe087a8bc22a16cad9104f911bbb1b7a">&#9670;&#160;</a></span>_download_from_ftp()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool src.BackcastPro.api.db_stocks_daily.db_stocks_daily._download_from_ftp </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>local_path</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">FTPサーバーからDuckDBファイルをダウンロード
+</pre> 
+</div>
+</div>
+<a id="a78d7ea6bfd9bdd0723187d844722d7ef" name="a78d7ea6bfd9bdd0723187d844722d7ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78d7ea6bfd9bdd0723187d844722d7ef">&#9670;&#160;</a></span>_ensure_metadata_table()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> None src.BackcastPro.api.db_stocks_daily.db_stocks_daily._ensure_metadata_table </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">duckdb.DuckDBPyConnection&#160;</td>
+          <td class="paramname"><em>db</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">メタデータテーブルが存在することを確認し、なければ作成する
+</pre> 
+</div>
+</div>
+<a id="a85c3fd05815bcc91a9add69929a10657" name="a85c3fd05815bcc91a9add69929a10657"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85c3fd05815bcc91a9add69929a10657">&#9670;&#160;</a></span>_get_metadata()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> Optional[Dict] src.BackcastPro.api.db_stocks_daily.db_stocks_daily._get_metadata </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">duckdb.DuckDBPyConnection&#160;</td>
+          <td class="paramname"><em>db</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>code</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">メタデータを取得
+
+Returns:
+    メタデータの辞書、存在しない場合はNone
+</pre> 
+</div>
+</div>
+<a id="a09b11729db4bbe26b2cd2fde3406b940" name="a09b11729db4bbe26b2cd2fde3406b940"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09b11729db4bbe26b2cd2fde3406b940">&#9670;&#160;</a></span>_save_metadata()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> None src.BackcastPro.api.db_stocks_daily.db_stocks_daily._save_metadata </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">duckdb.DuckDBPyConnection&#160;</td>
+          <td class="paramname"><em>db</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>from_date</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>to_date</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>record_count</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">株価データの保存期間をメタデータテーブルに保存/更新
+
+Args:
+    db: DuckDB接続
+    code: 銘柄コード
+    from_date: データ開始日 (YYYY-MM-DD形式)
+    to_date: データ終了日 (YYYY-MM-DD形式)
+    record_count: レコード数
+</pre> 
+</div>
+</div>
+<a id="ab41cb56f62f0f9d12c682199afa3e4ce" name="ab41cb56f62f0f9d12c682199afa3e4ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab41cb56f62f0f9d12c682199afa3e4ce">&#9670;&#160;</a></span>ensure_db_ready()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> None src.BackcastPro.api.db_stocks_daily.db_stocks_daily.ensure_db_ready </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>code</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">DuckDBファイルの準備を行う（存在しなければFTPからダウンロードを試行）
+
+Args:
+    code (str): 銘柄コード
+</pre> 
+</div>
+</div>
+<a id="a706ff53368740b385b380d3caa61e478" name="a706ff53368740b385b380d3caa61e478"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a706ff53368740b385b380d3caa61e478">&#9670;&#160;</a></span>get_db()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">src.BackcastPro.api.db_stocks_daily.db_stocks_daily.get_db </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>code</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">DuckDBデータベース接続を取得
+
+Args:
+    code (str): 銘柄コード
+
+Yields:
+    duckdb.DuckDBPyConnection: DuckDB接続オブジェクト
+</pre> 
+</div>
+</div>
+<a id="a15d0b18cdfde3abb2714cd105636082a" name="a15d0b18cdfde3abb2714cd105636082a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15d0b18cdfde3abb2714cd105636082a">&#9670;&#160;</a></span>load_stock_prices_from_cache()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> pd.DataFrame src.BackcastPro.api.db_stocks_daily.db_stocks_daily.load_stock_prices_from_cache </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">datetime &#160;</td>
+          <td class="paramname"><em>from_</em> = <code>None</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">datetime &#160;</td>
+          <td class="paramname"><em>to</em> = <code>None</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">株価時系列をDuckDBから取得
+
+Args:
+    code (str): 銘柄コード
+    from_ (datetime, optional): 取得開始日
+    to (datetime, optional): 取得終了日
+    
+Returns:
+    pd.DataFrame: 株価データ
+</pre> 
+</div>
+</div>
+<a id="ae787fc91a3825f65235e43d15cb01f59" name="ae787fc91a3825f65235e43d15cb01f59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae787fc91a3825f65235e43d15cb01f59">&#9670;&#160;</a></span>save_stock_prices()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> None src.BackcastPro.api.db_stocks_daily.db_stocks_daily.save_stock_prices </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">pd.DataFrame&#160;</td>
+          <td class="paramname"><em>df</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">datetime &#160;</td>
+          <td class="paramname"><em>from_</em> = <code>None</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">datetime &#160;</td>
+          <td class="paramname"><em>to</em> = <code>None</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">株価時系列をDuckDBに保存（アップサート、動的テーブル作成対応）
+
+Args:
+    code (str): 銘柄コード
+    df (pd.DataFrame): J-Quantsのカラムを想定（Date, Open, High, Low, Close, Volume）
+    from_ (datetime, optional): データ開始日（指定しない場合はdfから自動取得）
+    to (datetime, optional): データ終了日（指定しない場合はdfから自動取得）
+</pre> 
+</div>
+</div>
+<hr/>このクラス詳解は次のファイルから抽出されました:<ul>
+<li>src/BackcastPro/api/<a class="el" href="db__stocks__daily_8py.html">db_stocks_daily.py</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacesrc.html">src</a></li><li class="navelem"><a class="el" href="namespacesrc_1_1BackcastPro.html">BackcastPro</a></li><li class="navelem"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api.html">api</a></li><li class="navelem"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api_1_1db__stocks__daily.html">db_stocks_daily</a></li><li class="navelem"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html">db_stocks_daily</a></li>
+    <li class="footer">構築: <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

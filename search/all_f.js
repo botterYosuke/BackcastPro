@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['value_0',['value',['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#ac109d547de6e562d9184891f7543f962',1,'src::BackcastPro::trade::Trade']]]
+  ['order_0',['Order',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html',1,'src::BackcastPro::order']]],
+  ['order_2epy_1',['order.py',['../order_8py.html',1,'']]],
+  ['orders_2',['orders',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#abc13f2a58aecc75490633194a2622a31',1,'src.BackcastPro._broker._Broker.orders'],['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a119921ef0cb250c1940191a19bdfd1ed',1,'src.BackcastPro.backtest.Backtest.orders()']]]
 ];

@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['index_0',['index',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#aea2e5b002435207a3730e808d9b63e50',1,'src::BackcastPro::backtest::Backtest']]],
-  ['init_1',['init',['../classsrc_1_1BackcastPro_1_1strategy_1_1Strategy.html#a1bed2b1ce05eb5ffbc3e4bd53f63f282',1,'src::BackcastPro::strategy::Strategy']]],
-  ['is_5fcontingent_2',['is_contingent',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html#a01ec9a37f6fc7c7ff0c510404d7527bc',1,'src::BackcastPro::order::Order']]],
-  ['is_5flong_3',['is_long',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html#aed3e6980f5005f7d1098e3e0d693237e',1,'src.BackcastPro.order.Order.is_long()'],['../classsrc_1_1BackcastPro_1_1position_1_1Position.html#a2fa82a09efc2b4b79e6251d2b02c9e06',1,'src.BackcastPro.position.Position.is_long()'],['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#ac9d16a0bcad6eca4e35c7e613f62252d',1,'src.BackcastPro.trade.Trade.is_long()']]],
-  ['is_5fshort_4',['is_short',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html#ad3ffb06d2d9649379535aaea03a6453f',1,'src.BackcastPro.order.Order.is_short()'],['../classsrc_1_1BackcastPro_1_1position_1_1Position.html#a0267f4dde64903caedc4bab17acdb2d1',1,'src.BackcastPro.position.Position.is_short()'],['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#a188902029a1104f0dad159eca23e6eed',1,'src.BackcastPro.trade.Trade.is_short()']]]
+  ['failure_5fcache_5ffile_0',['failure_cache_file',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1e__api_1_1e__api.html#a27f5794c97fcb435de57edf9d01cb2c7',1,'src::BackcastPro::api::lib::e_api::e_api']]],
+  ['finalize_1',['finalize',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a499de6638ef3e4bca3f4f0c37e231136',1,'src::BackcastPro::backtest::Backtest']]]
 ];

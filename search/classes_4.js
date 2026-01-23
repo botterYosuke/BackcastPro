@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['strategy_0',['Strategy',['../classsrc_1_1BackcastPro_1_1strategy_1_1Strategy.html',1,'src::BackcastPro::strategy']]]
+  ['jquants_0',['jquants',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html',1,'src::BackcastPro::api::lib::jquants']]]
 ];

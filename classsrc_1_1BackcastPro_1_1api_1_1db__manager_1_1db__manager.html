@@ -1,0 +1,574 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>BackcastPro - APIリファレンス: src.BackcastPro.api.db_manager.db_manager クラス</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+  $(document).ready(function() { init_search(); });
+/* @license-end */
+</script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">BackcastPro - APIリファレンス
+   </div>
+  </td>
+    <td>        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect"                onmouseover="return searchBox.OnSearchSelectShow()"                onmouseout="return searchBox.OnSearchSelectHide()">&#160;</span>
+          <input type="text" id="MSearchField" value="" placeholder="検索" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 構築: Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "search/",'.html');
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">読み取り中…</div>
+<div class="SRStatus" id="Searching">検索中…</div>
+<div class="SRStatus" id="NoMatches">一致する文字列を見つけられません</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">公開メンバ関数</a> &#124;
+<a href="#pub-attribs">公開変数類</a> &#124;
+<a href="#pro-methods">限定公開メンバ関数</a> &#124;
+<a href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager-members.html">全メンバ一覧</a>  </div>
+  <div class="headertitle"><div class="title">src.BackcastPro.api.db_manager.db_manager クラス</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="dynheader">
+src.BackcastPro.api.db_manager.db_manager の継承関係図</div>
+<div class="dyncontent">
+ <div class="center">
+  <img src="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.png" usemap="#src.BackcastPro.api.db_5Fmanager.db_5Fmanager_map" alt=""/>
+  <map id="src.BackcastPro.api.db_5Fmanager.db_5Fmanager_map" name="src.BackcastPro.api.db_5Fmanager.db_5Fmanager_map">
+<area href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__board_1_1db__stocks__board.html" alt="src.BackcastPro.api.db_stocks_board.db_stocks_board" shape="rect" coords="0,56,326,80"/>
+<area href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html" alt="src.BackcastPro.api.db_stocks_daily.db_stocks_daily" shape="rect" coords="336,56,662,80"/>
+<area href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__info_1_1db__stocks__info.html" alt="src.BackcastPro.api.db_stocks_info.db_stocks_info" shape="rect" coords="672,56,998,80"/>
+  </map>
+</div></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+公開メンバ関数</h2></td></tr>
+<tr class="memitem:a2b4f0aa01d607cb85d26381386595870" id="r_a2b4f0aa01d607cb85d26381386595870"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a2b4f0aa01d607cb85d26381386595870">__init__</a> (self)</td></tr>
+<tr class="separator:a2b4f0aa01d607cb85d26381386595870"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fa225342caf114a01f1c983643c5a4a" id="r_a5fa225342caf114a01f1c983643c5a4a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a5fa225342caf114a01f1c983643c5a4a">__add_db__</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name, pd.DataFrame df, str key)</td></tr>
+<tr class="separator:a5fa225342caf114a01f1c983643c5a4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab69de8759fc0c8bb26e1924286559b9e" id="r_ab69de8759fc0c8bb26e1924286559b9e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#ab69de8759fc0c8bb26e1924286559b9e">__create_db__</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name, pd.DataFrame df, str key)</td></tr>
+<tr class="separator:ab69de8759fc0c8bb26e1924286559b9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+公開変数類</h2></td></tr>
+<tr class="memitem:a34e5bf1e6e1ed03ba4810ed7f28e7681" id="r_a34e5bf1e6e1ed03ba4810ed7f28e7681"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a34e5bf1e6e1ed03ba4810ed7f28e7681">cache_dir</a></td></tr>
+<tr class="separator:a34e5bf1e6e1ed03ba4810ed7f28e7681"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acce5c141183edbf357840a349ad41da2" id="r_acce5c141183edbf357840a349ad41da2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#acce5c141183edbf357840a349ad41da2">isEnable</a></td></tr>
+<tr class="separator:acce5c141183edbf357840a349ad41da2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+限定公開メンバ関数</h2></td></tr>
+<tr class="memitem:a350f98dacae2483caa17612cedae4e16" id="r_a350f98dacae2483caa17612cedae4e16"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a350f98dacae2483caa17612cedae4e16">_table_exists</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name)</td></tr>
+<tr class="separator:a350f98dacae2483caa17612cedae4e16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a098ad4567d6395780f4e0f3289467d09" id="r_a098ad4567d6395780f4e0f3289467d09"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a098ad4567d6395780f4e0f3289467d09">_create_table_from_dataframe</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name, pd.DataFrame df, list primary_keys=None)</td></tr>
+<tr class="separator:a098ad4567d6395780f4e0f3289467d09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4647b513737e96ca9c36cb96f282289a" id="r_a4647b513737e96ca9c36cb96f282289a"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a4647b513737e96ca9c36cb96f282289a">_convert_df_to_list</a> (self, pd.DataFrame df)</td></tr>
+<tr class="separator:a4647b513737e96ca9c36cb96f282289a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdf857adc30f884a6782da8eb0a44d85" id="r_acdf857adc30f884a6782da8eb0a44d85"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#acdf857adc30f884a6782da8eb0a44d85">_validate_table_schema</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name, pd.DataFrame df, str key)</td></tr>
+<tr class="separator:acdf857adc30f884a6782da8eb0a44d85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55517943242517532778d1b2a0aa91c9" id="r_a55517943242517532778d1b2a0aa91c9"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html#a55517943242517532778d1b2a0aa91c9">_batch_insert_data</a> (self, duckdb.DuckDBPyConnection db_connection, str table_name, pd.DataFrame df, int batch_size=1000)</td></tr>
+<tr class="separator:a55517943242517532778d1b2a0aa91c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">詳解</h2>
+<div class="textblock"><pre class="fragment">データベース管理クラス
+キャッシュやデータの保存・読み込みを担当
+</pre> </div><h2 class="groupheader">構築子と解体子</h2>
+<a id="a2b4f0aa01d607cb85d26381386595870" name="a2b4f0aa01d607cb85d26381386595870"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b4f0aa01d607cb85d26381386595870">&#9670;&#160;</a></span>__init__()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">src.BackcastPro.api.db_manager.db_manager.__init__ </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__board_1_1db__stocks__board.html#a4933d7bf610a4e418073982c6641719d">src.BackcastPro.api.db_stocks_board.db_stocks_board</a>, <a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html#ac7b32ba3ae40575f84b13c9fd8d414f9">src.BackcastPro.api.db_stocks_daily.db_stocks_daily</a>, <a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__stocks__info_1_1db__stocks__info.html#accf00840e5657c6e48352009280fb0f1">src.BackcastPro.api.db_stocks_info.db_stocks_info</a>で再実装されています。</p>
+
+</div>
+</div>
+<h2 class="groupheader">関数詳解</h2>
+<a id="a5fa225342caf114a01f1c983643c5a4a" name="a5fa225342caf114a01f1c983643c5a4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fa225342caf114a01f1c983643c5a4a">&#9670;&#160;</a></span>__add_db__()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">src.BackcastPro.api.db_manager.db_manager.__add_db__ </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">duckdb.DuckDBPyConnection&#160;</td>
+          <td class="paramname"><em>db_connection</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>table_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">pd.DataFrame&#160;</td>
+          <td class="paramname"><em>df</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>key</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab69de8759fc0c8bb26e1924286559b9e" name="ab69de8759fc0c8bb26e1924286559b9e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab69de8759fc0c8bb26e1924286559b9e">&#9670;&#160;</a></span>__create_db__()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">src.BackcastPro.api.db_manager.db_manager.__create_db__ </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">duckdb.DuckDBPyConnection&#160;</td>
+          <td class="paramname"><em>db_connection</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>table_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">pd.DataFrame&#160;</td>
+          <td class="paramname"><em>df</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>key</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a55517943242517532778d1b2a0aa91c9" name="a55517943242517532778d1b2a0aa91c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55517943242517532778d1b2a0aa91c9">&#9670;&#160;</a></span>_batch_insert_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> None src.BackcastPro.api.db_manager.db_manager._batch_insert_data </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">duckdb.DuckDBPyConnection&#160;</td>
+          <td class="paramname"><em>db_connection</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>table_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">pd.DataFrame&#160;</td>
+          <td class="paramname"><em>df</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &#160;</td>
+          <td class="paramname"><em>batch_size</em> = <code>1000</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">大量データを効率的にバッチ挿入
+
+Args:
+    db_connection (duckdb.DuckDBPyConnection): DuckDB接続
+    table_name (str): 挿入先テーブル名
+    df (pd.DataFrame): 挿入するデータ
+    batch_size (int): バッチサイズ（デフォルト: 1000件）
+</pre> 
+</div>
+</div>
+<a id="a4647b513737e96ca9c36cb96f282289a" name="a4647b513737e96ca9c36cb96f282289a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4647b513737e96ca9c36cb96f282289a">&#9670;&#160;</a></span>_convert_df_to_list()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> list src.BackcastPro.api.db_manager.db_manager._convert_df_to_list </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">pd.DataFrame&#160;</td>
+          <td class="paramname"><em>df</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">DataFrameを辞書のリスト形式に変換
+
+Args:
+    df (pd.DataFrame): 変換するDataFrame
+
+Returns:
+    list: 各行が辞書形式のリスト
+</pre> 
+</div>
+</div>
+<a id="a098ad4567d6395780f4e0f3289467d09" name="a098ad4567d6395780f4e0f3289467d09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a098ad4567d6395780f4e0f3289467d09">&#9670;&#160;</a></span>_create_table_from_dataframe()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> None src.BackcastPro.api.db_manager.db_manager._create_table_from_dataframe </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">duckdb.DuckDBPyConnection&#160;</td>
+          <td class="paramname"><em>db_connection</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>table_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">pd.DataFrame&#160;</td>
+          <td class="paramname"><em>df</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">list &#160;</td>
+          <td class="paramname"><em>primary_keys</em> = <code>None</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">DataFrameの構造に基づいて動的にテーブルを作成
+
+Args:
+    table_name (str): 作成するテーブル名
+    df (pd.DataFrame): テーブル構造の基準となるDataFrame
+    primary_keys (list): プライマリキーとするカラム名のリスト
+</pre> 
+</div>
+</div>
+<a id="a350f98dacae2483caa17612cedae4e16" name="a350f98dacae2483caa17612cedae4e16"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a350f98dacae2483caa17612cedae4e16">&#9670;&#160;</a></span>_table_exists()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> bool src.BackcastPro.api.db_manager.db_manager._table_exists </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">duckdb.DuckDBPyConnection&#160;</td>
+          <td class="paramname"><em>db_connection</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>table_name</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">テーブルが存在するかチェック</pre> 
+</div>
+</div>
+<a id="acdf857adc30f884a6782da8eb0a44d85" name="acdf857adc30f884a6782da8eb0a44d85"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdf857adc30f884a6782da8eb0a44d85">&#9670;&#160;</a></span>_validate_table_schema()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"> None src.BackcastPro.api.db_manager.db_manager._validate_table_schema </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">duckdb.DuckDBPyConnection&#160;</td>
+          <td class="paramname"><em>db_connection</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>table_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">pd.DataFrame&#160;</td>
+          <td class="paramname"><em>df</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>key</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<pre class="fragment">既存テーブルと新データのカラム整合性をチェック
+
+Args:
+    table_name (str): テーブル名
+    df (pd.DataFrame): 新データ
+
+Raises:
+    ValueError: カラム構造に不整合がある場合
+</pre> 
+</div>
+</div>
+<h2 class="groupheader">メンバ詳解</h2>
+<a id="a34e5bf1e6e1ed03ba4810ed7f28e7681" name="a34e5bf1e6e1ed03ba4810ed7f28e7681"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34e5bf1e6e1ed03ba4810ed7f28e7681">&#9670;&#160;</a></span>cache_dir</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">src.BackcastPro.api.db_manager.db_manager.cache_dir</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acce5c141183edbf357840a349ad41da2" name="acce5c141183edbf357840a349ad41da2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acce5c141183edbf357840a349ad41da2">&#9670;&#160;</a></span>isEnable</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">src.BackcastPro.api.db_manager.db_manager.isEnable</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>このクラス詳解は次のファイルから抽出されました:<ul>
+<li>src/BackcastPro/api/<a class="el" href="db__manager_8py.html">db_manager.py</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespacesrc.html">src</a></li><li class="navelem"><a class="el" href="namespacesrc_1_1BackcastPro.html">BackcastPro</a></li><li class="navelem"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api.html">api</a></li><li class="navelem"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api_1_1db__manager.html">db_manager</a></li><li class="navelem"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html">db_manager</a></li>
+    <li class="footer">構築: <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

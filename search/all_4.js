@@ -1,10 +1,15 @@
 var searchData=
 [
-  ['entry_5fbar_0',['entry_bar',['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#a26395e51bcea549f8251613da6e01cf3',1,'src::BackcastPro::trade::Trade']]],
-  ['entry_5fprice_1',['entry_price',['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#ad43619bfb8767d61d73a2e876626a8dd',1,'src::BackcastPro::trade::Trade']]],
-  ['entry_5ftime_2',['entry_time',['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#a92390e52d79fb633216267aa3f0917aa',1,'src::BackcastPro::trade::Trade']]],
-  ['equity_3',['equity',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#a27575938408f66547697a0f69db12967',1,'src.BackcastPro._broker._Broker.equity()'],['../classsrc_1_1BackcastPro_1_1strategy_1_1Strategy.html#a5814d6028f539e146f4d9955201c10c8',1,'src.BackcastPro.strategy.Strategy.equity()']]],
-  ['exit_5fbar_4',['exit_bar',['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#abc07f46398cd7597681440b88b5cd22d',1,'src::BackcastPro::trade::Trade']]],
-  ['exit_5fprice_5',['exit_price',['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#af432cb244bf0d2a637bbb4c8b25bbe46',1,'src::BackcastPro::trade::Trade']]],
-  ['exit_5ftime_6',['exit_time',['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#ae30d9a8049ef47014a996fab437d8adb',1,'src::BackcastPro::trade::Trade']]]
+  ['data_0',['data',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#afa4d0de1d5e96c269ef7a916baf4a96b',1,'src::BackcastPro::backtest::Backtest']]],
+  ['db_1',['db',['../classsrc_1_1BackcastPro_1_1api_1_1stocks__board_1_1stocks__board.html#a766e86711bcbdeedf417109b14046d19',1,'src.BackcastPro.api.stocks_board.stocks_board.db'],['../classsrc_1_1BackcastPro_1_1api_1_1stocks__info_1_1stocks__info.html#aa5befc1209cb263af9f75cef34282142',1,'src.BackcastPro.api.stocks_info.stocks_info.db'],['../classsrc_1_1BackcastPro_1_1api_1_1stocks__price_1_1stocks__price.html#aa9d8fd2db639a79738247ebc3d349266',1,'src.BackcastPro.api.stocks_price.stocks_price.db']]],
+  ['db_5fmanager_2',['db_manager',['../classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html',1,'src::BackcastPro::api::db_manager']]],
+  ['db_5fmanager_2epy_3',['db_manager.py',['../db__manager_8py.html',1,'']]],
+  ['db_5fstocks_5fboard_4',['db_stocks_board',['../classsrc_1_1BackcastPro_1_1api_1_1db__stocks__board_1_1db__stocks__board.html',1,'src::BackcastPro::api::db_stocks_board']]],
+  ['db_5fstocks_5fboard_2epy_5',['db_stocks_board.py',['../db__stocks__board_8py.html',1,'']]],
+  ['db_5fstocks_5fdaily_6',['db_stocks_daily',['../classsrc_1_1BackcastPro_1_1api_1_1db__stocks__daily_1_1db__stocks__daily.html',1,'src::BackcastPro::api::db_stocks_daily']]],
+  ['db_5fstocks_5fdaily_2epy_7',['db_stocks_daily.py',['../db__stocks__daily_8py.html',1,'']]],
+  ['db_5fstocks_5finfo_8',['db_stocks_info',['../classsrc_1_1BackcastPro_1_1api_1_1db__stocks__info_1_1db__stocks__info.html',1,'src::BackcastPro::api::db_stocks_info']]],
+  ['db_5fstocks_5finfo_2epy_9',['db_stocks_info.py',['../db__stocks__info_8py.html',1,'']]],
+  ['default_5ftimeout_5fseconds_10',['DEFAULT_TIMEOUT_SECONDS',['../namespacesrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants.html#ac3aafdba4f310037204c28d5bdcd9ca3',1,'src::BackcastPro::api::lib::jquants']]],
+  ['df_11',['df',['../namespacesrc_1_1BackcastPro_1_1api_1_1lib_1_1e__api.html#a30a215870ebf5837b3adaf8be1f62c23',1,'src.BackcastPro.api.lib.e_api.df'],['../namespacesrc_1_1BackcastPro_1_1api_1_1lib_1_1kabusap.html#ac817c4f894d06da023fea5c5a78f0d8c',1,'src.BackcastPro.api.lib.kabusap.df']]]
 ];

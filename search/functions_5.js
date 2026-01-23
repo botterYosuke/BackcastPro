@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['geometric_5fmean_0',['geometric_mean',['../namespacesrc_1_1BackcastPro_1_1__stats.html#a74fe18f75212e419125fa4f5d1629433',1,'src::BackcastPro::_stats']]]
+  ['finalize_0',['finalize',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a499de6638ef3e4bca3f4f0c37e231136',1,'src::BackcastPro::backtest::Backtest']]]
 ];
