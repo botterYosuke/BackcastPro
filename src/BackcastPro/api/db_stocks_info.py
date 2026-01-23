@@ -171,11 +171,29 @@ class db_stocks_info(db_manager):
             return pd.DataFrame()
 
 
+    def ensure_db_ready(self) -> None:
+        """
+        DuckDBファイルの準備を行う（存在しなければFTPからダウンロードを試行）
+        """
+        if not self.isEnable:
+            return
+
+        db_path = os.path.join(self.cache_dir, "listed_info.duckdb")
+
+        if not os.path.exists(db_path):
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            # FTPからダウンロードを試行
+            if self._download_from_ftp(db_path):
+                logger.info(f"DuckDBファイルをFTPからダウンロードしました: {db_path}")
+            else:
+                logger.debug(f"FTPにDuckDBファイルが存在しません: listed_info.duckdb")
+
+
     @contextmanager
     def get_db(self):
         """
         DuckDBデータベース接続を取得（コンテキストマネージャー対応）
-        
+
         Yields:
             duckdb.DuckDBPyConnection: DuckDB接続オブジェクト
         """
@@ -183,7 +201,7 @@ class db_stocks_info(db_manager):
         if not os.path.exists(db_path):
             os.makedirs(os.path.dirname(db_path), exist_ok=True)
             # FTPからダウンロードを試行
-            if self._download_from_ftp(code, db_path):
+            if self._download_from_ftp(db_path):
                 logger.info(f"DuckDBファイルをFTPからダウンロードしました: {db_path}")
             else:
                 logger.info(f"DuckDBファイルを作成しました: {db_path}")
@@ -194,7 +212,7 @@ class db_stocks_info(db_manager):
         finally:
             db.close()
 
-    def _download_from_ftp(self, code: str, local_path: str) -> bool:
+    def _download_from_ftp(self, local_path: str) -> bool:
         """
         FTPサーバーからDuckDBファイルをダウンロード
         """

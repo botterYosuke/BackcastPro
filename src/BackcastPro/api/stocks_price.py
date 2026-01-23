@@ -36,6 +36,9 @@ class stocks_price:
         if norm_from and norm_to and norm_from > norm_to:
             raise ValueError("開始日が終了日より後になっています")
 
+        # DBファイルの準備（存在しなければFTPからダウンロードを試行）
+        self.db.ensure_db_ready(code)
+
         # 1) cacheフォルダから取得
         df = self.db.load_stock_prices_from_cache(code, norm_from, norm_to)
         if df is not None and not df.empty:

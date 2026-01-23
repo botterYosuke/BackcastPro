@@ -395,6 +395,32 @@ class db_stocks_daily(db_manager):
             return pd.DataFrame()
 
 
+    def ensure_db_ready(self, code: str) -> None:
+        """
+        DuckDBファイルの準備を行う（存在しなければFTPからダウンロードを試行）
+
+        Args:
+            code (str): 銘柄コード
+        """
+        if not self.isEnable:
+            return
+
+        # コードの正規化（サフィックス除去）
+        normalized_code = code
+        if len(code) > 4:
+            normalized_code = code[:-1]
+
+        db_path = os.path.join(self.cache_dir, "stocks_daily", f"{normalized_code}.duckdb")
+
+        if not os.path.exists(db_path):
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            # FTPからダウンロードを試行
+            if self._download_from_ftp(normalized_code, db_path):
+                logger.info(f"DuckDBファイルをFTPからダウンロードしました: {db_path}")
+            else:
+                logger.debug(f"FTPにDuckDBファイルが存在しません: {normalized_code}")
+
+
     @contextmanager
     def get_db(self, code: str):
         """

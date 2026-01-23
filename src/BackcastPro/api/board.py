@@ -5,7 +5,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-def board(code: str = "", datetime: datetime = None,
+def board(code: str = "", date: datetime = None,
             df: pd.DataFrame = None):
     """
     銘柄コードを指定して板情報チャートを表示する
@@ -21,7 +21,7 @@ def board(code: str = "", datetime: datetime = None,
         # 板情報データを取得
         from .stocks_board import stocks_board
         __sb__ = stocks_board()    
-        df = __sb__.get_japanese_stock_board_data(code)
+        df = __sb__.get_japanese_stock_board_data(code, date)
 
     # データが空の場合のエラーハンドリング
     if df.empty:

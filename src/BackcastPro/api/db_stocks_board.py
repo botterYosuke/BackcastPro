@@ -251,70 +251,81 @@ class db_stocks_board(db_manager):
             raise
 
 
-    def load_stock_board_from_cache(self, code: str, from_: datetime = None, to: datetime = None) -> pd.DataFrame:
+    def load_stock_board_from_cache(self, code: str, at: datetime) -> pd.DataFrame:
         """
-        板情報をDuckDBから取得
+        指定時刻の板情報をDuckDBから取得（指定時刻以前で最も近いデータを返す）
 
         Args:
             code (str): 銘柄コード
-            from_ (datetime, optional): 取得開始時刻
-            to (datetime, optional): 取得終了時刻
+            at (datetime): 取得時刻
 
         Returns:
-            pd.DataFrame: 板情報データ
+            pd.DataFrame: 板情報データ（1行）
         """
         try:
             if not self.isEnable:
                 return pd.DataFrame()
 
-            start_timestamp = ""
-            end_timestamp = ""
-            if from_ is not None:
-                if isinstance(from_, str):
-                    from_ = datetime.strptime(from_, '%Y-%m-%d %H:%M:%S')
-                start_timestamp = from_.strftime('%Y-%m-%d %H:%M:%S')
-            if to is not None:
-                if isinstance(to, str):
-                    to = datetime.strptime(to, '%Y-%m-%d %H:%M:%S')
-                end_timestamp = to.strftime('%Y-%m-%d %H:%M:%S')
+            if at is None:
+                return pd.DataFrame()
+
+            if isinstance(at, str):
+                at = datetime.strptime(at, '%Y-%m-%d %H:%M:%S')
+            target_timestamp = at.strftime('%Y-%m-%d %H:%M:%S')
 
             table_name = "stocks_board"
 
             with self.get_db(code) as db:
 
                 if not self._table_exists(db, table_name):
-                    logger.debug(f"キャッシュに板情報がありません（外部APIから取得します）: {code}")
+                    logger.debug(f"テーブル {table_name} が存在しません: {code}")
                     return pd.DataFrame()
 
-                metadata = self._get_metadata(db, code)
-                if metadata:
-                    logger.info(f"板情報メタデータ: {code} - {metadata['from_timestamp']} ～ {metadata['to_timestamp']}, {metadata['record_count']}件")
-                else:
-                    logger.info(f"板情報メタデータが存在しません: {code}")
+                # 指定時刻以前で最も近いデータを取得
+                query = f'''
+                    SELECT * FROM {table_name}
+                    WHERE "Code" = ? AND "Timestamp" <= ?
+                    ORDER BY "Timestamp" DESC
+                    LIMIT 1
+                '''
+                df = db.execute(query, [code, target_timestamp]).fetchdf()
 
-                params = []
-                cond_parts = []
-                cond_parts.append('"Code" = ?')
-                params.append(code)
-                if start_timestamp:
-                    cond_parts.append('"Timestamp" >= ?')
-                    params.append(start_timestamp)
-                if end_timestamp:
-                    cond_parts.append('"Timestamp" <= ?')
-                    params.append(end_timestamp)
+                if df.empty:
+                    logger.info(f"指定時刻 {target_timestamp} 以前の板情報がありません: {code}")
+                    return pd.DataFrame()
 
-                where_clause = f"WHERE {' AND '.join(cond_parts)}" if cond_parts else ""
-                query = f'SELECT * FROM {table_name} {where_clause} ORDER BY "Timestamp"'
-
-                df = db.execute(query, params).fetchdf()
-
-                logger.info(f"板情報をDuckDBから読み込みました: {code} ({len(df)}件)")
-
+                logger.info(f"板情報をDuckDBから読み込みました: {code} (時刻: {df['Timestamp'].iloc[0]})")
                 return df
 
         except Exception as e:
             logger.error(f"板情報の読み込みに失敗しました: {str(e)}", exc_info=True)
             return pd.DataFrame()
+
+
+    def ensure_db_ready(self, code: str) -> None:
+        """
+        DuckDBファイルの準備を行う（存在しなければFTPからダウンロードを試行）
+
+        Args:
+            code (str): 銘柄コード
+        """
+        if not self.isEnable:
+            return
+
+        # コードの正規化（サフィックス除去）
+        normalized_code = code
+        if len(code) > 4:
+            normalized_code = code[:-1]
+
+        db_path = os.path.join(self.cache_dir, "stocks_board", f"{normalized_code}.duckdb")
+
+        if not os.path.exists(db_path):
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            # FTPからダウンロードを試行
+            if self._download_from_ftp(normalized_code, db_path):
+                logger.info(f"DuckDBファイルをFTPからダウンロードしました: {db_path}")
+            else:
+                logger.debug(f"FTPにDuckDBファイルが存在しません: {normalized_code}")
 
 
     @contextmanager

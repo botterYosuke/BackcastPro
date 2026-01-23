@@ -20,6 +20,9 @@ class stocks_info:
 
     def get_japanese_listed_info(self, code = "", date: datetime = None) -> pd.DataFrame:
 
+        # DBファイルの準備（存在しなければFTPからダウンロードを試行）
+        self.db.ensure_db_ready()
+
         # 1) J-Quantsから取得
         if self.jq.isEnable:
             df = self.jq.get_listed_info(code=code, date=date)
