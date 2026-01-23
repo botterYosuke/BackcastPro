@@ -1,5 +1,5 @@
 """
-過去の板情報（equities_trades）をDuckDBに保存するスクリプト
+過去の約定情報（equities_trades）をDuckDBに保存するスクリプト
 
 Usage:
     python import_equities_trades.py                    # 全ファイルを処理
@@ -26,22 +26,23 @@ logger = logging.getLogger(__name__)
 
 # パス設定
 JQUANTS_DIR = r"S:\j-quants"
-OUTPUT_DIR = r"S:\jp\stocks_board"
+OUTPUT_DIR = r"S:\jp\stocks_trades"
 
 
-def ensure_table(db: duckdb.DuckDBPyConnection, table_name: str = "stocks_board") -> None:
+def ensure_table(db: duckdb.DuckDBPyConnection, table_name: str = "stocks_trades") -> None:
     """テーブルが存在しない場合は作成"""
     create_sql = f"""
     CREATE TABLE IF NOT EXISTS {table_name} (
         "Price" DOUBLE,
         "Qty" BIGINT,
         "Type" VARCHAR(20),
+        "TransactionId" BIGINT NOT NULL,
         "source" VARCHAR(50),
-        "Code" VARCHAR(20) NOT NULL,
+        "Code" VARCHAR(10) NOT NULL,
         "Timestamp" VARCHAR(30) NOT NULL,
         "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         "updated_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY ("Code", "Timestamp")
+        PRIMARY KEY ("Code", "TransactionId")
     )
     """
     db.execute(create_sql)
@@ -52,8 +53,8 @@ def ensure_table(db: duckdb.DuckDBPyConnection, table_name: str = "stocks_board"
 def ensure_metadata_table(db: duckdb.DuckDBPyConnection) -> None:
     """メタデータテーブルが存在しない場合は作成"""
     create_sql = """
-    CREATE TABLE IF NOT EXISTS stocks_board_metadata (
-        "Code" VARCHAR(20) PRIMARY KEY,
+    CREATE TABLE IF NOT EXISTS stocks_trades_metadata (
+        "Code" VARCHAR(10) PRIMARY KEY,
         "from_timestamp" TIMESTAMP,
         "to_timestamp" TIMESTAMP,
         "record_count" INTEGER,
@@ -70,13 +71,13 @@ def update_metadata(db: duckdb.DuckDBPyConnection, code: str) -> None:
     # 現在のデータ範囲を取得
     stats = db.execute("""
         SELECT MIN("Timestamp") as min_ts, MAX("Timestamp") as max_ts, COUNT(*) as count
-        FROM stocks_board WHERE "Code" = ?
+        FROM stocks_trades WHERE "Code" = ?
     """, [code]).fetchone()
 
     if stats and stats[0]:
         # 既存レコードを確認
         existing = db.execute(
-            'SELECT "from_timestamp", "to_timestamp" FROM stocks_board_metadata WHERE "Code" = ?',
+            'SELECT "from_timestamp", "to_timestamp" FROM stocks_trades_metadata WHERE "Code" = ?',
             [code]
         ).fetchone()
 
@@ -85,14 +86,14 @@ def update_metadata(db: duckdb.DuckDBPyConnection, code: str) -> None:
             new_from = min(str(stats[0]), str(existing[0])) if existing[0] else str(stats[0])
             new_to = max(str(stats[1]), str(existing[1])) if existing[1] else str(stats[1])
             db.execute("""
-                UPDATE stocks_board_metadata
+                UPDATE stocks_trades_metadata
                 SET "from_timestamp" = ?, "to_timestamp" = ?, "record_count" = ?, "last_updated" = CURRENT_TIMESTAMP
                 WHERE "Code" = ?
             """, [new_from, new_to, stats[2], code])
         else:
             # 新規挿入
             db.execute("""
-                INSERT INTO stocks_board_metadata ("Code", "from_timestamp", "to_timestamp", "record_count")
+                INSERT INTO stocks_trades_metadata ("Code", "from_timestamp", "to_timestamp", "record_count")
                 VALUES (?, ?, ?, ?)
             """, [code, stats[0], stats[1], stats[2]])
 
@@ -138,12 +139,8 @@ def process_csv_file(csv_path: str, target_codes: Optional[List[str]] = None) ->
     # sourceを追加
     df['source'] = 'j-quants'
 
-    # 必要なカラムのみ抽出
-    df = df[['Price', 'Qty', 'Type', 'source', 'Code', 'Timestamp']]
-
-    # 同一タイムスタンプの重複を除去（最後の取引を保持）
-    df = df.drop_duplicates(subset=['Code', 'Timestamp'], keep='last')
-    logger.info(f"重複除去後: {len(df)} 件")
+    # 必要なカラムのみ抽出（TransactionIdを含める）
+    df = df[['Price', 'Qty', 'Type', 'TransactionId', 'source', 'Code', 'Timestamp']]
 
     # 銘柄コードごとにグループ化して処理
     stats = {'processed': 0, 'codes': []}
@@ -159,23 +156,23 @@ def process_csv_file(csv_path: str, target_codes: Optional[List[str]] = None) ->
             try:
                 ensure_table(db)
 
-                # 既存のタイムスタンプを取得
-                existing_ts = set()
+                # 既存のTransactionIdを取得
+                existing_ids = set()
                 try:
-                    result = db.execute('SELECT DISTINCT "Timestamp" FROM stocks_board WHERE "Code" = ?', [code]).fetchall()
-                    existing_ts = {row[0] for row in result}
+                    result = db.execute('SELECT DISTINCT "TransactionId" FROM stocks_trades WHERE "Code" = ?', [code]).fetchall()
+                    existing_ids = {row[0] for row in result}
                 except:
                     pass
 
                 # 新規データのみフィルタリング
-                new_df = group_df[~group_df['Timestamp'].isin(existing_ts)]
+                new_df = group_df[~group_df['TransactionId'].isin(existing_ids)]
 
                 if not new_df.empty:
                     # バッチ挿入
                     db.register('temp_df', new_df)
                     db.execute("""
-                        INSERT INTO stocks_board ("Price", "Qty", "Type", "source", "Code", "Timestamp")
-                        SELECT "Price", "Qty", "Type", "source", "Code", "Timestamp" FROM temp_df
+                        INSERT INTO stocks_trades ("Price", "Qty", "Type", "TransactionId", "source", "Code", "Timestamp")
+                        SELECT "Price", "Qty", "Type", "TransactionId", "source", "Code", "Timestamp" FROM temp_df
                     """)
 
                     # メタデータ更新
@@ -202,7 +199,7 @@ def process_csv_file(csv_path: str, target_codes: Optional[List[str]] = None) ->
 
 
 def main():
-    parser = argparse.ArgumentParser(description='過去の板情報をDuckDBに保存')
+    parser = argparse.ArgumentParser(description='過去の約定情報をDuckDBに保存')
     parser.add_argument('--code', type=str, help='特定の銘柄コードのみ処理')
     parser.add_argument('--file', type=str, help='特定のファイルのみ処理')
     parser.add_argument('--dry-run', action='store_true', help='実際には保存せずに処理内容を表示')

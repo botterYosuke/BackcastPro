@@ -185,7 +185,7 @@ class db_stocks_board(db_manager):
                         ).fetchdf()
 
                         if not existing_df.empty:
-                            existing_df['Timestamp'] = pd.to_datetime(existing_df['Timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
+                            existing_df['Timestamp'] = pd.to_datetime(existing_df['Timestamp'], format='mixed').dt.strftime('%Y-%m-%d %H:%M:%S')
                             existing_df['Code'] = existing_df['Code'].astype(str)
                             existing_pairs = set(
                                 [(str(row['Code']), str(row['Timestamp'])) for _, row in existing_df.iterrows()]
@@ -194,7 +194,7 @@ class db_stocks_board(db_manager):
                             existing_pairs = set()
 
                         df_to_save_copy = df.copy()
-                        df_to_save_copy['Timestamp'] = pd.to_datetime(df_to_save_copy['Timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
+                        df_to_save_copy['Timestamp'] = pd.to_datetime(df_to_save_copy['Timestamp'], format='mixed').dt.strftime('%Y-%m-%d %H:%M:%S')
                         df_to_save_copy['Code'] = df_to_save_copy['Code'].astype(str)
 
                         new_pairs = set(
@@ -208,7 +208,7 @@ class db_stocks_board(db_manager):
                                 axis=1
                             )
                             new_data_df = df[mask].copy()
-                            new_data_df['Timestamp'] = pd.to_datetime(new_data_df['Timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
+                            new_data_df['Timestamp'] = pd.to_datetime(new_data_df['Timestamp'], format='mixed').dt.strftime('%Y-%m-%d %H:%M:%S')
                             new_data_df['Code'] = new_data_df['Code'].astype(str)
                             logger.info(f"新規データ {len(new_data_df)} 件を追加します（銘柄コード: {code}）")
                             self._batch_insert_data(db, table_name, new_data_df)
@@ -218,7 +218,7 @@ class db_stocks_board(db_manager):
                     else:
                         logger.info(f"新しいテーブル {table_name} を作成します")
                         df_normalized = df.copy()
-                        df_normalized['Timestamp'] = pd.to_datetime(df_normalized['Timestamp']).dt.strftime('%Y-%m-%d %H:%M:%S')
+                        df_normalized['Timestamp'] = pd.to_datetime(df_normalized['Timestamp'], format='mixed').dt.strftime('%Y-%m-%d %H:%M:%S')
                         primary_keys = ['Code', 'Timestamp']
                         self._create_table_from_dataframe(db, table_name, df_normalized, primary_keys)
                         db.execute(f'CREATE INDEX IF NOT EXISTS idx_{table_name}_Code ON {table_name}("Code")')
@@ -272,8 +272,16 @@ class db_stocks_board(db_manager):
             if isinstance(at, str):
                 at = datetime.strptime(at, '%Y-%m-%d %H:%M:%S')
             target_timestamp = at.strftime('%Y-%m-%d %H:%M:%S')
+            # 同じ日の範囲に限定
+            date_start = at.strftime('%Y-%m-%d') + ' 00:00:00'
+            date_end = at.strftime('%Y-%m-%d') + ' 23:59:59'
 
             table_name = "stocks_board"
+
+            # 検索するコードのリスト（元のコード、見つからなければ末尾に0を追加）
+            codes_to_try = [code]
+            if len(code) == 4:
+                codes_to_try.append(code + '0')
 
             with self.get_db(code) as db:
 
@@ -281,21 +289,32 @@ class db_stocks_board(db_manager):
                     logger.debug(f"テーブル {table_name} が存在しません: {code}")
                     return pd.DataFrame()
 
-                # 指定時刻以前で最も近いデータを取得
-                query = f'''
-                    SELECT * FROM {table_name}
-                    WHERE "Code" = ? AND "Timestamp" <= ?
-                    ORDER BY "Timestamp" DESC
-                    LIMIT 1
-                '''
-                df = db.execute(query, [code, target_timestamp]).fetchdf()
+                for search_code in codes_to_try:
+                    # 指定時刻以前で最も近いデータを取得（同じ日に限定）
+                    query = f'''
+                        SELECT * FROM {table_name}
+                        WHERE "Code" = ? AND "Timestamp" <= ? AND "Timestamp" >= ?
+                        ORDER BY "Timestamp" DESC
+                        LIMIT 1
+                    '''
+                    df = db.execute(query, [search_code, target_timestamp, date_start]).fetchdf()
 
-                if df.empty:
-                    logger.info(f"指定時刻 {target_timestamp} 以前の板情報がありません: {code}")
-                    return pd.DataFrame()
+                    # 指定時刻以前にデータがなければ、指定時刻以後で最も近いデータを取得（同じ日に限定）
+                    if df.empty:
+                        query_after = f'''
+                            SELECT * FROM {table_name}
+                            WHERE "Code" = ? AND "Timestamp" > ? AND "Timestamp" <= ?
+                            ORDER BY "Timestamp" ASC
+                            LIMIT 1
+                        '''
+                        df = db.execute(query_after, [search_code, target_timestamp, date_end]).fetchdf()
 
-                logger.info(f"板情報をDuckDBから読み込みました: {code} (時刻: {df['Timestamp'].iloc[0]})")
-                return df
+                    if not df.empty:
+                        logger.info(f"板情報をDuckDBから読み込みました: {search_code} (時刻: {df['Timestamp'].iloc[0]})")
+                        return df
+
+                logger.info(f"指定日 {at.strftime('%Y-%m-%d')} の板情報がありません: {code}")
+                return pd.DataFrame()
 
         except Exception as e:
             logger.error(f"板情報の読み込みに失敗しました: {str(e)}", exc_info=True)
