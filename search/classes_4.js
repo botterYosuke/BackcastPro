@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['jquants_0',['jquants',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html',1,'src::BackcastPro::api::lib::jquants']]]
+  ['e_5fapi_0',['e_api',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1e__api_1_1e__api.html',1,'src::BackcastPro::api::lib::e_api']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['kabusap_0',['kabusap',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1kabusap_1_1kabusap.html',1,'src::BackcastPro::api::lib::kabusap']]]
+  ['jquants_0',['jquants',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html',1,'src::BackcastPro::api::lib::jquants']]]
 ];

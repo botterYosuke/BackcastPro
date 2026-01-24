@@ -6,6 +6,12 @@ var annotated_dup =
           [ "_Broker", "classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html", "classsrc_1_1BackcastPro_1_1__broker_1_1__Broker" ]
         ] ],
         [ "api", "namespacesrc_1_1BackcastPro_1_1api.html", [
+          [ "chart", "namespacesrc_1_1BackcastPro_1_1api_1_1chart.html", [
+            [ "CandleBar", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1CandleBar.html", null ],
+            [ "LightweightChartWidget", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html", null ],
+            [ "MarkerData", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1MarkerData.html", null ],
+            [ "VolumeBar", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1VolumeBar.html", null ]
+          ] ],
           [ "db_manager", "namespacesrc_1_1BackcastPro_1_1api_1_1db__manager.html", [
             [ "db_manager", "classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html", "classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager" ]
           ] ],

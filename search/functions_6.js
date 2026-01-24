@@ -10,10 +10,11 @@ var searchData=
   ['get_5fjapanese_5flisted_5finfo_7',['get_japanese_listed_info',['../classsrc_1_1BackcastPro_1_1api_1_1stocks__info_1_1stocks__info.html#a47c34aef362be3ddd131462535b166ec',1,'src::BackcastPro::api::stocks_info::stocks_info']]],
   ['get_5fjapanese_5fstock_5fboard_5fdata_8',['get_japanese_stock_board_data',['../classsrc_1_1BackcastPro_1_1api_1_1stocks__board_1_1stocks__board.html#a49da81a82520985791c56e149b804156',1,'src::BackcastPro::api::stocks_board::stocks_board']]],
   ['get_5fjapanese_5fstock_5fprice_5fdata_9',['get_japanese_stock_price_data',['../classsrc_1_1BackcastPro_1_1api_1_1stocks__price_1_1stocks__price.html#ad2ba5fed4e65a5608701e63181e22bf0',1,'src::BackcastPro::api::stocks_price::stocks_price']]],
-  ['get_5flisted_5finfo_10',['get_listed_info',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#a23a0961c84732c8a7553664f9b89bfc1',1,'src::BackcastPro::api::lib::jquants::jquants']]],
-  ['get_5fmarket_5ftrading_5fcalendar_11',['get_market_trading_calendar',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#a5a4518bf753af25f6c401cef8a374dc5',1,'src::BackcastPro::api::lib::jquants::jquants']]],
-  ['get_5fstock_5fboard_12',['get_stock_board',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__board.html#a5dc682ea6392acab2fa4d114d6a6ad64',1,'src::BackcastPro::api::stocks_board']]],
-  ['get_5fstock_5fdaily_13',['get_stock_daily',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price.html#af5a0cb1d432b57b925842ec068f74dcb',1,'src::BackcastPro::api::stocks_price']]],
-  ['get_5fstock_5finfo_14',['get_stock_info',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__info.html#a8b984d1c888803f80e239797ff244731',1,'src::BackcastPro::api::stocks_info']]],
-  ['goto_15',['goto',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a6c291f80f53ff0c665ac269b1a95949f',1,'src::BackcastPro::backtest::Backtest']]]
+  ['get_5flast_5fbar_10',['get_last_bar',['../namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#a3957f04b8c1867fa8c938922e1eaa14d',1,'src::BackcastPro::api::chart']]],
+  ['get_5flisted_5finfo_11',['get_listed_info',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#a23a0961c84732c8a7553664f9b89bfc1',1,'src::BackcastPro::api::lib::jquants::jquants']]],
+  ['get_5fmarket_5ftrading_5fcalendar_12',['get_market_trading_calendar',['../classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#a5a4518bf753af25f6c401cef8a374dc5',1,'src::BackcastPro::api::lib::jquants::jquants']]],
+  ['get_5fstock_5fboard_13',['get_stock_board',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__board.html#a5dc682ea6392acab2fa4d114d6a6ad64',1,'src::BackcastPro::api::stocks_board']]],
+  ['get_5fstock_5fdaily_14',['get_stock_daily',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price.html#af5a0cb1d432b57b925842ec068f74dcb',1,'src::BackcastPro::api::stocks_price']]],
+  ['get_5fstock_5finfo_15',['get_stock_info',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__info.html#a8b984d1c888803f80e239797ff244731',1,'src::BackcastPro::api::stocks_info']]],
+  ['goto_16',['goto',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a6c291f80f53ff0c665ac269b1a95949f',1,'src::BackcastPro::backtest::Backtest']]]
 ];

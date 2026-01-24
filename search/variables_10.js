@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['yf_0',['yf',['../namespacesrc_1_1BackcastPro_1_1api_1_1lib_1_1stooq.html#a88da037215db00b84bb4f8005ee914f3',1,'src::BackcastPro::api::lib::stooq']]]
+  ['value_0',['value',['../classsrc_1_1BackcastPro_1_1api_1_1chart_1_1VolumeBar.html#af13889a76698b475ac43efa8394084a0',1,'src::BackcastPro::api::chart::VolumeBar']]],
+  ['volume_5fdata_1',['volume_data',['../classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html#a2984f7e58720928a2eaf84dc10fc6062',1,'src::BackcastPro::api::chart::LightweightChartWidget']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['trade_0',['Trade',['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html',1,'src::BackcastPro::trade']]]
+  ['order_0',['Order',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html',1,'src::BackcastPro::order']]]
 ];

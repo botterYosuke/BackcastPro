@@ -1,6 +1,9 @@
 var hierarchy =
 [
     [ "src.BackcastPro._broker._Broker", "classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html", null ],
+    [ "anywidget.AnyWidget", null, [
+      [ "src.BackcastPro.api.chart.LightweightChartWidget", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html", null ]
+    ] ],
     [ "src.BackcastPro.backtest.Backtest", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html", null ],
     [ "src.BackcastPro.api.db_manager.db_manager", "classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html", [
       [ "src.BackcastPro.api.db_stocks_board.db_stocks_board", "classsrc_1_1BackcastPro_1_1api_1_1db__stocks__board_1_1db__stocks__board.html", null ],
@@ -15,5 +18,10 @@ var hierarchy =
     [ "src.BackcastPro.api.stocks_board.stocks_board", "classsrc_1_1BackcastPro_1_1api_1_1stocks__board_1_1stocks__board.html", null ],
     [ "src.BackcastPro.api.stocks_info.stocks_info", "classsrc_1_1BackcastPro_1_1api_1_1stocks__info_1_1stocks__info.html", null ],
     [ "src.BackcastPro.api.stocks_price.stocks_price", "classsrc_1_1BackcastPro_1_1api_1_1stocks__price_1_1stocks__price.html", null ],
-    [ "src.BackcastPro.trade.Trade", "classsrc_1_1BackcastPro_1_1trade_1_1Trade.html", null ]
+    [ "src.BackcastPro.trade.Trade", "classsrc_1_1BackcastPro_1_1trade_1_1Trade.html", null ],
+    [ "TypedDict", null, [
+      [ "src.BackcastPro.api.chart.CandleBar", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1CandleBar.html", null ],
+      [ "src.BackcastPro.api.chart.MarkerData", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1MarkerData.html", null ],
+      [ "src.BackcastPro.api.chart.VolumeBar", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1VolumeBar.html", null ]
+    ] ]
 ];
