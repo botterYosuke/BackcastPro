@@ -107,8 +107,8 @@ $(document).ready(function(){initNavTree('namespacesrc_1_1BackcastPro_1_1api_1_1
 <tr class="separator:acfc70242fe2eab505ff35999250ce6c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afd5aac336e7a7192f7447266a6b54d9e" id="r_afd5aac336e7a7192f7447266a6b54d9e"><td class="memItemLeft" align="right" valign="top">pd.DataFrame&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#afd5aac336e7a7192f7447266a6b54d9e">_prepare_chart_df</a> (pd.DataFrame df)</td></tr>
 <tr class="separator:afd5aac336e7a7192f7447266a6b54d9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae55adbb0fe87fc957914ce401ebbf222" id="r_ae55adbb0fe87fc957914ce401ebbf222"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#ae55adbb0fe87fc957914ce401ebbf222">chart_by_df</a> (pd.DataFrame df)</td></tr>
-<tr class="separator:ae55adbb0fe87fc957914ce401ebbf222"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fde2ccdbe5c52b958a9ce45370067a5" id="r_a0fde2ccdbe5c52b958a9ce45370067a5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#a0fde2ccdbe5c52b958a9ce45370067a5">chart_by_df</a> (pd.DataFrame df, *list trades=None, int height=500, bool show_tags=True, bool show_volume=True, str title=None, str code=None)</td></tr>
+<tr class="separator:a0fde2ccdbe5c52b958a9ce45370067a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">関数詳解</h2>
 <a id="afd5aac336e7a7192f7447266a6b54d9e" name="afd5aac336e7a7192f7447266a6b54d9e"></a>
@@ -184,8 +184,8 @@ Args:
 </pre> 
 </div>
 </div>
-<a id="ae55adbb0fe87fc957914ce401ebbf222" name="ae55adbb0fe87fc957914ce401ebbf222"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae55adbb0fe87fc957914ce401ebbf222">&#9670;&#160;</a></span>chart_by_df()</h2>
+<a id="a0fde2ccdbe5c52b958a9ce45370067a5" name="a0fde2ccdbe5c52b958a9ce45370067a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fde2ccdbe5c52b958a9ce45370067a5">&#9670;&#160;</a></span>chart_by_df()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -194,8 +194,48 @@ Args:
           <td class="memname">src.BackcastPro.api.chart.chart_by_df </td>
           <td>(</td>
           <td class="paramtype">pd.DataFrame&#160;</td>
-          <td class="paramname"><em>df</em></td><td>)</td>
+          <td class="paramname"><em>df</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">*list &#160;</td>
+          <td class="paramname"><em>trades</em> = <code>None</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &#160;</td>
+          <td class="paramname"><em>height</em> = <code>500</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool &#160;</td>
+          <td class="paramname"><em>show_tags</em> = <code>True</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool &#160;</td>
+          <td class="paramname"><em>show_volume</em> = <code>True</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str &#160;</td>
+          <td class="paramname"><em>title</em> = <code>None</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str &#160;</td>
+          <td class="paramname"><em>code</em> = <code>None</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -203,6 +243,19 @@ Args:
 
 Args:
     df: 株価データ（pandas DataFrame）
+    trades: 取引リスト（Trade オブジェクトのリスト）。各オブジェクトは以下のプロパティを持つ:
+            - code: 銘柄コード
+            - size: ポジションサイズ（正: ロング、負: ショート）
+            - entry_time: エントリー日時
+            - entry_price: エントリー価格
+            - tag: 売買理由（オプション）
+            - exit_time: 決済日時（オプション）
+            - exit_price: 決済価格（オプション）
+    height: チャートの高さ（ピクセル）
+    show_tags: 売買理由（tag）をチャートに表示するか
+    show_volume: 出来高を表示するか
+    title: チャートのタイトル
+    code: 銘柄コード（trades のフィルタリング用）
 </pre> 
 </div>
 </div>

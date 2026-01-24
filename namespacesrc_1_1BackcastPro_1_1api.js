@@ -7,7 +7,7 @@ var namespacesrc_1_1BackcastPro_1_1api =
     [ "chart", "namespacesrc_1_1BackcastPro_1_1api_1_1chart.html", [
       [ "_prepare_chart_df", "namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#afd5aac336e7a7192f7447266a6b54d9e", null ],
       [ "chart", "namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#acfc70242fe2eab505ff35999250ce6c5", null ],
-      [ "chart_by_df", "namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#ae55adbb0fe87fc957914ce401ebbf222", null ]
+      [ "chart_by_df", "namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#a0fde2ccdbe5c52b958a9ce45370067a5", null ]
     ] ],
     [ "db_manager", "namespacesrc_1_1BackcastPro_1_1api_1_1db__manager.html", "namespacesrc_1_1BackcastPro_1_1api_1_1db__manager" ],
     [ "db_stocks_board", "namespacesrc_1_1BackcastPro_1_1api_1_1db__stocks__board.html", "namespacesrc_1_1BackcastPro_1_1api_1_1db__stocks__board" ],

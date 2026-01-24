@@ -125,8 +125,8 @@ $(document).ready(function(){initNavTree('classsrc_1_1BackcastPro_1_1backtest_1_
 <tr class="separator:a48199c7ebf696ef8511ec587a7652bf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c98453243767aeef23cd7f90931f42d" id="r_a3c98453243767aeef23cd7f90931f42d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a3c98453243767aeef23cd7f90931f42d">sell</a> (self, *str code=None, float size=None, Optional[float] limit=None, Optional[float] stop=None, Optional[float] sl=None, Optional[float] tp=None, object tag=None)</td></tr>
 <tr class="separator:a3c98453243767aeef23cd7f90931f42d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6ada68ca5e3d2ffab42dbdcb154e28b" id="r_ad6ada68ca5e3d2ffab42dbdcb154e28b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#ad6ada68ca5e3d2ffab42dbdcb154e28b">make_chart</a> (self, str code=None, int height=500, bool show_tags=True)</td></tr>
-<tr class="separator:ad6ada68ca5e3d2ffab42dbdcb154e28b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c9137a3c8e5da5735ef1f5319ee7f48" id="r_a0c9137a3c8e5da5735ef1f5319ee7f48"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a0c9137a3c8e5da5735ef1f5319ee7f48">chart</a> (self, str code=None, int height=500, bool show_tags=True)</td></tr>
+<tr class="separator:a0c9137a3c8e5da5735ef1f5319ee7f48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa4d0de1d5e96c269ef7a916baf4a96b" id="r_afa4d0de1d5e96c269ef7a916baf4a96b"><td class="memItemLeft" align="right" valign="top">dict[str, pd.DataFrame]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#afa4d0de1d5e96c269ef7a916baf4a96b">data</a> (self)</td></tr>
 <tr class="separator:afa4d0de1d5e96c269ef7a916baf4a96b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35f9cd7d04f97eac287e0ec20a953b01" id="r_a35f9cd7d04f97eac287e0ec20a953b01"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a35f9cd7d04f97eac287e0ec20a953b01">position</a> (self)</td></tr>
@@ -468,6 +468,55 @@ Args:
 <pre class="fragment">現在の現金残高</pre> 
 </div>
 </div>
+<a id="a0c9137a3c8e5da5735ef1f5319ee7f48" name="a0c9137a3c8e5da5735ef1f5319ee7f48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c9137a3c8e5da5735ef1f5319ee7f48">&#9670;&#160;</a></span>chart()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">src.BackcastPro.backtest.Backtest.chart </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">str &#160;</td>
+          <td class="paramname"><em>code</em> = <code>None</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &#160;</td>
+          <td class="paramname"><em>height</em> = <code>500</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool &#160;</td>
+          <td class="paramname"><em>show_tags</em> = <code>True</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">現在時点までのローソク足チャートを生成（売買マーカー付き）
+
+Args:
+    code: 銘柄コード
+    height: チャートの高さ
+    show_tags: 売買理由（tag）をチャートに表示するか
+
+Returns:
+    plotly.graph_objects.Figure
+</pre> 
+</div>
+</div>
 <a id="a468f04d225e2a49b5c9bde374d6005ab" name="a468f04d225e2a49b5c9bde374d6005ab"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a468f04d225e2a49b5c9bde374d6005ab">&#9670;&#160;</a></span>closed_trades()</h2>
 
@@ -635,55 +684,6 @@ Note:
       </table>
 </div><div class="memdoc">
 <pre class="fragment">完了したかどうか</pre> 
-</div>
-</div>
-<a id="ad6ada68ca5e3d2ffab42dbdcb154e28b" name="ad6ada68ca5e3d2ffab42dbdcb154e28b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad6ada68ca5e3d2ffab42dbdcb154e28b">&#9670;&#160;</a></span>make_chart()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">src.BackcastPro.backtest.Backtest.make_chart </td>
-          <td>(</td>
-          <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>self</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">str &#160;</td>
-          <td class="paramname"><em>code</em> = <code>None</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int &#160;</td>
-          <td class="paramname"><em>height</em> = <code>500</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool &#160;</td>
-          <td class="paramname"><em>show_tags</em> = <code>True</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<pre class="fragment">現在時点までのローソク足チャートを生成（売買マーカー付き）
-
-Args:
-    code: 銘柄コード
-    height: チャートの高さ
-    show_tags: 売買理由（tag）をチャートに表示するか
-
-Returns:
-    plotly.graph_objects.Figure
-</pre> 
 </div>
 </div>
 <a id="a119921ef0cb250c1940191a19bdfd1ed" name="a119921ef0cb250c1940191a19bdfd1ed"></a>
