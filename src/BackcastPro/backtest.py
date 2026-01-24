@@ -10,11 +10,6 @@ from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-try:
-    import plotly.graph_objects as go
-    HAS_PLOTLY = True
-except ImportError:
-    HAS_PLOTLY = False
 
 from ._broker import _Broker
 from ._stats import compute_stats
@@ -125,6 +120,10 @@ class Backtest:
 
         # パフォーマンス最適化: 各銘柄の index position マッピング
         self._index_positions: dict[str, dict] = {}
+
+        # チャートウィジェットキャッシュ（パフォーマンス最適化）
+        self._chart_widgets: dict = {}
+        self._chart_last_index: dict[str, int] = {}
 
         # 自動的にstart()を呼び出す
         if data is not None:
@@ -287,13 +286,24 @@ class Backtest:
 
         return not self._is_finished
 
-    def reset(self) -> 'Backtest':
-        """バックテストをリセットして最初から"""
+    def reset(self, *, clear_chart_cache: bool = False) -> 'Backtest':
+        """
+        バックテストをリセットして最初から
+
+        Args:
+            clear_chart_cache: チャートウィジェットキャッシュをクリアするか
+                              （デフォルト: False でウィジェットは再利用）
+        """
         self._broker_instance = self._broker_factory(data=self._data)
         self._step_index = 0
         self._is_finished = False
         self._current_data = {}
         self._results = None
+        # インデックスをリセット（次回chart()で全データ更新）
+        self._chart_last_index = {}
+        # 明示的に指定された場合のみウィジェットをクリア
+        if clear_chart_cache:
+            self._chart_widgets = {}
         return self
 
     def goto(self, step: int, strategy: Callable[['Backtest'], None] = None) -> 'Backtest':
@@ -402,17 +412,18 @@ class Backtest:
         """
         現在時点までのローソク足チャートを生成（売買マーカー付き）
 
+        差分更新対応:
+        - 初回呼び出し: 全データでウィジェット作成
+        - 2回目以降: 既存ウィジェットを再利用し差分更新
+
         Args:
             code: 銘柄コード
             height: チャートの高さ
             show_tags: 売買理由（tag）をチャートに表示するか
 
         Returns:
-            plotly.graph_objects.Figure
+            LightweightChartWidget
         """
-        if not HAS_PLOTLY:
-            raise ImportError("plotly がインストールされていません。pip install plotly を実行してください。")
-
         if code is None:
             if len(self._data) == 1:
                 code = list(self._data.keys())[0]
@@ -420,19 +431,48 @@ class Backtest:
                 raise ValueError("複数銘柄がある場合はcodeを指定してください")
 
         if not self._is_started or self._broker_instance is None:
-            return go.Figure()
+            from .api.chart import LightweightChartWidget
+            return LightweightChartWidget()
 
         if code not in self._current_data or len(self._current_data[code]) == 0:
-            return go.Figure()
+            from .api.chart import LightweightChartWidget
+            return LightweightChartWidget()
 
         df = self._current_data[code]
+        current_idx = len(df)
 
         # 全取引（アクティブ + 決済済み）を取得
         all_trades = list(self._broker_instance.closed_trades) + list(self._broker_instance.trades)
 
-        # chart_by_df を呼び出してチャートを生成
+        # キャッシュ確認
+        if code in self._chart_widgets:
+            widget = self._chart_widgets[code]
+            last_idx = self._chart_last_index.get(code, 0)
+
+            # 巻き戻しまたは大きなジャンプの場合は全データ更新
+            needs_full_update = (
+                last_idx == 0 or
+                current_idx < last_idx or
+                current_idx - last_idx > 1
+            )
+
+            if needs_full_update:
+                # 全データ更新
+                from .api.chart import df_to_lwc_data, trades_to_markers
+                widget.data = df_to_lwc_data(df)
+                widget.markers = trades_to_markers(all_trades, code, show_tags)
+            else:
+                # 差分更新: 最新バーのみ
+                from .api.chart import get_last_bar, trades_to_markers
+                widget.last_bar = get_last_bar(df)
+                widget.markers = trades_to_markers(all_trades, code, show_tags)
+
+            self._chart_last_index[code] = current_idx
+            return widget
+
+        # 初回: 新規ウィジェット作成
         from .api.chart import chart_by_df
-        return chart_by_df(
+        widget = chart_by_df(
             df,
             trades=all_trades,
             height=height,
@@ -441,6 +481,11 @@ class Backtest:
             title=f"{code} - {self.current_time}",
             code=code,
         )
+
+        self._chart_widgets[code] = widget
+        self._chart_last_index[code] = current_idx
+
+        return widget
 
     # =========================================================================
     # ステップ実行用プロパティ
