@@ -202,7 +202,40 @@ class LightweightChartWidget(anywidget.AnyWidget):
             typeof bar.close === 'number';
     }
 
+    // チャートインスタンスを保持するためのキー
+    // 重要: el ではなく model に保存する
+    // marimo の AnyWidgetPlugin は値が変わるたびに render() を呼び出し、
+    // 毎回異なる el 要素が渡される可能性がある。
+    // model オブジェクトは同一インスタンスが維持されるため、こちらに保存する。
+    const MODEL_CHART_KEY = '__lwcChart';
+    const MODEL_SERIES_KEY = '__lwcSeries';
+    const MODEL_VOLUME_KEY = '__lwcVolume';
+    const MODEL_OBSERVER_KEY = '__lwcObserver';
+    const MODEL_EL_KEY = '__lwcElement';
+
     async function render({ model, el }) {
+        // 既存のチャートがあるか確認（べき等性のため）
+        // marimo は値が変わるたびに render() を呼び出すが、
+        // change:* イベントリスナーが既にデータを更新しているため、
+        // ここでは新規作成をスキップする
+        if (model[MODEL_CHART_KEY]) {
+            // 新しい el が渡された場合、チャートを新しい el に移動
+            const oldEl = model[MODEL_EL_KEY];
+            if (oldEl !== el && oldEl && model[MODEL_CHART_KEY]) {
+                // 既存のチャートコンテナを新しい el に移動
+                while (oldEl.firstChild) {
+                    el.appendChild(oldEl.firstChild);
+                }
+                model[MODEL_EL_KEY] = el;
+                // ResizeObserver を新しい el に付け替え
+                if (model[MODEL_OBSERVER_KEY]) {
+                    model[MODEL_OBSERVER_KEY].disconnect();
+                    model[MODEL_OBSERVER_KEY].observe(el);
+                }
+            }
+            return () => {};
+        }
+
         // ライブラリ読み込み
         try {
             createChart = await loadLibrary();
@@ -234,6 +267,10 @@ class LightweightChartWidget(anywidget.AnyWidget):
             },
         });
 
+        // チャートインスタンスを model に保存
+        model[MODEL_CHART_KEY] = chart;
+        model[MODEL_EL_KEY] = el;
+
         // ローソク足シリーズ
         const candleSeries = chart.addCandlestickSeries({
             upColor: '#26a69a',
@@ -242,6 +279,7 @@ class LightweightChartWidget(anywidget.AnyWidget):
             wickUpColor: '#26a69a',
             wickDownColor: '#ef5350',
         });
+        model[MODEL_SERIES_KEY] = candleSeries;
 
         // 出来高シリーズ（オプション）
         let volumeSeries = null;
@@ -255,6 +293,7 @@ class LightweightChartWidget(anywidget.AnyWidget):
             chart.priceScale('volume').applyOptions({
                 scaleMargins: { top: 0.8, bottom: 0 },
             });
+            model[MODEL_VOLUME_KEY] = volumeSeries;
         }
 
         // 初期データ設定
@@ -305,11 +344,16 @@ class LightweightChartWidget(anywidget.AnyWidget):
             const bar = model.get("last_bar");
             if (isValidBar(bar)) {
                 candleSeries.update(bar);
-            } else if (bar && Object.keys(bar).length > 0) {
-                console.warn('Invalid bar format:', bar);
             }
             // 空オブジェクトの場合は無視（クリア時）
         });
+
+        // リスナー設定前に発生した last_bar の変更を適用
+        // （チャート作成中にイベントが発火した場合への対処）
+        const currentLastBar = model.get("last_bar");
+        if (isValidBar(currentLastBar)) {
+            candleSeries.update(currentLastBar);
+        }
 
         // リサイズ対応
         const resizeObserver = new ResizeObserver(entries => {
@@ -319,12 +363,38 @@ class LightweightChartWidget(anywidget.AnyWidget):
             }
         });
         resizeObserver.observe(el);
+        model[MODEL_OBSERVER_KEY] = resizeObserver;
 
-        // クリーンアップ
-        return () => {
-            resizeObserver.disconnect();
-            chart.remove();
+        // クリーンアップ関数を作成
+        // 注: model に保存しているため、cleanup は最終的な破棄時のみ呼ばれる想定
+        // marimo が毎回 cleanup を呼んでも、model にチャートが残っている限り再利用される
+        const cleanup = () => {
+            // model にチャートが存在しない場合はスキップ
+            if (!model[MODEL_CHART_KEY]) {
+                return;
+            }
+
+            // 現在の el が DOM に接続されている場合は削除しない
+            // （ウィジェットがまだ表示されている可能性がある）
+            const currentEl = model[MODEL_EL_KEY];
+            if (currentEl && currentEl.isConnected) {
+                return;
+            }
+            if (model[MODEL_OBSERVER_KEY]) {
+                model[MODEL_OBSERVER_KEY].disconnect();
+            }
+            if (model[MODEL_CHART_KEY]) {
+                model[MODEL_CHART_KEY].remove();
+            }
+            // チャート参照をクリア
+            delete model[MODEL_CHART_KEY];
+            delete model[MODEL_SERIES_KEY];
+            delete model[MODEL_VOLUME_KEY];
+            delete model[MODEL_OBSERVER_KEY];
+            delete model[MODEL_EL_KEY];
         };
+
+        return cleanup;
     }
 
     export default { render };
