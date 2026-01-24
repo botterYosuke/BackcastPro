@@ -276,7 +276,7 @@ def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     カラム名をJ-Quants APIの形式に統一し、型変換を行う
 
     日次株価のフィールド定義に基づいた型変換:
-    - Date: string (YYYY-MM-DD) → datetime
+    - Date: string (YYYY-MM-DD) → DatetimeIndex
     - Code: string → string
     - 数値フィールド: number → float
       (Open, High, Low, Close, Volume, TurnoverValue,
@@ -284,9 +284,16 @@ def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
        AdjustmentOpen, AdjustmentHigh, AdjustmentLow,
        AdjustmentClose, AdjustmentVolume)
     """
-    # Date列をdatetime型に変換
-    if "Date" in df.columns:
+    # 既にDatetimeIndexの場合はそのまま処理を続行
+    if isinstance(df.index, pd.DatetimeIndex):
+        pass
+    # Date列をdatetime型に変換してindexに設定
+    elif "Date" in df.columns:
         df["Date"] = pd.to_datetime(df["Date"])
+        df = df.set_index("Date")
+    else:
+        # インデックスが日付でない場合は、警告を出す
+        logger.warning("Dateカラムが存在せず、インデックスも日付型ではありません")
 
     # Code列はstring型として保持（明示的に変換）
     if "Code" in df.columns:
@@ -315,19 +322,8 @@ def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
         if field in df.columns:
             df[field] = pd.to_numeric(df[field], errors="coerce")
 
-    # Dateカラムが存在しない場合、インデックスから作成
-    if "Date" not in df.columns:
-        if isinstance(df.index, pd.DatetimeIndex):
-            # インデックスが日付の場合は、Dateカラムとして追加
-            df["Date"] = df.index
-        else:
-            # インデックスが日付でない場合は、エラーを避けるため空のDateカラムを作成
-            logger.warning("Dateカラムが存在せず、インデックスも日付型ではありません")
-            df["Date"] = pd.NaT
-
-    # カラムの順序を統一（Dateカラムを先頭に配置）
+    # カラムの順序を統一（Dateはindexなので含めない）
     column_order = [
-        "Date",
         "Code",
         "Open",
         "High",

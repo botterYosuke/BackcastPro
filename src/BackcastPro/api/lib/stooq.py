@@ -27,7 +27,7 @@ def stooq_daily_quotes(code: str, from_: datetime = None, to: datetime = None) -
         to (datetime): データ取得終了日
 
     Returns:
-        pd.DataFrame: 株価データのDataFrame
+        pd.DataFrame: 株価データのDataFrame（DatetimeIndexとして日付がインデックスに設定）
     """
     try:
         # yfinance ライブラリが利用可能な場合はそれを使用
@@ -39,15 +39,14 @@ def stooq_daily_quotes(code: str, from_: datetime = None, to: datetime = None) -
                 # データを日付昇順に並び替え
                 df = df.sort_index()
 
-                # インデックスが日付の場合は、Dateカラムを追加
-                if isinstance(df.index, pd.DatetimeIndex):
-                    df = df.reset_index()
-                    if len(df.columns) > 0 and df.columns[0] not in ['Open', 'High', 'Low', 'Close', 'Volume']:
-                        df = df.rename(columns={df.columns[0]: 'Date'})
-                    if 'Date' not in df.columns:
-                        df['Date'] = df.index
-                elif 'Date' not in df.columns:
-                    df['Date'] = df.index
+                # DatetimeIndexであることを保証
+                if not isinstance(df.index, pd.DatetimeIndex):
+                    if 'Date' in df.columns:
+                        df['Date'] = pd.to_datetime(df['Date'])
+                        df = df.set_index('Date')
+                    else:
+                        df.index = pd.to_datetime(df.index)
+                        df.index.name = 'Date'
 
                 return df
 
@@ -60,15 +59,14 @@ def stooq_daily_quotes(code: str, from_: datetime = None, to: datetime = None) -
         # データを日付昇順に並び替え
         df = df.sort_index()
 
-        # インデックスが日付の場合は、Dateカラムを追加
-        if isinstance(df.index, pd.DatetimeIndex):
-            df = df.reset_index()
-            if len(df.columns) > 0 and df.columns[0] not in ['Open', 'High', 'Low', 'Close', 'Volume']:
-                df = df.rename(columns={df.columns[0]: 'Date'})
-            if 'Date' not in df.columns:
-                df['Date'] = df.index
-        elif 'Date' not in df.columns:
-            df['Date'] = df.index
+        # DatetimeIndexであることを保証（_get_yfinance_daily_quotesは既にDatetimeIndex）
+        if not isinstance(df.index, pd.DatetimeIndex):
+            if 'Date' in df.columns:
+                df['Date'] = pd.to_datetime(df['Date'])
+                df = df.set_index('Date')
+            else:
+                df.index = pd.to_datetime(df.index)
+                df.index.name = 'Date'
 
         return df
 

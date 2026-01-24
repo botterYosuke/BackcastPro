@@ -31,55 +31,53 @@ def chart(code: str = "", from_: datetime = None, to: datetime = None,
 
 def _prepare_chart_df(df: pd.DataFrame) -> pd.DataFrame:
     """チャート表示用データを準備（plotly用）"""
-    # indexがDatetimeIndexの場合は、Date列として復元
+    df = df.copy()
+
+    # DatetimeIndexの場合はそのまま使用
     if isinstance(df.index, pd.DatetimeIndex):
-        # 元のindex名を保存（reset_index()の前に確認）
-        original_index_name = df.index.name
-        # DatetimeIndexをDate列として復元
-        df = df.reset_index()
-        # 復元された列の名前が'Date'でない場合は'Date'にリネーム
-        # 名前のないDatetimeIndexは'index'という名前で復元される
-        # 名前がある場合はその名前で復元される
-        if original_index_name is None or original_index_name == '':
-            # 名前のないDatetimeIndexの場合、'index'という列名で復元される
-            if 'index' in df.columns:
-                df.rename(columns={'index': 'Date'}, inplace=True)
-        elif original_index_name != 'Date':
-            # index名が'Date'でない場合、その名前で復元されているので'Date'にリネーム
-            if original_index_name in df.columns:
-                df.rename(columns={original_index_name: 'Date'}, inplace=True)
+        # インデックス名を'Date'に統一
+        df.index.name = 'Date'
+    elif 'Date' in df.columns:
+        # Date列がある場合はインデックスに設定
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.set_index('Date')
+    elif 'date' in df.columns:
+        # date列がある場合はインデックスに設定
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.set_index('date')
+        df.index.name = 'Date'
     else:
-        # インデックスをリセット（DatetimeIndexでない場合）
-        df = df.reset_index()
-    
-    # Date カラムを判定
-    date_col = 'Date' if 'Date' in df.columns else df.columns[0]
-    df['Date'] = pd.to_datetime(df[date_col])
-    
+        # インデックスをdatetimeに変換を試みる
+        try:
+            df.index = pd.to_datetime(df.index)
+            df.index.name = 'Date'
+        except (ValueError, TypeError):
+            pass
+
     # カラム名を大文字に統一（plotly用）
     column_mapping = {
         'open': 'Open',
         'high': 'High',
         'low': 'Low',
         'close': 'Close',
-        'volume': 'Volume',
-        'date': 'Date'
+        'volume': 'Volume'
     }
-    # 小文字に変換してからマッピング
-    df.columns = df.columns.str.lower()
-    df.rename(columns=column_mapping, inplace=True)
-    
+    # 小文字カラムがあればマッピング
+    for lower, upper in column_mapping.items():
+        if lower in df.columns and upper not in df.columns:
+            df.rename(columns={lower: upper}, inplace=True)
+
     # 必要なカラムを抽出して数値変換
-    required_cols = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume']
+    required_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
     available_cols = [col for col in required_cols if col in df.columns]
     df = df[available_cols].copy()
-    
+
     # 数値カラムを数値型に変換
     numeric_cols = ['Open', 'High', 'Low', 'Close', 'Volume']
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce')
-    
+
     return df.dropna()
 
 def chart_by_df(
@@ -113,7 +111,7 @@ def chart_by_df(
     """
     # データを整形
     df = _prepare_chart_df(df)
-    x_data = df["Date"]
+    x_data = df.index  # DatetimeIndexを使用
     volume_col = df.get("Volume", None)
 
     # plotlyのFigureを作成

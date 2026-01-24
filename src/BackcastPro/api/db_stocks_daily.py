@@ -386,6 +386,11 @@ class db_stocks_daily(db_manager):
 
                 df = db.execute(query, params).fetchdf()
 
+                # Date列をDatetimeIndexに設定
+                if not df.empty and 'Date' in df.columns:
+                    df['Date'] = pd.to_datetime(df['Date'])
+                    df = df.set_index('Date')
+
                 logger.info(f"株価データをDuckDBから読み込みました: {code} ({len(df)}件)")
 
                 return df
