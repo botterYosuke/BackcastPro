@@ -398,7 +398,7 @@ class Backtest:
     # 可視化
     # =========================================================================
 
-    def make_chart(self, code: str = None, height: int = 500, show_tags: bool = True):
+    def chart(self, code: str = None, height: int = 500, show_tags: bool = True):
         """
         現在時点までのローソク足チャートを生成（売買マーカー付き）
 
@@ -427,76 +427,20 @@ class Backtest:
 
         df = self._current_data[code]
 
-        fig = go.Figure()
-
-        # ローソク足
-        fig.add_trace(go.Candlestick(
-            x=df.index,
-            open=df["Open"],
-            high=df["High"],
-            low=df["Low"],
-            close=df["Close"],
-            name=code
-        ))
-
-        # 売買マーカー
+        # 全取引（アクティブ + 決済済み）を取得
         all_trades = list(self._broker_instance.closed_trades) + list(self._broker_instance.trades)
-        for trade in all_trades:
-            if trade.code != code:
-                continue
 
-            is_long = trade.size > 0
-
-            # エントリーマーカー
-            hover_text = f"{'BUY' if is_long else 'SELL'}<br>Price: {trade.entry_price:.2f}"
-            if show_tags and trade.tag:
-                hover_text += f"<br>Reason: {trade.tag}"
-
-            fig.add_trace(go.Scatter(
-                x=[trade.entry_time],
-                y=[trade.entry_price],
-                mode="markers+text" if show_tags and trade.tag else "markers",
-                marker=dict(
-                    color="green" if is_long else "red",
-                    size=12,
-                    symbol="triangle-up" if is_long else "triangle-down",
-                ),
-                text=[trade.tag] if show_tags and trade.tag else None,
-                textposition="top center" if is_long else "bottom center",
-                textfont=dict(size=10),
-                hovertext=hover_text,
-                hoverinfo="text",
-                name="BUY" if is_long else "SELL",
-                showlegend=False
-            ))
-
-            # イグジットマーカー（決済済みの場合）
-            if trade.exit_time is not None:
-                pnl = (trade.exit_price - trade.entry_price) * trade.size
-                fig.add_trace(go.Scatter(
-                    x=[trade.exit_time],
-                    y=[trade.exit_price],
-                    mode="markers",
-                    marker=dict(
-                        color="blue",
-                        size=10,
-                        symbol="x",
-                    ),
-                    hovertext=f"EXIT<br>Price: {trade.exit_price:.2f}<br>PnL: {pnl:+.2f}",
-                    hoverinfo="text",
-                    name="EXIT",
-                    showlegend=False
-                ))
-
-        fig.update_layout(
-            title=f"{code} - {self.current_time}",
-            xaxis_title="Date",
-            yaxis_title="Price",
+        # chart_by_df を呼び出してチャートを生成
+        from .api.chart import chart_by_df
+        return chart_by_df(
+            df,
+            trades=all_trades,
             height=height,
-            xaxis_rangeslider_visible=False,
+            show_tags=show_tags,
+            show_volume=False,
+            title=f"{code} - {self.current_time}",
+            code=code,
         )
-
-        return fig
 
     # =========================================================================
     # ステップ実行用プロパティ

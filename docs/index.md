@@ -52,7 +52,7 @@ print(results)
 - **シンプルな戦略実装**: 関数ベースで `buy()` / `sell()` を呼ぶだけ
 - **統計の自動計算**: 代表的なパフォーマンス指標を同梱
 - **リスク管理**: `sl` と `tp` に標準対応
-- **可視化**: `make_chart()` で plotly ローソク足チャート生成
+- **可視化**: `chart()` で plotly ローソク足チャート生成
 - **marimo連携**: スライダーで時間を操作しながらリアルタイム可視化
 
 ```mermaid
@@ -79,7 +79,7 @@ flowchart TD
 | `goto(step, strategy)` | 指定位置まで進める |
 | `buy(code, size, tag, ...)` | 買い注文 |
 | `sell(code, size, tag, ...)` | 売り注文 |
-| `make_chart(code)` | チャート生成 |
+| `chart(code)` | チャート生成 |
 | `finalize()` | 統計計算 |
 | `run_with_strategy(func)` | 一括実行 |
 

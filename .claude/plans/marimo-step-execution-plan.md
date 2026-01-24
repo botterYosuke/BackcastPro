@@ -125,7 +125,7 @@ slider = mo.ui.slider(
 bt.goto(slider.value, strategy=my_strategy)
 
 # チャート描画
-chart = bt.make_chart(code="AAPL")
+chart = bt.chart(code="AAPL")
 mo.vstack([slider, chart])
 ```
 
@@ -382,10 +382,10 @@ def sell(self, *,
     return self._broker_instance.new_order(code, -size, limit, stop, sl, tp, tag)
 ```
 
-### 5.6 `make_chart()` メソッド（tag 表示対応）
+### 5.6 `chart()` メソッド（tag 表示対応）
 
 ```python
-def make_chart(self, code: str = None, height: int = 500, show_tags: bool = True) -> go.Figure:
+def chart(self, code: str = None, height: int = 500, show_tags: bool = True) -> go.Figure:
     """
     現在時点までのローソク足チャートを生成（売買マーカー付き）
 
@@ -679,7 +679,7 @@ mo.hstack([slider, stock_select])
 bt.goto(slider.value, strategy=my_strategy)
 
 # チャート描画（tag 表示付き）
-chart = bt.make_chart(code=stock_select.value, height=500, show_tags=True)
+chart = bt.chart(code=stock_select.value, height=500, show_tags=True)
 
 # 情報パネル
 info = mo.md(f"""
@@ -722,7 +722,7 @@ play_btn
 - [ ] パフォーマンス最適化（iloc ベース slicing）
 
 ### Phase 2: 可視化（必須）
-- [ ] `make_chart()` メソッド（plotly + tag 表示）
+- [ ] `chart()` メソッド（plotly + tag 表示）
 - [ ] `goto()` メソッド（strategy 引数対応）
 
 ### Phase 3: 互換性

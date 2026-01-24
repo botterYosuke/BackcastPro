@@ -205,7 +205,7 @@ for _ in range(10):
 bt.goto(100, strategy=my_strategy)
 
 # チャートを確認
-chart = bt.make_chart()
+chart = bt.chart()
 chart.show()
 ```
 
@@ -303,7 +303,7 @@ slider = mo.ui.slider(
 bt.goto(slider.value, strategy=my_strategy)
 
 # チャート描画（tag 表示付き）
-chart = bt.make_chart(height=500, show_tags=True)
+chart = bt.chart(height=500, show_tags=True)
 
 # 情報パネル
 info = mo.md(f"""
@@ -405,5 +405,5 @@ A: 複数銘柄を扱う場合は `bt.position` ではなく `bt.position_of(cod
 
 - **データ準備** → **Backtest初期化** → **戦略関数定義** → **実行** → **分析** の順に進めます
 - `run_with_strategy()` で一括実行、または `step()` でステップ実行
-- `make_chart()` で売買マーカー付きチャートを生成
+- `chart()` で売買マーカー付きチャートを生成
 - marimo連携でインタラクティブな可視化が可能

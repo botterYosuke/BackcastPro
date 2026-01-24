@@ -98,7 +98,7 @@ def __(bt, code, mo, my_strategy, slider):
     bt.goto(slider.value, strategy=my_strategy)
 
     # チャート生成
-    chart = bt.make_chart(code=code, height=500, show_tags=True)
+    chart = bt.chart(code=code, height=500, show_tags=True)
 
     # 情報パネル
     info = mo.md(f"""

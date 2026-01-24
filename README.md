@@ -65,7 +65,7 @@ import marimo as mo
 
 slider = mo.ui.slider(start=1, stop=len(bt.index), value=1, label="時間")
 bt.goto(slider.value, strategy=my_strategy)
-chart = bt.make_chart()  # plotlyローソク足 + 売買マーカー
+chart = bt.chart()  # plotlyローソク足 + 売買マーカー
 
 mo.vstack([slider, chart])
 ```
