@@ -11,3 +11,18 @@ BackcastPro をご利用いただきありがとうございます。
 ※ 使い始めはチュートリアル → 詳細はAPIリファレンスをご参照ください。
 """
 from .backtest import Backtest
+
+from .api.stocks_price import get_stock_daily
+from .api.stocks_board import get_stock_board
+from .api.stocks_info import get_stock_info
+from .api.chart import chart
+from .api.board import board
+
+__all__ = [
+    'Backtest',
+    'get_stock_daily', 
+    'get_stock_board', 
+    'get_stock_info',
+    'chart',
+    'board'
+]
