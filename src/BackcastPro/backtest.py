@@ -462,11 +462,16 @@ class Backtest:
                 widget.data = df_to_lwc_data(df)
                 widget.markers = trades_to_markers(all_trades, code, show_tags)
             else:
-                # 差分更新: last_bar と data の両方を更新
-                # last_bar: JS側でリアルタイム更新用（change:last_barイベント）
+                # 差分更新: last_bar_packed (バイナリ) と data の両方を更新
+                # last_bar_packed: JS側でリアルタイム更新用（change:last_bar_packedイベント）
                 # data: 同期が失われた場合のフォールバック用
                 from .api.chart import df_to_lwc_data, get_last_bar, trades_to_markers
-                widget.last_bar = get_last_bar(df)
+                bar = get_last_bar(df)
+                # バイナリプロトコルで高速更新 (INP改善)
+                if hasattr(widget, "update_bar_fast"):
+                    widget.update_bar_fast(bar)
+                else:
+                    widget.last_bar = bar
                 widget.data = df_to_lwc_data(df)  # フォールバック用に全データも更新
                 widget.markers = trades_to_markers(all_trades, code, show_tags)
 

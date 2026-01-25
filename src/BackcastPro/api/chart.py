@@ -192,6 +192,38 @@ class LightweightChartWidget(anywidget.AnyWidget):
         throw new Error('All CDN sources failed');
     }
 
+    // msgpack ライブラリ読み込み（Phase 3: バイナリプロトコル）
+    let msgpackDecode = null;
+    let msgpackLoadPromise = null;
+    async function loadMsgpack() {
+        // ESM 互換の CDN URL のみ使用
+        const CDN_URLS = [
+            'https://cdn.jsdelivr.net/npm/msgpack-lite@0.1.26/+esm',
+            'https://cdn.jsdelivr.net/npm/@msgpack/msgpack@3.0.0-beta2/+esm',
+        ];
+        for (const url of CDN_URLS) {
+            try {
+                const mod = await import(url);
+                // msgpack-lite と @msgpack/msgpack の両方に対応
+                return mod.default?.decode || mod.decode;
+            } catch (e) {
+                console.warn(`Failed to load msgpack from ${url}:`, e);
+            }
+        }
+        console.warn('msgpack failed to load, falling back to JSON');
+        return null;
+    }
+
+    // 遅延ロード用ヘルパー
+    async function ensureMsgpack() {
+        if (msgpackDecode) return msgpackDecode;
+        if (!msgpackLoadPromise) {
+            msgpackLoadPromise = loadMsgpack();
+        }
+        msgpackDecode = await msgpackLoadPromise;
+        return msgpackDecode;
+    }
+
     // バーデータの検証
     function isValidBar(bar) {
         return bar &&
@@ -239,6 +271,7 @@ class LightweightChartWidget(anywidget.AnyWidget):
         // ライブラリ読み込み
         try {
             createChart = await loadLibrary();
+            // msgpack は遅延ロード (ensureMsgpack() で初回使用時にロード)
         } catch (e) {
             el.innerHTML = '<p style="color:#ef5350;padding:20px;">Chart library failed to load. Check network connection.</p>';
             console.error(e);
@@ -270,6 +303,12 @@ class LightweightChartWidget(anywidget.AnyWidget):
         // チャートインスタンスを model に保存
         model[MODEL_CHART_KEY] = chart;
         model[MODEL_EL_KEY] = el;
+
+        // 高頻度更新キーを設定（React 再レンダーをスキップ）
+        // last_bar, last_bar_packed は model.on() で直接処理されるため、React の再レンダーは不要
+        if (model.setDirectUpdateKeys) {
+            model.setDirectUpdateKeys(['last_bar', 'last_bar_packed']);
+        }
 
         // ローソク足シリーズ
         const candleSeries = chart.addCandlestickSeries({
@@ -340,12 +379,83 @@ class LightweightChartWidget(anywidget.AnyWidget):
         });
 
         // 最後のバーのみ更新（差分更新）
-        model.on("change:last_bar", () => {
-            const bar = model.get("last_bar");
-            if (isValidBar(bar)) {
-                candleSeries.update(bar);
+        // RAF ベースのバッチ更新: ブラウザの描画サイクルに同期して更新
+        // 100ms間隔の更新でも最大60fpsに制限し、CPU負荷を軽減
+        let pendingBar = null;
+        let rafId = null;
+        let isDisposed = false;
+
+        const flushPendingBar = () => {
+            // Guard: チャートが破棄されていたらスキップ
+            if (isDisposed || !model[MODEL_CHART_KEY]) {
+                pendingBar = null;
+                rafId = null;
+                return;
             }
-            // 空オブジェクトの場合は無視（クリア時）
+            try {
+                if (pendingBar && isValidBar(pendingBar)) {
+                    candleSeries.update(pendingBar);
+                }
+            } catch (e) {
+                // チャートがRAF待機中に破棄された場合のエラーを抑制
+                console.debug('Chart update skipped (disposed):', e);
+            } finally {
+                pendingBar = null;
+                rafId = null;
+            }
+        };
+
+        model.on("change:last_bar", () => {
+            // チャートが破棄されていたら新規更新をスキップ
+            if (isDisposed) return;
+
+            const bar = model.get("last_bar");
+            if (!isValidBar(bar)) return;
+
+            // 複数の更新が同フレーム内に発生した場合、最新の値のみ使用
+            pendingBar = bar;
+
+            // 次の描画フレームでまとめて更新
+            if (rafId === null) {
+                rafId = requestAnimationFrame(flushPendingBar);
+            }
+        });
+
+        // バイナリプロトコル用ハンドラ (Phase 3: INP改善)
+        // msgpack でペイロードを削減し、パース時間を短縮
+        // ハンドラは常に登録し、msgpack は遅延ロード
+        model.on("change:last_bar_packed", async () => {
+            if (isDisposed) return;
+
+            const packed = model.get("last_bar_packed");
+            if (!packed || packed.byteLength === 0) return;
+
+            // 遅延ロード: 初回使用時に msgpack をロード
+            const decode = await ensureMsgpack();
+            if (!decode) {
+                console.warn('msgpack unavailable, ignoring packed data');
+                return;
+            }
+
+            try {
+                const decoded = decode(new Uint8Array(packed));
+                if (!Array.isArray(decoded) || decoded.length !== 5) {
+                    console.warn('Invalid packed bar format');
+                    return;
+                }
+                const [time, open, high, low, close] = decoded;
+                if (!isValidBar({ time, open, high, low, close })) {
+                    console.warn('Invalid bar values after decode');
+                    return;
+                }
+                pendingBar = { time, open, high, low, close };
+
+                if (rafId === null) {
+                    rafId = requestAnimationFrame(flushPendingBar);
+                }
+            } catch (e) {
+                console.warn('msgpack decode failed:', e);
+            }
         });
 
         // リスナー設定前に発生した last_bar の変更を適用
@@ -369,6 +479,16 @@ class LightweightChartWidget(anywidget.AnyWidget):
         // 注: model に保存しているため、cleanup は最終的な破棄時のみ呼ばれる想定
         // marimo が毎回 cleanup を呼んでも、model にチャートが残っている限り再利用される
         const cleanup = () => {
+            // 破棄フラグを設定（RAF コールバックでの更新を防止）
+            isDisposed = true;
+
+            // RAF をキャンセル（メモリリーク防止）
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+            pendingBar = null;
+
             // model にチャートが存在しない場合はスキップ
             if (!model[MODEL_CHART_KEY]) {
                 return;
@@ -412,7 +532,35 @@ class LightweightChartWidget(anywidget.AnyWidget):
     volume_data = traitlets.List([]).tag(sync=True)
     markers = traitlets.List([]).tag(sync=True)
     last_bar = traitlets.Dict({}).tag(sync=True)
+    last_bar_packed = traitlets.Bytes(b"").tag(sync=True)  # バイナリプロトコル用
     options = traitlets.Dict({}).tag(sync=True)
+
+    def update_bar_fast(self, bar: dict) -> None:
+        """バイナリプロトコルで高速更新 (INP改善用)
+
+        msgpack でシリアライズしてペイロードを削減し、
+        JavaScript 側のパース時間を短縮する。
+        msgpack が利用できない場合は JSON ベースの last_bar にフォールバック。
+
+        Args:
+            bar: ローソク足バーデータ（time, open, high, low, close）
+        """
+        required_keys = ("time", "open", "high", "low", "close")
+
+        # 必要なキーが存在するか検証
+        if not all(k in bar for k in required_keys):
+            self.last_bar = bar
+            return
+
+        try:
+            import msgpack
+
+            self.last_bar_packed = msgpack.packb(
+                [bar[k] for k in required_keys]
+            )
+        except (ImportError, Exception):
+            # msgpack が利用できない場合は JSON にフォールバック
+            self.last_bar = bar
 
 
 def _prepare_chart_df(df: pd.DataFrame) -> pd.DataFrame:

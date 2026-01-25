@@ -30,6 +30,7 @@ dependencies = [
     "duckdb>=0.9.0",
     "plotly>=5.0.0",
     "anywidget>=0.9.21",
+    "msgpack>=1.0.0",
 ]
 
 [project.optional-dependencies]
