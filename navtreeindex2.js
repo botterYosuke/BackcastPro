@@ -1,5 +1,10 @@
 var NAVTREEINDEX2 =
 {
+"db__manager_8py.html#a8ae23ece0b264110d197476f37e5915d":[2,0,0,0,0,4,1],
+"db__stocks__board_8py.html":[2,0,0,0,0,5],
+"db__stocks__board_8py.html#a4684852938c0d7e5d47c8fbcf5d91548":[2,0,0,0,0,5,1],
+"db__stocks__daily_8py.html":[2,0,0,0,0,6],
+"db__stocks__daily_8py.html#a6a42ec85e649e93308a13c1482f59674":[2,0,0,0,0,6,1],
 "db__stocks__info_8py.html":[2,0,0,0,0,7],
 "db__stocks__info_8py.html#af605551166ab64258c28386b1ae536e7":[2,0,0,0,0,7,1],
 "dir_68267d1309a1af8e8297ef4c3efbcdba.html":[2,0,0],
@@ -34,7 +39,8 @@ var NAVTREEINDEX2 =
 "functions_r.html":[1,3,0,17],
 "functions_s.html":[1,3,0,18],
 "functions_t.html":[1,3,0,19],
-"functions_v.html":[1,3,0,20],
+"functions_u.html":[1,3,0,20],
+"functions_v.html":[1,3,0,21],
 "functions_vars.html":[1,3,2],
 "hierarchy.html":[1,2],
 "index.html":[],
@@ -117,7 +123,6 @@ var NAVTREEINDEX2 =
 "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price.html#a8a25a43b8c5143db6ef6230665657bcb":[0,0,0,0,2,9,2],
 "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price.html#af5a0cb1d432b57b925842ec068f74dcb":[0,0,0,0,2,9,1],
 "namespacesrc_1_1BackcastPro_1_1backtest.html":[0,0,0,0,3],
-"namespacesrc_1_1BackcastPro_1_1backtest.html#a195080e3c6f71b2ab9deb14ae0a101ec":[0,0,0,0,3,1],
 "namespacesrc_1_1BackcastPro_1_1order.html":[0,0,0,0,4],
 "namespacesrc_1_1BackcastPro_1_1position.html":[0,0,0,0,5],
 "namespacesrc_1_1BackcastPro_1_1trade.html":[0,0,0,0,6],

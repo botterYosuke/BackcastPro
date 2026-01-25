@@ -96,6 +96,7 @@ $(document).ready(function(){initNavTree('classsrc_1_1BackcastPro_1_1api_1_1char
 
 <div class="header">
   <div class="summary">
+<a href="#pub-methods">公開メンバ関数</a> &#124;
 <a href="#pub-static-attribs">静的公開変数類</a> &#124;
 <a href="#pro-static-attribs">静的限定公開変数類</a> &#124;
 <a href="classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget-members.html">全メンバ一覧</a>  </div>
@@ -109,6 +110,11 @@ src.BackcastPro.api.chart.LightweightChartWidget の継承関係図</div>
   <img src="classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.png" alt=""/>
  </div></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+公開メンバ関数</h2></td></tr>
+<tr class="memitem:a2cd6e2bdf0cbc14b13c5969e07da75bf" id="r_a2cd6e2bdf0cbc14b13c5969e07da75bf"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html#a2cd6e2bdf0cbc14b13c5969e07da75bf">update_bar_fast</a> (self, dict bar)</td></tr>
+<tr class="separator:a2cd6e2bdf0cbc14b13c5969e07da75bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 静的公開変数類</h2></td></tr>
 <tr class="memitem:a261d500baafe99d28d09ba10b29603bf" id="r_a261d500baafe99d28d09ba10b29603bf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html#a261d500baafe99d28d09ba10b29603bf">data</a> = traitlets.List([]).tag(sync=True)</td></tr>
@@ -119,6 +125,8 @@ src.BackcastPro.api.chart.LightweightChartWidget の継承関係図</div>
 <tr class="separator:ac1949b3a38bd2fe4a5ea28ad53ad4efe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed2917b3ca5277ddfe5cbc64cf4d2dbe" id="r_aed2917b3ca5277ddfe5cbc64cf4d2dbe"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html#aed2917b3ca5277ddfe5cbc64cf4d2dbe">last_bar</a> = traitlets.Dict({}).tag(sync=True)</td></tr>
 <tr class="separator:aed2917b3ca5277ddfe5cbc64cf4d2dbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0bd366fe29659aca3bdead5e8dea8e7a" id="r_a0bd366fe29659aca3bdead5e8dea8e7a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html#a0bd366fe29659aca3bdead5e8dea8e7a">last_bar_packed</a> = traitlets.Bytes(b&quot;&quot;).tag(sync=True)</td></tr>
+<tr class="separator:a0bd366fe29659aca3bdead5e8dea8e7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abed3d54d479df86a72807a38b4d46a73" id="r_abed3d54d479df86a72807a38b4d46a73"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html#abed3d54d479df86a72807a38b4d46a73">options</a> = traitlets.Dict({}).tag(sync=True)</td></tr>
 <tr class="separator:abed3d54d479df86a72807a38b4d46a73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -149,7 +157,44 @@ Example:
 
     # 差分更新
     widget.last_bar = get_last_bar(df)
-</pre> </div><h2 class="groupheader">メンバ詳解</h2>
+</pre> </div><h2 class="groupheader">関数詳解</h2>
+<a id="a2cd6e2bdf0cbc14b13c5969e07da75bf" name="a2cd6e2bdf0cbc14b13c5969e07da75bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cd6e2bdf0cbc14b13c5969e07da75bf">&#9670;&#160;</a></span>update_bar_fast()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> None src.BackcastPro.api.chart.LightweightChartWidget.update_bar_fast </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">dict&#160;</td>
+          <td class="paramname"><em>bar</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">バイナリプロトコルで高速更新 (INP改善用)
+
+msgpack でシリアライズしてペイロードを削減し、
+JavaScript 側のパース時間を短縮する。
+msgpack が利用できない場合は JSON ベースの last_bar にフォールバック。
+
+Args:
+    bar: ローソク足バーデータ（time, open, high, low, close）
+</pre> 
+</div>
+</div>
+<h2 class="groupheader">メンバ詳解</h2>
 <a id="a9ed61e6d510ed1c807fe4bdc669b1d39" name="a9ed61e6d510ed1c807fe4bdc669b1d39"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9ed61e6d510ed1c807fe4bdc669b1d39">&#9670;&#160;</a></span>_css</h2>
 
@@ -233,6 +278,28 @@ Example:
       <table class="memname">
         <tr>
           <td class="memname">src.BackcastPro.api.chart.LightweightChartWidget.last_bar = traitlets.Dict({}).tag(sync=True)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0bd366fe29659aca3bdead5e8dea8e7a" name="a0bd366fe29659aca3bdead5e8dea8e7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bd366fe29659aca3bdead5e8dea8e7a">&#9670;&#160;</a></span>last_bar_packed</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">src.BackcastPro.api.chart.LightweightChartWidget.last_bar_packed = traitlets.Bytes(b&quot;&quot;).tag(sync=True)</td>
         </tr>
       </table>
   </td>

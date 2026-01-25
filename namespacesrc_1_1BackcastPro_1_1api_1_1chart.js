@@ -1,7 +1,7 @@
 var namespacesrc_1_1BackcastPro_1_1api_1_1chart =
 [
     [ "CandleBar", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1CandleBar.html", null ],
-    [ "LightweightChartWidget", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html", null ],
+    [ "LightweightChartWidget", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget" ],
     [ "MarkerData", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1MarkerData.html", null ],
     [ "VolumeBar", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1VolumeBar.html", null ],
     [ "_prepare_chart_df", "namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#afd5aac336e7a7192f7447266a6b54d9e", null ],

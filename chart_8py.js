@@ -3,7 +3,7 @@ var chart_8py =
     [ "src.BackcastPro.api.chart.CandleBar", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1CandleBar.html", null ],
     [ "src.BackcastPro.api.chart.VolumeBar", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1VolumeBar.html", null ],
     [ "src.BackcastPro.api.chart.MarkerData", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1MarkerData.html", null ],
-    [ "src.BackcastPro.api.chart.LightweightChartWidget", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html", null ],
+    [ "src.BackcastPro.api.chart.LightweightChartWidget", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget" ],
     [ "_prepare_chart_df", "chart_8py.html#afd5aac336e7a7192f7447266a6b54d9e", null ],
     [ "chart", "chart_8py.html#abd81f47e41f0ca389460377e130fc72f", null ],
     [ "chart_by_df", "chart_8py.html#a48c17c51e9be55e1b0b92dbba63bbbdd", null ],

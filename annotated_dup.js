@@ -8,7 +8,7 @@ var annotated_dup =
         [ "api", "namespacesrc_1_1BackcastPro_1_1api.html", [
           [ "chart", "namespacesrc_1_1BackcastPro_1_1api_1_1chart.html", [
             [ "CandleBar", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1CandleBar.html", null ],
-            [ "LightweightChartWidget", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html", null ],
+            [ "LightweightChartWidget", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget" ],
             [ "MarkerData", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1MarkerData.html", null ],
             [ "VolumeBar", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1VolumeBar.html", null ]
           ] ],

@@ -52,8 +52,8 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "BackcastPro_2____init_____8py.html",
-"classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#aab2e686a015d2275e1dbadf11b88a336",
-"db__stocks__info_8py.html"
+"classsrc_1_1BackcastPro_1_1api_1_1lib_1_1jquants_1_1jquants.html#a7c2ba255efb21062661733277b8f7d6b",
+"db__manager_8py.html#a8ae23ece0b264110d197476f37e5915d"
 ];
 
 var SYNCONMSG = 'クリックで同期表示が無効になります';
