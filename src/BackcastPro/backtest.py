@@ -20,7 +20,7 @@ class Backtest:
     特定のデータに対してバックテストを実行します。
 
     バックテストを初期化します。
-    初期化後、`Backtest.run_with_strategy`メソッドを呼び出して実行します。
+    初期化後、`Backtest.runy`メソッドを呼び出して実行します。
 
     `data`は以下の列を持つ`pd.DataFrame`です：
     `Open`, `High`, `Low`, `Close`, および（オプションで）`Volume`。
@@ -95,8 +95,6 @@ class Backtest:
                             'or a function that takes `(order_size, price)`'
                             'and returns commission dollar value')
 
-        self.set_data(data)
-
         # partialとは、関数の一部の引数を事前に固定して、新しい関数を作成します。
         # これにより、後で残りの引数だけを渡せば関数を実行できるようになります。
         # 1. _Brokerクラスのコンストラクタの引数の一部（cash, spread, commissionなど）を事前に固定
@@ -125,9 +123,11 @@ class Backtest:
         self._chart_widgets: dict = {}
         self._chart_last_index: dict[str, int] = {}
 
-        # 自動的にstart()を呼び出す
-        if data is not None:
-            self.start()
+        # 戦略関数
+        self._strategy: Optional[Callable[['Backtest'], None]] = None
+
+        # データを設定（set_data内でstart()が自動的に呼ばれる）
+        self.set_data(data)
 
     def _validate_and_prepare_df(self, df: pd.DataFrame, code: str) -> pd.DataFrame:
         """
@@ -212,8 +212,27 @@ class Backtest:
 
         self._data: dict[str, pd.DataFrame] = data
 
+        # データ設定後、自動的にバックテストを開始
+        self.start()
+
     def set_cash(self, cash):
         self._broker_factory.keywords['cash'] = cash
+
+    def set_strategy(self, strategy: Callable[['Backtest'], None]) -> 'Backtest':
+        """
+        戦略関数を設定する。
+
+        設定された戦略は step() の最初に自動的に呼び出される。
+        これは run() や goto() と同じタイミング。
+
+        Args:
+            strategy: 各ステップで呼び出す戦略関数 (bt) -> None
+
+        Returns:
+            self (メソッドチェーン用)
+        """
+        self._strategy = strategy
+        return self
 
     # =========================================================================
     # ステップ実行 API
@@ -271,6 +290,10 @@ class Backtest:
                     self._current_data[code] = df.iloc[:pos + 1]
                 # current_time がこの銘柄に存在しない場合は前の状態を維持
 
+            # 戦略を呼び出し（_current_data 設定後に呼ぶ）
+            if self._strategy is not None:
+                self._strategy(self)
+
             # ブローカー処理（注文の約定）
             try:
                 self._broker_instance._data = self._current_data
@@ -325,10 +348,16 @@ class Backtest:
             self.reset()
 
         # 目標まで進める（戦略を適用しながら）
-        while self._step_index < step and not self._is_finished:
-            if strategy:
-                strategy(self)
-            self.step()
+        # 引数の strategy が渡された場合は一時的に上書き
+        original_strategy = self._strategy
+        if strategy is not None:
+            self._strategy = strategy
+
+        try:
+            while self._step_index < step and not self._is_finished:
+                self.step()
+        finally:
+            self._strategy = original_strategy
 
         return self
 
@@ -616,19 +645,14 @@ class Backtest:
 
         return self._results
 
-    def run_with_strategy(self, strategy_func: Callable[['Backtest'], None] = None) -> pd.Series:
+    def run(self) -> pd.Series:
         """
         バックテストを最後まで実行（ステップ実行API版）
-
-        Args:
-            strategy_func: 各ステップで呼び出す関数 (bt) -> None
         """
         if not self._is_started:
             self.start()
 
         while not self._is_finished:
-            if strategy_func:
-                strategy_func(self)
             self.step()
 
         return self.finalize()
