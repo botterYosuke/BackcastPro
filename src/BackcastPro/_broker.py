@@ -4,7 +4,7 @@
 
 import warnings
 from math import copysign
-from typing import List, Optional, TYPE_CHECKING
+from typing import Callable, List, Optional, TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -88,6 +88,21 @@ class _Broker:
         self.trades: List[Trade] = []
         self.position = Position(self)
         self.closed_trades: List[Trade] = []
+
+        # 取引イベントコールバック（オプション）
+        # 署名: (event_type: str, trade: Trade) -> None
+        # event_type: 'BUY', 'SELL'
+        self._on_trade_event: Optional[Callable[[str, Trade], None]] = None
+
+    def set_on_trade_event(self, callback: Optional[Callable[[str, Trade], None]]) -> None:
+        """取引イベント発生時のコールバックを設定
+
+        Args:
+            callback: (event_type, trade) を受け取るコールバック関数
+                      event_type: 'BUY' または 'SELL'
+                      trade: Tradeインスタンス
+        """
+        self._on_trade_event = callback
 
     def _commission_func(self, order_size, price):
         return self._commission_fixed + abs(order_size) * price * self._commission_relative
@@ -428,3 +443,14 @@ class _Broker:
             trade.tp = tp
         if sl:
             trade.sl = sl
+
+        # 取引イベントコールバックを呼び出し
+        if self._on_trade_event:
+            event_type = "BUY" if size > 0 else "SELL"
+            try:
+                self._on_trade_event(event_type, trade)
+            except Exception as e:
+                warnings.warn(
+                    f'Trade event callback raised an exception: {e}',
+                    category=UserWarning
+                )

@@ -257,6 +257,12 @@ class Backtest:
                 ts: i for i, ts in enumerate(df.index)
             }
 
+        # 取引イベントパブリッシャーが既に設定されている場合、コールバックを登録
+        if hasattr(self, "_trade_event_publisher") and self._trade_event_publisher:
+            def on_trade(event_type: str, trade):
+                self._trade_event_publisher.emit_from_trade(trade, is_opening=True)
+            self._broker_instance.set_on_trade_event(on_trade)
+
         return self
 
     def step(self) -> bool:
@@ -616,6 +622,43 @@ class Backtest:
         # 状態を更新
         self._state_publisher.update_state(self)
         return self._state_publisher
+
+    def trade_event_publisher(self):
+        """
+        取引イベントをBroadcastChannelで公開するウィジェットを取得
+
+        bt.buy() / bt.sell() が成立した際にイベントを配信し、
+        外部のThree.jsシーンでマネーミサイルエフェクトをトリガー可能。
+
+        Returns:
+            TradeEventPublisher: marimoセルに配置するウィジェット
+
+        Example:
+            # marimoセル内
+            publisher = bt.trade_event_publisher()
+            publisher  # セルに配置して有効化
+
+            # 受信側（Three.jsシーン内等）
+            const channel = new BroadcastChannel('trade_event_channel');
+            channel.onmessage = (e) => {
+                const { event_type, code, size, price } = e.data.data;
+                if (event_type === 'BUY') triggerBuyEffect(size);
+                else triggerSellEffect(size);
+            };
+        """
+        from .api.trade_event_publisher import TradeEventPublisher
+
+        # シングルトンパターン（1つのBacktestにつき1つのPublisher）
+        if not hasattr(self, "_trade_event_publisher"):
+            self._trade_event_publisher = TradeEventPublisher()
+
+            # ブローカーにコールバックを設定
+            if self._broker_instance:
+                def on_trade(event_type: str, trade):
+                    self._trade_event_publisher.emit_from_trade(trade, is_opening=True)
+                self._broker_instance.set_on_trade_event(on_trade)
+
+        return self._trade_event_publisher
 
     # =========================================================================
     # ステップ実行用プロパティ
