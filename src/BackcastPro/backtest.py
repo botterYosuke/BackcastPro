@@ -304,10 +304,21 @@ class Backtest:
 
         self._step_index += 1
 
+        # チャート自動更新
+        self._update_all_charts()
+
         if self._step_index >= len(self.index):
             self._is_finished = True
 
         return not self._is_finished
+
+    def _update_all_charts(self) -> None:
+        """保持している全チャートウィジェットを更新"""
+        for code, widget in self._chart_widgets.items():
+            try:
+                self.update_chart(widget, code)
+            except Exception:
+                pass  # ウィジェット破棄時のエラーを無視
 
     def reset(self, *, clear_chart_cache: bool = False) -> 'Backtest':
         """
@@ -531,6 +542,51 @@ class Backtest:
         self._chart_last_index[code] = current_idx
 
         return widget
+
+    def update_chart(self, widget, code: str = None) -> None:
+        """
+        既存チャートウィジェットを差分更新（軽量）
+
+        chart()と異なり、ウィジェット作成やキャッシュ管理をスキップし、
+        データとマーカーの更新のみを行う。高頻度更新に最適。
+
+        Args:
+            widget: chart()で作成したLightweightChartWidget
+            code: 銘柄コード（省略時は最初のデータを使用）
+
+        Example:
+            # セル1: チャート作成（一度だけ）
+            chart_widget = bt.chart(code=code)
+
+            # セル2: 差分更新（AutoRefreshで繰り返し）
+            bt.update_chart(chart_widget, code)
+        """
+        if code is None:
+            code = next(iter(self._data.keys()), None)
+        if code is None:
+            return
+
+        if code not in self._current_data or len(self._current_data[code]) == 0:
+            return
+
+        df = self._current_data[code]
+
+        # 全データ更新（新しいバーを追加するため）
+        from .api.chart import df_to_lwc_data, get_last_bar
+        widget.data = df_to_lwc_data(df)
+
+        # last_bar も更新（リアルタイム描画用）
+        bar = get_last_bar(df)
+        if hasattr(widget, "update_bar_fast"):
+            widget.update_bar_fast(bar)
+        else:
+            widget.last_bar = bar
+
+        # マーカー更新
+        if self._broker_instance:
+            from .api.chart import trades_to_markers
+            all_trades = list(self._broker_instance.closed_trades) + list(self._broker_instance.trades)
+            widget.markers = trades_to_markers(all_trades, code, show_tags=True)
 
     def state_publisher(self):
         """
