@@ -25,7 +25,7 @@ class BacktestStatePublisher(anywidget.AnyWidget):
     Example:
         # Python側
         publisher = BacktestStatePublisher()
-        publisher.update_state(bt, code="7203")
+        publisher.update_state(bt)
 
         # JavaScript側（iframe内など）
         const channel = new BroadcastChannel('backtest_channel');
@@ -98,23 +98,30 @@ class BacktestStatePublisher(anywidget.AnyWidget):
 
     state = traitlets.Dict({}).tag(sync=True)
 
-    def update_state(self, bt: "Backtest", code: str | None = None) -> None:
+    def update_state(self, bt: "Backtest") -> None:
         """Backtestオブジェクトから状態を更新
 
         Args:
             bt: Backtestインスタンス
-            code: 銘柄コード（ポジション取得用）
         """
         # パブリックAPIを使用してステップインデックスを取得
         step_index = getattr(bt, "step_index", getattr(bt, "_step_index", 0))
         total_steps = len(bt.index) if hasattr(bt, "index") else 0
+
+        # 各銘柄のポジションを計算
+        positions: dict[str, int] = {}
+        if bt._broker_instance and bt._broker_instance.trades:
+            for trade in bt._broker_instance.trades:
+                code = trade.code
+                positions[code] = positions.get(code, 0) + trade.size
 
         self.state = {
             "current_time": str(bt.current_time) if bt.current_time else "-",
             "progress": float(bt.progress),
             "equity": float(bt.equity),
             "cash": float(bt.cash),
-            "position": bt.position_of(code) if code else 0,
+            "position": bt.position,
+            "positions": positions,
             "closed_trades": len(bt.closed_trades),
             "step_index": step_index,
             "total_steps": total_steps,

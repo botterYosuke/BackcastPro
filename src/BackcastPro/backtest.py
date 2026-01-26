@@ -532,22 +532,19 @@ class Backtest:
 
         return widget
 
-    def state_publisher(self, code: str = None):
+    def state_publisher(self):
         """
         バックテスト状態をBroadcastChannelで公開するウィジェットを取得
 
         外部のthree.js等からBroadcastChannelを購読して状態を参照可能。
         marimoセルに配置することで、状態がリアルタイムで配信される。
 
-        Args:
-            code: 銘柄コード（ポジション取得用）
-
         Returns:
             BacktestStatePublisher: marimoセルに配置するウィジェット
 
         Example:
             # marimoセル内
-            publisher = bt.state_publisher(code)
+            publisher = bt.state_publisher()
             publisher  # セルに配置して有効化
 
             # 受信側（iframe内等）
@@ -560,12 +557,8 @@ class Backtest:
         if not hasattr(self, "_state_publisher"):
             self._state_publisher = BacktestStatePublisher()
 
-        # 銘柄コードを自動決定
-        if code is None and len(self._data) == 1:
-            code = list(self._data.keys())[0]
-
         # 状態を更新
-        self._state_publisher.update_state(self, code)
+        self._state_publisher.update_state(self)
         return self._state_publisher
 
     # =========================================================================
@@ -575,6 +568,8 @@ class Backtest:
     @property
     def data(self) -> dict[str, pd.DataFrame]:
         """現在時点までのデータ"""
+        if len(self._current_data) == 0:
+            return self._data
         return self._current_data
 
     @property
@@ -618,14 +613,14 @@ class Backtest:
     @property
     def current_time(self) -> Optional[pd.Timestamp]:
         """現在の日時"""
-        if self._step_index == 0:
+        if self._step_index == 0 or not hasattr(self, 'index'):
             return None
         return self.index[self._step_index - 1]
 
     @property
     def progress(self) -> float:
         """進捗率（0.0〜1.0）"""
-        if len(self.index) == 0:
+        if not hasattr(self, 'index') or len(self.index) == 0:
             return 0.0
         return self._step_index / len(self.index)
 
