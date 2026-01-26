@@ -437,7 +437,13 @@ class Backtest:
     # 可視化
     # =========================================================================
 
-    def chart(self, code: str = None, height: int = 500, show_tags: bool = True):
+    def chart(
+        self,
+        code: str = None,
+        height: int = 500,
+        show_tags: bool = True,
+        visible_bars: int = 60,
+    ):
         """
         現在時点までのローソク足チャートを生成（売買マーカー付き）
 
@@ -449,6 +455,7 @@ class Backtest:
             code: 銘柄コード
             height: チャートの高さ
             show_tags: 売買理由（tag）をチャートに表示するか
+            visible_bars: 初期表示するバー数（デフォルト: 60本≒約2か月）
 
         Returns:
             LightweightChartWidget
@@ -517,12 +524,49 @@ class Backtest:
             show_volume=False,
             title=f"{code} - {self.current_time}",
             code=code,
+            visible_bars=visible_bars,
         )
 
         self._chart_widgets[code] = widget
         self._chart_last_index[code] = current_idx
 
         return widget
+
+    def state_publisher(self, code: str = None):
+        """
+        バックテスト状態をBroadcastChannelで公開するウィジェットを取得
+
+        外部のthree.js等からBroadcastChannelを購読して状態を参照可能。
+        marimoセルに配置することで、状態がリアルタイムで配信される。
+
+        Args:
+            code: 銘柄コード（ポジション取得用）
+
+        Returns:
+            BacktestStatePublisher: marimoセルに配置するウィジェット
+
+        Example:
+            # marimoセル内
+            publisher = bt.state_publisher(code)
+            publisher  # セルに配置して有効化
+
+            # 受信側（iframe内等）
+            const channel = new BroadcastChannel('backtest_channel');
+            channel.onmessage = (e) => updateHUD(e.data.data);
+        """
+        from .api.state_publisher import BacktestStatePublisher
+
+        # シングルトンパターン（1つのBacktestにつき1つのPublisher）
+        if not hasattr(self, "_state_publisher"):
+            self._state_publisher = BacktestStatePublisher()
+
+        # 銘柄コードを自動決定
+        if code is None and len(self._data) == 1:
+            code = list(self._data.keys())[0]
+
+        # 状態を更新
+        self._state_publisher.update_state(self, code)
+        return self._state_publisher
 
     # =========================================================================
     # ステップ実行用プロパティ

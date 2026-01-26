@@ -339,7 +339,17 @@ class LightweightChartWidget(anywidget.AnyWidget):
         const data = model.get("data") || [];
         if (data.length > 0) {
             candleSeries.setData(data);
-            chart.timeScale().fitContent();
+
+            // 表示範囲を直近N本に制限（デフォルト60本≒約2か月）
+            const visibleBars = options.visibleBars || 60;
+            if (data.length > visibleBars) {
+                chart.timeScale().setVisibleLogicalRange({
+                    from: data.length - visibleBars,
+                    to: data.length - 1,
+                });
+            } else {
+                chart.timeScale().fitContent();
+            }
         }
 
         // 出来高データ設定
@@ -359,7 +369,17 @@ class LightweightChartWidget(anywidget.AnyWidget):
             const newData = model.get("data") || [];
             if (newData.length > 0) {
                 candleSeries.setData(newData);
-                chart.timeScale().fitContent();
+
+                // 表示範囲を直近N本に制限
+                const visibleBars = options.visibleBars || 60;
+                if (newData.length > visibleBars) {
+                    chart.timeScale().setVisibleLogicalRange({
+                        from: newData.length - visibleBars,
+                        to: newData.length - 1,
+                    });
+                } else {
+                    chart.timeScale().fitContent();
+                }
             }
         });
 
@@ -677,6 +697,7 @@ def chart_by_df(
     title: str = None,
     code: str = None,
     tz: str = "Asia/Tokyo",
+    visible_bars: int = 60,
 ) -> LightweightChartWidget:
     """
     株価データからLightweight Chartsチャートを作成
@@ -690,6 +711,7 @@ def chart_by_df(
         title: チャートのタイトル（現在は未使用）
         code: 銘柄コード（trades のフィルタリング用）
         tz: タイムゾーン（デフォルト: Asia/Tokyo）
+        visible_bars: 初期表示するバー数（デフォルト: 60本≒約2か月）
 
     Returns:
         LightweightChartWidget: anywidget ベースのチャートウィジェット
@@ -702,6 +724,7 @@ def chart_by_df(
     widget.options = {
         "height": height,
         "showVolume": show_volume,
+        "visibleBars": visible_bars,
     }
 
     # ローソク足データ設定
