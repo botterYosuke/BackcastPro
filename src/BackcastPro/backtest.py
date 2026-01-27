@@ -337,13 +337,19 @@ class Backtest:
         self._broker_instance = self._broker_factory(data=self._data)
         self._step_index = 0
         self._is_finished = False
-        self._current_data = {}
         self._results = None
         # インデックスをリセット（次回chart()で全データ更新）
         self._chart_last_index = {}
         # 明示的に指定された場合のみウィジェットをクリア
         if clear_chart_cache:
             self._chart_widgets = {}
+        # 初期データ（最初の1行）でチャートをリセット
+        self._current_data = {}
+        if self._data:
+            for code, df in self._data.items():
+                if len(df) > 0:
+                    self._current_data[code] = df.iloc[:1]
+        self._update_all_charts()
         return self
 
     def goto(self, step: int, strategy: Callable[['Backtest'], None] = None) -> 'Backtest':
