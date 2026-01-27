@@ -263,6 +263,10 @@ class Backtest:
                 self._trade_event_publisher.emit_from_trade(trade, is_opening=True)
             self._broker_instance.set_on_trade_event(on_trade)
 
+        # ヘッドレス取引イベントが有効な場合、コールバックを設定
+        if getattr(self, '_headless_trade_events_enabled', False):
+            self._setup_headless_trade_callback()
+
         return self
 
     def step(self) -> bool:
@@ -606,72 +610,6 @@ class Backtest:
             all_trades = list(self._broker_instance.closed_trades) + list(self._broker_instance.trades)
             widget.markers = trades_to_markers(all_trades, code, show_tags=True)
 
-    def state_publisher(self):
-        """
-        バックテスト状態をBroadcastChannelで公開するウィジェットを取得
-
-        外部のthree.js等からBroadcastChannelを購読して状態を参照可能。
-        marimoセルに配置することで、状態がリアルタイムで配信される。
-
-        Returns:
-            BacktestStatePublisher: marimoセルに配置するウィジェット
-
-        Example:
-            # marimoセル内
-            publisher = bt.state_publisher()
-            publisher  # セルに配置して有効化
-
-            # 受信側（iframe内等）
-            const channel = new BroadcastChannel('backtest_channel');
-            channel.onmessage = (e) => updateHUD(e.data.data);
-        """
-        from .api.state_publisher import BacktestStatePublisher
-
-        # シングルトンパターン（1つのBacktestにつき1つのPublisher）
-        if not hasattr(self, "_state_publisher"):
-            self._state_publisher = BacktestStatePublisher()
-
-        # 状態を更新
-        self._state_publisher.update_state(self)
-        return self._state_publisher
-
-    def trade_event_publisher(self):
-        """
-        取引イベントをBroadcastChannelで公開するウィジェットを取得
-
-        bt.buy() / bt.sell() が成立した際にイベントを配信し、
-        外部のThree.jsシーンでマネーミサイルエフェクトをトリガー可能。
-
-        Returns:
-            TradeEventPublisher: marimoセルに配置するウィジェット
-
-        Example:
-            # marimoセル内
-            publisher = bt.trade_event_publisher()
-            publisher  # セルに配置して有効化
-
-            # 受信側（Three.jsシーン内等）
-            const channel = new BroadcastChannel('trade_event_channel');
-            channel.onmessage = (e) => {
-                const { event_type, code, size, price } = e.data.data;
-                if (event_type === 'BUY') triggerBuyEffect(size);
-                else triggerSellEffect(size);
-            };
-        """
-        from .api.trade_event_publisher import TradeEventPublisher
-
-        # シングルトンパターン（1つのBacktestにつき1つのPublisher）
-        if not hasattr(self, "_trade_event_publisher"):
-            self._trade_event_publisher = TradeEventPublisher()
-
-            # ブローカーにコールバックを設定
-            if self._broker_instance:
-                def on_trade(event_type: str, trade):
-                    self._trade_event_publisher.emit_from_trade(trade, is_opening=True)
-                self._broker_instance.set_on_trade_event(on_trade)
-
-        return self._trade_event_publisher
-
     # =========================================================================
     # ステップ実行用プロパティ
     # =========================================================================
@@ -819,3 +757,142 @@ class Backtest:
     def commission(self):
         # partialで初期化されている場合、初期化時のcommission値を返す
         return self._broker_factory.keywords.get('commission', 0)
+
+    # =========================================================================
+    # ヘッドレスパブリッシャーAPI（app.setup内でも動作可能）
+    # =========================================================================
+
+    def publish_state_headless(self):
+        """
+        バックテスト状態をBroadcastChannelで公開（ヘッドレス版）
+
+        AnyWidgetのレンダリングが不要。app.setup内や_game_loop内から
+        直接呼び出してBroadcastChannelにメッセージを送信できる。
+        mo.output.replace() を使用して動的にiframeを出力する。
+
+        Example:
+            # _game_loop内で使用可能
+            def _game_loop():
+                while bt.is_finished == False:
+                    bt.step()
+                    bt.publish_state_headless()  # 動的に出力
+        """
+        import json
+        import marimo as mo
+
+        # 状態データを準備
+        positions: dict[str, int] = {}
+        if self._broker_instance and self._broker_instance.trades:
+            for trade in self._broker_instance.trades:
+                code = trade.code
+                positions[code] = positions.get(code, 0) + trade.size
+
+        state = {
+            "current_time": str(self.current_time) if self.current_time else "-",
+            "progress": float(self.progress),
+            "equity": float(self.equity),
+            "cash": float(self.cash),
+            "position": self.position,
+            "positions": positions,
+            "closed_trades": len(self.closed_trades),
+            "step_index": self._step_index,
+            "total_steps": len(self.index) if hasattr(self, "index") else 0,
+        }
+
+        state_json = json.dumps(state)
+        script = f'''
+        <div style="display:none;">
+            <script>
+                const channel = new BroadcastChannel('backtest_channel');
+                channel.postMessage({{
+                    type: 'backtest_update',
+                    data: {state_json}
+                }});
+            </script>
+        </div>
+        '''
+        # mo.output.replace() で動的に出力（スレッドからでも動作）
+        iframe = mo.iframe(script, height="0px")
+        mo.output.replace(iframe)
+
+    def publish_trade_event_headless(
+        self,
+        event_type: str,
+        code: str,
+        size: int,
+        price: float,
+        tag: Optional[str] = None
+    ):
+        """
+        取引イベントをBroadcastChannelで公開（ヘッドレス版）
+
+        Args:
+            event_type: 'BUY' または 'SELL'
+            code: 銘柄コード
+            size: 取引数量（正の値）
+            price: 約定価格
+            tag: 取引タグ（オプション）
+        """
+        import json
+        import marimo as mo
+
+        event = {
+            "event_type": event_type,
+            "code": code,
+            "size": abs(size),
+            "price": float(price),
+            "tag": str(tag) if tag else None,
+        }
+
+        event_json = json.dumps(event)
+        script = f'''
+        <div style="display:none;">
+            <script>
+                const channel = new BroadcastChannel('trade_event_channel');
+                channel.postMessage({{
+                    type: 'trade_event',
+                    data: {event_json}
+                }});
+            </script>
+        </div>
+        '''
+        # mo.output.append() で動的に出力（スレッドからでも動作）
+        iframe = mo.iframe(script, height="0px")
+        mo.output.append(iframe)
+
+    def enable_headless_trade_events(self):
+        """
+        取引イベントをヘッドレスモードで自動発行するよう設定
+
+        bt.buy() / bt.sell() が成立した際に自動的に
+        publish_trade_event_headless() が呼び出される。
+        ウィジェットのレンダリングが不要。app.setup内や_game_loop内から使用可能。
+
+        Example:
+            # _game_loop内で使用可能
+            def _game_loop():
+                bt.enable_headless_trade_events()  # 最初に1回呼び出し
+                while bt.is_finished == False:
+                    bt.step()
+                    bt.publish_state_headless()
+        """
+        self._headless_trade_events_enabled = True
+
+        # ブローカーが既に存在する場合はコールバックを設定
+        if self._broker_instance:
+            self._setup_headless_trade_callback()
+
+    def _setup_headless_trade_callback(self):
+        """ヘッドレス取引イベント用のコールバックを設定"""
+        if not getattr(self, '_headless_trade_events_enabled', False):
+            return
+
+        def on_trade(event_type: str, trade):
+            self.publish_trade_event_headless(
+                event_type=event_type,
+                code=trade.code,
+                size=trade.size,
+                price=trade.entry_price,
+                tag=getattr(trade, 'tag', None)
+            )
+        self._broker_instance.set_on_trade_event(on_trade)
