@@ -485,11 +485,17 @@ class Backtest:
 
         if not self._is_started or self._broker_instance is None:
             from .api.chart import LightweightChartWidget
-            return LightweightChartWidget()
+            # キャッシュに登録して後から更新できるようにする
+            if code not in self._chart_widgets:
+                self._chart_widgets[code] = LightweightChartWidget()
+            return self._chart_widgets[code]
 
         if code not in self._current_data or len(self._current_data[code]) == 0:
             from .api.chart import LightweightChartWidget
-            return LightweightChartWidget()
+            # キャッシュに登録して後から更新できるようにする
+            if code not in self._chart_widgets:
+                self._chart_widgets[code] = LightweightChartWidget()
+            return self._chart_widgets[code]
 
         df = self._current_data[code]
         current_idx = len(df)
