@@ -10,3 +10,4 @@ dist
 
 *.html
 .playwright-mcp
+site/

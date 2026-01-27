@@ -1,0 +1,108 @@
+site_name: BackcastPro
+site_description: トレーディング戦略のためのPythonバックテストライブラリ
+site_url: https://botteryosuke.github.io/BackcastPro/
+repo_name: botterYosuke/BackcastPro
+repo_url: https://github.com/botterYosuke/BackcastPro
+edit_uri: edit/main/docs/
+
+copyright: "&copy; 2024-2025 botterYosuke"
+
+nav:
+  - ホーム: index.md
+  - ユーザーガイド:
+      - チュートリアル: tutorial.md
+      - トラブルシューティング: troubleshooting.md
+  - 開発者向け:
+      - 開発者ガイド: developer-guide.md
+      - 約定ロジック分析: execution-logic-report.md
+      - PyPIデプロイ: how-to-deploy-to-PyPI.md
+  - プライバシーポリシー: privacy.md
+
+theme:
+  name: material
+  language: ja
+  logo: img/logo.drawio.svg
+  favicon: img/logo.drawio.svg
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: ダークモードに切り替え
+
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: ライトモードに切り替え
+
+  features:
+    - content.code.copy
+    - content.code.annotate
+    - navigation.instant
+    - navigation.tabs
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - search.suggest
+    - toc.follow
+
+  font:
+    text: Noto Sans JP
+    code: Fira Code
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/botterYosuke/BackcastPro
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/fzJTbpzE
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/BackcastPro/
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      lang: ja
