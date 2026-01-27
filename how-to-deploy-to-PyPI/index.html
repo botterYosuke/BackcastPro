@@ -10,29 +10,31 @@
       
       
       
-        <link rel="canonical" href="https://botteryosuke.github.io/BackcastPro/">
+        <link rel="canonical" href="https://botteryosuke.github.io/BackcastPro/how-to-deploy-to-PyPI/">
       
       
+        <link rel="prev" href="../execution-logic-report/">
       
-        <link rel="next" href="tutorial/">
+      
+        <link rel="next" href="../privacy/">
       
       
         
       
       
-      <link rel="icon" href="img/logo.drawio.svg">
+      <link rel="icon" href="../img/logo.drawio.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>BackcastPro</title>
+        <title>PyPIデプロイ - BackcastPro</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,7 +53,7 @@
       
     
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#backcastpro" class="md-skip">
+        <a href="#pypiwindows-uv" class="md-skip">
           コンテンツにスキップ
         </a>
       
@@ -90,9 +92,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="ヘッダー">
-    <a href="." title="BackcastPro" class="md-header__button md-logo" aria-label="BackcastPro" data-md-component="logo">
+    <a href=".." title="BackcastPro" class="md-header__button md-logo" aria-label="BackcastPro" data-md-component="logo">
       
-  <img src="img/logo.drawio.svg" alt="logo">
+  <img src="../img/logo.drawio.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -109,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ホーム
+              PyPIデプロイ
             
           </span>
         </div>
@@ -220,11 +222,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -245,7 +245,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="tutorial/" class="md-tabs__link">
+        <a href="../tutorial/" class="md-tabs__link">
           
   
   
@@ -261,11 +261,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="developer-guide/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../developer-guide/" class="md-tabs__link">
           
   
   
@@ -283,7 +285,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="privacy/" class="md-tabs__link">
+      <a href="../privacy/" class="md-tabs__link">
         
   
   
@@ -318,9 +320,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="ナビゲーション" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="BackcastPro" class="md-nav__button md-logo" aria-label="BackcastPro" data-md-component="logo">
+    <a href=".." title="BackcastPro" class="md-nav__button md-logo" aria-label="BackcastPro" data-md-component="logo">
       
-  <img src="img/logo.drawio.svg" alt="logo">
+  <img src="../img/logo.drawio.svg" alt="logo">
 
     </a>
     BackcastPro
@@ -344,37 +346,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    ホーム
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -390,159 +365,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="目次">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      目次
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ドキュメント一覧
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="ドキュメント一覧">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ユーザー向けドキュメント
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        開発者向けドキュメント
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        サンプルコード
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        クイックスタート
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        主な機能
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API 概要
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="API 概要">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        メソッド
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        プロパティ
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        サポート
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ライセンス
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -604,7 +426,7 @@
   
   
     <li class="md-nav__item">
-      <a href="tutorial/" class="md-nav__link">
+      <a href="../tutorial/" class="md-nav__link">
         
   
   
@@ -632,7 +454,7 @@
   
   
     <li class="md-nav__item">
-      <a href="troubleshooting/" class="md-nav__link">
+      <a href="../troubleshooting/" class="md-nav__link">
         
   
   
@@ -664,24 +486,29 @@
       
   
   
+    
   
   
+  
     
     
     
     
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
             
   
   
@@ -699,7 +526,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -717,7 +544,7 @@
   
   
     <li class="md-nav__item">
-      <a href="developer-guide/" class="md-nav__link">
+      <a href="../developer-guide/" class="md-nav__link">
         
   
   
@@ -745,7 +572,7 @@
   
   
     <li class="md-nav__item">
-      <a href="execution-logic-report/" class="md-nav__link">
+      <a href="../execution-logic-report/" class="md-nav__link">
         
   
   
@@ -770,10 +597,35 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="how-to-deploy-to-PyPI/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyPIデプロイ
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -789,6 +641,63 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pypiwindows-uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PyPIへのデプロイ方法（Windows / uv）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PyPIへのデプロイ方法（Windows / uv）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 配布物をビルド
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-pypi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. PyPIへアップロード
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -808,7 +717,7 @@
   
   
     <li class="md-nav__item">
-      <a href="privacy/" class="md-nav__link">
+      <a href="../privacy/" class="md-nav__link">
         
   
   
@@ -845,8 +754,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -855,22 +762,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#pypiwindows-uv" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ドキュメント一覧
+        PyPIへのデプロイ方法（Windows / uv）
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="ドキュメント一覧">
+    <nav class="md-nav" aria-label="PyPIへのデプロイ方法（Windows / uv）">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ユーザー向けドキュメント
+        1. 配布物をビルド
       
     </span>
   </a>
@@ -878,21 +785,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#2-pypi" class="md-nav__link">
     <span class="md-ellipsis">
       
-        開発者向けドキュメント
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        サンプルコード
+        2. PyPIへアップロード
       
     </span>
   </a>
@@ -901,89 +797,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        クイックスタート
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        主な機能
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API 概要
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="API 概要">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        メソッド
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        プロパティ
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        サポート
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ライセンス
-      
-    </span>
-  </a>
   
 </li>
       
@@ -1007,176 +820,27 @@
   
 
 
-<h1 id="backcastpro"><img src="img/logo.drawio.svg" alt="BackcastPro Logo" width="40" height="24"> BackcastPro ドキュメント<a class="headerlink" href="#backcastpro" title="Permanent link">&para;</a></h1>
-<p>BackcastProは、トレーディング戦略のためのPythonバックテストライブラリです。
-**リプレイ型シミュレーター**で、1バーずつ時間を進めながらチャートと売買を可視化できます。</p>
-<h2 id="_1">ドキュメント一覧<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<h3 id="_2">ユーザー向けドキュメント<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong><a href="tutorial/">チュートリアル</a></strong> - 基本的な使い方を学ぶ</li>
-<li><strong><a href="troubleshooting/">トラブルシューティング</a></strong> - よくある問題と解決方法</li>
-</ul>
-<h3 id="_3">開発者向けドキュメント<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong><a href="developer-guide/">開発者ガイド</a></strong> - 開発に参加するための情報</li>
-<li><strong><a href="execution-logic-report/">約定ロジック分析レポート</a></strong> - 売買約定時の価格決定ロジック詳細</li>
-<li><strong><a href="how-to-deploy-to-PyPI/">PyPIへのデプロイ方法</a></strong> - パッケージの配布方法</li>
-</ul>
-<h3 id="_4">サンプルコード<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong><a href="examples/">サンプル集</a></strong> - 実用的な戦略の例</li>
-<li><a href="examples/marimo_replay.py">marimoリプレイシミュレーター</a> - スライダーで時間操作</li>
-<li><a href="examples/SmaCross.py">SMAクロス戦略ユーティリティ</a> - 移動平均計算</li>
-</ul>
-<h2 id="_5">クイックスタート<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">yfinance</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">yf</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">BackcastPro</span><span class="w"> </span><span class="kn">import</span> <span class="n">Backtest</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># データを取得</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;7203.T&#39;</span>  <span class="c1"># トヨタ（東証）</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">df</span> <span class="o">=</span> <span class="n">yf</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;1y&#39;</span><span class="p">)</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># バックテストを初期化</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="n">code</span><span class="p">:</span> <span class="n">df</span><span class="p">},</span> <span class="n">cash</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># 戦略関数を定義</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="k">def</span><span class="w"> </span><span class="nf">my_strategy</span><span class="p">(</span><span class="n">bt</span><span class="p">):</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="k">if</span> <span class="n">bt</span><span class="o">.</span><span class="n">position</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>        <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">tag</span><span class="o">=</span><span class="s2">&quot;entry&quot;</span><span class="p">)</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># 一括実行</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">results</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">run_with_strategy</span><span class="p">(</span><span class="n">my_strategy</span><span class="p">)</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+  <h1>PyPIデプロイ</h1>
+
+<h2 id="pypiwindows-uv">PyPIへのデプロイ方法（Windows / uv）<a class="headerlink" href="#pypiwindows-uv" title="Permanent link">&para;</a></h2>
+<p>詳細なリリース手順は <code>developer-guide.md</code> の「リリースプロセス」を参照してください。ここでは最小手順のみを記載します。</p>
+<h3 id="1">1. 配布物をビルド<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
+<div class="language-powershell highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">uv</span> <span class="n">build</span>
 </span></code></pre></div>
-<h2 id="_6">主な機能<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>リプレイ型シミュレーター</strong>: <code>step()</code> で1バーずつ進めながらチャート確認</li>
-<li><strong>シンプルな戦略実装</strong>: 関数ベースで <code>buy()</code> / <code>sell()</code> を呼ぶだけ</li>
-<li><strong>統計の自動計算</strong>: 代表的なパフォーマンス指標を同梱</li>
-<li><strong>リスク管理</strong>: <code>sl</code> と <code>tp</code> に標準対応</li>
-<li><strong>可視化</strong>: <code>chart()</code> で plotly ローソク足チャート生成</li>
-<li><strong>marimo連携</strong>: スライダーで時間を操作しながらリアルタイム可視化</li>
-</ul>
-<pre class="mermaid"><code>flowchart TD
-    A["データ準備"] --&gt; B["Backtest 初期化"]
-    B --&gt; C["start() 開始"]
-    C --&gt; D["strategy(bt) 戦略実行"]
-    D --&gt; E["step() 1バー進める"]
-    E --&gt; F{"is_finished?"}
-    F --&gt;|No| D
-    F --&gt;|Yes| G["finalize() 統計計算"]
-    G --&gt; H["結果 pd.Series"]</code></pre>
-<h2 id="api">API 概要<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
-<h3 id="_7">メソッド<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>メソッド</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>start()</code></td>
-<td>バックテスト開始</td>
-</tr>
-<tr>
-<td><code>step()</code></td>
-<td>1バー進める</td>
-</tr>
-<tr>
-<td><code>reset()</code></td>
-<td>最初からやり直し</td>
-</tr>
-<tr>
-<td><code>goto(step, strategy)</code></td>
-<td>指定位置まで進める</td>
-</tr>
-<tr>
-<td><code>buy(code, size, tag, ...)</code></td>
-<td>買い注文</td>
-</tr>
-<tr>
-<td><code>sell(code, size, tag, ...)</code></td>
-<td>売り注文</td>
-</tr>
-<tr>
-<td><code>chart(code)</code></td>
-<td>チャート生成</td>
-</tr>
-<tr>
-<td><code>finalize()</code></td>
-<td>統計計算</td>
-</tr>
-<tr>
-<td><code>run_with_strategy(func)</code></td>
-<td>一括実行</td>
-</tr>
-</tbody>
-</table>
-<h3 id="_8">プロパティ<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>プロパティ</th>
-<th>説明</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>data</code></td>
-<td>現在時点までのデータ</td>
-</tr>
-<tr>
-<td><code>position</code></td>
-<td>ポジションサイズ（全銘柄合計）</td>
-</tr>
-<tr>
-<td><code>position_of(code)</code></td>
-<td>指定銘柄のポジション</td>
-</tr>
-<tr>
-<td><code>equity</code></td>
-<td>現在の資産</td>
-</tr>
-<tr>
-<td><code>cash</code></td>
-<td>現在の現金</td>
-</tr>
-<tr>
-<td><code>current_time</code></td>
-<td>現在の日時</td>
-</tr>
-<tr>
-<td><code>progress</code></td>
-<td>進捗率（0.0〜1.0）</td>
-</tr>
-<tr>
-<td><code>is_finished</code></td>
-<td>完了フラグ</td>
-</tr>
-<tr>
-<td><code>trades</code></td>
-<td>アクティブな取引</td>
-</tr>
-<tr>
-<td><code>closed_trades</code></td>
-<td>決済済み取引</td>
-</tr>
-<tr>
-<td><code>orders</code></td>
-<td>未約定の注文</td>
-</tr>
-</tbody>
-</table>
-<h2 id="_9">サポート<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>GitHub Issues</strong>: バグ報告や機能要求</li>
-<li><strong>Discord</strong>: コミュニティでの質問</li>
-<li><strong>ドキュメント</strong>: 詳細な使用方法の確認</li>
-</ul>
-<h2 id="_10">ライセンス<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
-<p>MIT License - 詳細は<a href="../LICENSE">LICENSE</a>を参照してください。</p>
+<h3 id="2-pypi">2. PyPIへアップロード<a class="headerlink" href="#2-pypi" title="Permanent link">&para;</a></h3>
+<div class="language-powershell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">uv</span> <span class="n">publish</span>
+</span></code></pre></div>
+<div class="language-powershell highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">uv</span> <span class="n">publish</span> <span class="p">-</span><span class="n">-publish-url</span> <span class="n">https</span><span class="p">://</span><span class="n">test</span><span class="p">.</span><span class="n">pypi</span><span class="p">.</span><span class="n">org</span><span class="p">/</span><span class="n">legacy</span><span class="p">/</span>
+</span></code></pre></div>
+<p>アップロード時は PyPI の API トークン（<code>pypi-</code> で始まる値）を入力します。</p>
+<p>環境変数で事前に設定する場合：</p>
+<div class="language-powershell highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">$env:UV_PUBLISH_TOKEN</span> <span class="p">=</span> <span class="s2">&quot;pypi-xxxx...&quot;</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">uv</span> <span class="n">publish</span>
+</span></code></pre></div>
+<p>参考:
+- <a href="https://docs.astral.sh/uv/reference/cli/#uv-build">uv build</a>
+- <a href="https://docs.astral.sh/uv/reference/cli/#uv-publish">uv publish</a>
+- <a href="https://packaging.python.org/en/latest/tutorials/packaging-projects/">Packaging projects（公式）</a></p>
 
 
 
@@ -1211,15 +875,31 @@
       
       <nav class="md-footer__inner md-grid" aria-label="フッター" >
         
+          
+          <a href="../execution-logic-report/" class="md-footer__link md-footer__link--prev" aria-label="前: 約定ロジック分析">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                前
+              </span>
+              <div class="md-ellipsis">
+                約定ロジック分析
+              </div>
+            </div>
+          </a>
+        
         
           
-          <a href="tutorial/" class="md-footer__link md-footer__link--next" aria-label="次: チュートリアル">
+          <a href="../privacy/" class="md-footer__link md-footer__link--next" aria-label="次: プライバシーポリシー">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 次
               </span>
               <div class="md-ellipsis">
-                チュートリアル
+                プライバシーポリシー
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1298,10 +978,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["content.code.copy", "content.code.annotate", "navigation.instant", "navigation.tabs", "navigation.top", "navigation.footer", "search.highlight", "search.suggest", "toc.follow"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.code.annotate", "navigation.instant", "navigation.tabs", "navigation.top", "navigation.footer", "search.highlight", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
