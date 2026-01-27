@@ -127,8 +127,8 @@ $(document).ready(function(){initNavTree('namespacesrc_1_1BackcastPro_1_1api_1_1
 <tr class="separator:afd5aac336e7a7192f7447266a6b54d9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42835bf733e507666552d143c2dff0d3" id="r_a42835bf733e507666552d143c2dff0d3"><td class="memItemLeft" align="right" valign="top">list[dict]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#a42835bf733e507666552d143c2dff0d3">trades_to_markers</a> (list trades, str code=None, bool show_tags=True, str tz=&quot;Asia/Tokyo&quot;)</td></tr>
 <tr class="separator:a42835bf733e507666552d143c2dff0d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48c17c51e9be55e1b0b92dbba63bbbdd" id="r_a48c17c51e9be55e1b0b92dbba63bbbdd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html">LightweightChartWidget</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#a48c17c51e9be55e1b0b92dbba63bbbdd">chart_by_df</a> (pd.DataFrame df, *list trades=None, int height=500, bool show_tags=True, bool show_volume=True, str title=None, str code=None, str tz=&quot;Asia/Tokyo&quot;)</td></tr>
-<tr class="separator:a48c17c51e9be55e1b0b92dbba63bbbdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e37af2be83450463a39dff5de51c0e8" id="r_a3e37af2be83450463a39dff5de51c0e8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html">LightweightChartWidget</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#a3e37af2be83450463a39dff5de51c0e8">chart_by_df</a> (pd.DataFrame df, *list trades=None, int height=500, bool show_tags=True, bool show_volume=True, str title=None, str code=None, str tz=&quot;Asia/Tokyo&quot;, int visible_bars=60)</td></tr>
+<tr class="separator:a3e37af2be83450463a39dff5de51c0e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd81f47e41f0ca389460377e130fc72f" id="r_abd81f47e41f0ca389460377e130fc72f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#abd81f47e41f0ca389460377e130fc72f">chart</a> (str code=&quot;&quot;, datetime.datetime from_=None, datetime.datetime to=None, pd.DataFrame df=None)</td></tr>
 <tr class="separator:abd81f47e41f0ca389460377e130fc72f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -211,8 +211,8 @@ Args:
 </pre> 
 </div>
 </div>
-<a id="a48c17c51e9be55e1b0b92dbba63bbbdd" name="a48c17c51e9be55e1b0b92dbba63bbbdd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a48c17c51e9be55e1b0b92dbba63bbbdd">&#9670;&#160;</a></span>chart_by_df()</h2>
+<a id="a3e37af2be83450463a39dff5de51c0e8" name="a3e37af2be83450463a39dff5de51c0e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e37af2be83450463a39dff5de51c0e8">&#9670;&#160;</a></span>chart_by_df()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -263,7 +263,13 @@ Args:
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">str &#160;</td>
-          <td class="paramname"><em>tz</em> = <code>&quot;Asia/Tokyo&quot;</code>&#160;</td>
+          <td class="paramname"><em>tz</em> = <code>&quot;Asia/Tokyo&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &#160;</td>
+          <td class="paramname"><em>visible_bars</em> = <code>60</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -283,6 +289,7 @@ Args:
     title: チャートのタイトル（現在は未使用）
     code: 銘柄コード（trades のフィルタリング用）
     tz: タイムゾーン（デフォルト: Asia/Tokyo）
+    visible_bars: 初期表示するバー数（デフォルト: 60本≒約2か月）
 
 Returns:
     LightweightChartWidget: anywidget ベースのチャートウィジェット

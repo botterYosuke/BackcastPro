@@ -2,7 +2,9 @@ var hierarchy =
 [
     [ "src.BackcastPro._broker._Broker", "classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html", null ],
     [ "anywidget.AnyWidget", null, [
-      [ "src.BackcastPro.api.chart.LightweightChartWidget", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html", null ]
+      [ "src.BackcastPro.api.chart.LightweightChartWidget", "classsrc_1_1BackcastPro_1_1api_1_1chart_1_1LightweightChartWidget.html", null ],
+      [ "src.BackcastPro.api.state_publisher.BacktestStatePublisher", "classsrc_1_1BackcastPro_1_1api_1_1state__publisher_1_1BacktestStatePublisher.html", null ],
+      [ "src.BackcastPro.api.trade_event_publisher.TradeEventPublisher", "classsrc_1_1BackcastPro_1_1api_1_1trade__event__publisher_1_1TradeEventPublisher.html", null ]
     ] ],
     [ "src.BackcastPro.backtest.Backtest", "classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html", null ],
     [ "src.BackcastPro.api.db_manager.db_manager", "classsrc_1_1BackcastPro_1_1api_1_1db__manager_1_1db__manager.html", [

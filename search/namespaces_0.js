@@ -17,11 +17,13 @@ var searchData=
   ['src_3a_3abackcastpro_3a_3aapi_3a_3alib_3a_3akabusap_14',['kabusap',['../namespacesrc_1_1BackcastPro_1_1api_1_1lib_1_1kabusap.html',1,'src::BackcastPro::api::lib']]],
   ['src_3a_3abackcastpro_3a_3aapi_3a_3alib_3a_3astooq_15',['stooq',['../namespacesrc_1_1BackcastPro_1_1api_1_1lib_1_1stooq.html',1,'src::BackcastPro::api::lib']]],
   ['src_3a_3abackcastpro_3a_3aapi_3a_3alib_3a_3autil_16',['util',['../namespacesrc_1_1BackcastPro_1_1api_1_1lib_1_1util.html',1,'src::BackcastPro::api::lib']]],
-  ['src_3a_3abackcastpro_3a_3aapi_3a_3astocks_5fboard_17',['stocks_board',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__board.html',1,'src::BackcastPro::api']]],
-  ['src_3a_3abackcastpro_3a_3aapi_3a_3astocks_5finfo_18',['stocks_info',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__info.html',1,'src::BackcastPro::api']]],
-  ['src_3a_3abackcastpro_3a_3aapi_3a_3astocks_5fprice_19',['stocks_price',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price.html',1,'src::BackcastPro::api']]],
-  ['src_3a_3abackcastpro_3a_3abacktest_20',['backtest',['../namespacesrc_1_1BackcastPro_1_1backtest.html',1,'src::BackcastPro']]],
-  ['src_3a_3abackcastpro_3a_3aorder_21',['order',['../namespacesrc_1_1BackcastPro_1_1order.html',1,'src::BackcastPro']]],
-  ['src_3a_3abackcastpro_3a_3aposition_22',['position',['../namespacesrc_1_1BackcastPro_1_1position.html',1,'src::BackcastPro']]],
-  ['src_3a_3abackcastpro_3a_3atrade_23',['trade',['../namespacesrc_1_1BackcastPro_1_1trade.html',1,'src::BackcastPro']]]
+  ['src_3a_3abackcastpro_3a_3aapi_3a_3astate_5fpublisher_17',['state_publisher',['../namespacesrc_1_1BackcastPro_1_1api_1_1state__publisher.html',1,'src::BackcastPro::api']]],
+  ['src_3a_3abackcastpro_3a_3aapi_3a_3astocks_5fboard_18',['stocks_board',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__board.html',1,'src::BackcastPro::api']]],
+  ['src_3a_3abackcastpro_3a_3aapi_3a_3astocks_5finfo_19',['stocks_info',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__info.html',1,'src::BackcastPro::api']]],
+  ['src_3a_3abackcastpro_3a_3aapi_3a_3astocks_5fprice_20',['stocks_price',['../namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price.html',1,'src::BackcastPro::api']]],
+  ['src_3a_3abackcastpro_3a_3aapi_3a_3atrade_5fevent_5fpublisher_21',['trade_event_publisher',['../namespacesrc_1_1BackcastPro_1_1api_1_1trade__event__publisher.html',1,'src::BackcastPro::api']]],
+  ['src_3a_3abackcastpro_3a_3abacktest_22',['backtest',['../namespacesrc_1_1BackcastPro_1_1backtest.html',1,'src::BackcastPro']]],
+  ['src_3a_3abackcastpro_3a_3aorder_23',['order',['../namespacesrc_1_1BackcastPro_1_1order.html',1,'src::BackcastPro']]],
+  ['src_3a_3abackcastpro_3a_3aposition_24',['position',['../namespacesrc_1_1BackcastPro_1_1position.html',1,'src::BackcastPro']]],
+  ['src_3a_3abackcastpro_3a_3atrade_25',['trade',['../namespacesrc_1_1BackcastPro_1_1trade.html',1,'src::BackcastPro']]]
 ];

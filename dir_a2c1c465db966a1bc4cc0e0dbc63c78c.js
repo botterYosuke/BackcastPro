@@ -8,7 +8,9 @@ var dir_a2c1c465db966a1bc4cc0e0dbc63c78c =
     [ "db_stocks_board.py", "db__stocks__board_8py.html", "db__stocks__board_8py" ],
     [ "db_stocks_daily.py", "db__stocks__daily_8py.html", "db__stocks__daily_8py" ],
     [ "db_stocks_info.py", "db__stocks__info_8py.html", "db__stocks__info_8py" ],
+    [ "state_publisher.py", "state__publisher_8py.html", "state__publisher_8py" ],
     [ "stocks_board.py", "stocks__board_8py.html", "stocks__board_8py" ],
     [ "stocks_info.py", "stocks__info_8py.html", "stocks__info_8py" ],
-    [ "stocks_price.py", "stocks__price_8py.html", "stocks__price_8py" ]
+    [ "stocks_price.py", "stocks__price_8py.html", "stocks__price_8py" ],
+    [ "trade_event_publisher.py", "trade__event__publisher_8py.html", "trade__event__publisher_8py" ]
 ];

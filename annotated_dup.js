@@ -35,6 +35,9 @@ var annotated_dup =
               [ "kabusap", "classsrc_1_1BackcastPro_1_1api_1_1lib_1_1kabusap_1_1kabusap.html", "classsrc_1_1BackcastPro_1_1api_1_1lib_1_1kabusap_1_1kabusap" ]
             ] ]
           ] ],
+          [ "state_publisher", "namespacesrc_1_1BackcastPro_1_1api_1_1state__publisher.html", [
+            [ "BacktestStatePublisher", "classsrc_1_1BackcastPro_1_1api_1_1state__publisher_1_1BacktestStatePublisher.html", "classsrc_1_1BackcastPro_1_1api_1_1state__publisher_1_1BacktestStatePublisher" ]
+          ] ],
           [ "stocks_board", "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__board.html", [
             [ "stocks_board", "classsrc_1_1BackcastPro_1_1api_1_1stocks__board_1_1stocks__board.html", "classsrc_1_1BackcastPro_1_1api_1_1stocks__board_1_1stocks__board" ]
           ] ],
@@ -43,6 +46,9 @@ var annotated_dup =
           ] ],
           [ "stocks_price", "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price.html", [
             [ "stocks_price", "classsrc_1_1BackcastPro_1_1api_1_1stocks__price_1_1stocks__price.html", "classsrc_1_1BackcastPro_1_1api_1_1stocks__price_1_1stocks__price" ]
+          ] ],
+          [ "trade_event_publisher", "namespacesrc_1_1BackcastPro_1_1api_1_1trade__event__publisher.html", [
+            [ "TradeEventPublisher", "classsrc_1_1BackcastPro_1_1api_1_1trade__event__publisher_1_1TradeEventPublisher.html", "classsrc_1_1BackcastPro_1_1api_1_1trade__event__publisher_1_1TradeEventPublisher" ]
           ] ]
         ] ],
         [ "backtest", "namespacesrc_1_1BackcastPro_1_1backtest.html", [

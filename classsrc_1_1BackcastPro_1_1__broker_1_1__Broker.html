@@ -109,6 +109,8 @@ $(document).ready(function(){initNavTree('classsrc_1_1BackcastPro_1_1__broker_1_
 公開メンバ関数</h2></td></tr>
 <tr class="memitem:a92381ee16ab7029707590c97bd1ddade" id="r_a92381ee16ab7029707590c97bd1ddade"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#a92381ee16ab7029707590c97bd1ddade">__init__</a> (self, *data, <a class="el" href="classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#ae9643d4670e52c60e4d2aed54c5e7ff7">cash</a>, spread, <a class="el" href="classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#a525d103c9a939f47cb4a3a355266cc5f">commission</a>, margin, trade_on_close, hedging, exclusive_orders)</td></tr>
 <tr class="separator:a92381ee16ab7029707590c97bd1ddade"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9eee3cb3b7b6ad95b6e9968f808483d6" id="r_a9eee3cb3b7b6ad95b6e9968f808483d6"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#a9eee3cb3b7b6ad95b6e9968f808483d6">set_on_trade_event</a> (self, Optional[Callable[[str, <a class="el" href="classsrc_1_1BackcastPro_1_1trade_1_1Trade.html">Trade</a>], None]] callback)</td></tr>
+<tr class="separator:a9eee3cb3b7b6ad95b6e9968f808483d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af23a92edeb7e9e93868937ed9efbd42e" id="r_af23a92edeb7e9e93868937ed9efbd42e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classsrc_1_1BackcastPro_1_1order_1_1Order.html">Order</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#af23a92edeb7e9e93868937ed9efbd42e">new_order</a> (self, str code, float size, Optional[float] limit=None, Optional[float] stop=None, Optional[float] sl=None, Optional[float] tp=None, object tag=None, *Optional[<a class="el" href="classsrc_1_1BackcastPro_1_1trade_1_1Trade.html">Trade</a>] trade=None)</td></tr>
 <tr class="separator:af23a92edeb7e9e93868937ed9efbd42e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ebf2a73b0453082fd1cd0f163b1e310" id="r_a5ebf2a73b0453082fd1cd0f163b1e310"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#a5ebf2a73b0453082fd1cd0f163b1e310">last_price</a> (self, str code)</td></tr>
@@ -172,6 +174,8 @@ $(document).ready(function(){initNavTree('classsrc_1_1BackcastPro_1_1__broker_1_
 <tr class="separator:a889956aeb04fb6eb8af0379e9e137f39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae1e9973b7e22709cc308178327a801af" id="r_ae1e9973b7e22709cc308178327a801af"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#ae1e9973b7e22709cc308178327a801af">_current_time</a></td></tr>
 <tr class="separator:ae1e9973b7e22709cc308178327a801af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad54bccc201ff94ece13be7d161b29620" id="r_ad54bccc201ff94ece13be7d161b29620"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#ad54bccc201ff94ece13be7d161b29620">_on_trade_event</a></td></tr>
+<tr class="separator:ad54bccc201ff94ece13be7d161b29620"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">詳解</h2>
 <div class="textblock"><pre class="fragment">バックテストにおける証券取引の実行、注文管理、ポジション管理、損益計算を担当します。
@@ -761,6 +765,40 @@ In long positions, the adjusted price is a fraction higher, and vice versa.
 
 </div>
 </div>
+<a id="a9eee3cb3b7b6ad95b6e9968f808483d6" name="a9eee3cb3b7b6ad95b6e9968f808483d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9eee3cb3b7b6ad95b6e9968f808483d6">&#9670;&#160;</a></span>set_on_trade_event()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> None src.BackcastPro._broker._Broker.set_on_trade_event </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>self</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Optional[Callable[[str, <a class="el" href="classsrc_1_1BackcastPro_1_1trade_1_1Trade.html">Trade</a>], None]]&#160;</td>
+          <td class="paramname"><em>callback</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">取引イベント発生時のコールバックを設定
+
+Args:
+    callback: (event_type, trade) を受け取るコールバック関数
+              event_type: 'BUY' または 'SELL'
+              trade: Tradeインスタンス
+</pre> 
+</div>
+</div>
 <h2 class="groupheader">メンバ詳解</h2>
 <a id="aaf4097fa420f50def8f466363b667538" name="aaf4097fa420f50def8f466363b667538"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaf4097fa420f50def8f466363b667538">&#9670;&#160;</a></span>_cash</h2>
@@ -949,6 +987,28 @@ In long positions, the adjusted price is a fraction higher, and vice versa.
       <table class="memname">
         <tr>
           <td class="memname">src.BackcastPro._broker._Broker._leverage</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad54bccc201ff94ece13be7d161b29620" name="ad54bccc201ff94ece13be7d161b29620"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad54bccc201ff94ece13be7d161b29620">&#9670;&#160;</a></span>_on_trade_event</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">src.BackcastPro._broker._Broker._on_trade_event</td>
         </tr>
       </table>
   </td>

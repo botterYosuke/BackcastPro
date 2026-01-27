@@ -10,7 +10,9 @@ var namespacesrc_1_1BackcastPro_1_1api =
     [ "db_stocks_daily", "namespacesrc_1_1BackcastPro_1_1api_1_1db__stocks__daily.html", "namespacesrc_1_1BackcastPro_1_1api_1_1db__stocks__daily" ],
     [ "db_stocks_info", "namespacesrc_1_1BackcastPro_1_1api_1_1db__stocks__info.html", "namespacesrc_1_1BackcastPro_1_1api_1_1db__stocks__info" ],
     [ "lib", "namespacesrc_1_1BackcastPro_1_1api_1_1lib.html", "namespacesrc_1_1BackcastPro_1_1api_1_1lib" ],
+    [ "state_publisher", "namespacesrc_1_1BackcastPro_1_1api_1_1state__publisher.html", "namespacesrc_1_1BackcastPro_1_1api_1_1state__publisher" ],
     [ "stocks_board", "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__board.html", "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__board" ],
     [ "stocks_info", "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__info.html", "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__info" ],
-    [ "stocks_price", "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price.html", "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price" ]
+    [ "stocks_price", "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price.html", "namespacesrc_1_1BackcastPro_1_1api_1_1stocks__price" ],
+    [ "trade_event_publisher", "namespacesrc_1_1BackcastPro_1_1api_1_1trade__event__publisher.html", "namespacesrc_1_1BackcastPro_1_1api_1_1trade__event__publisher" ]
 ];

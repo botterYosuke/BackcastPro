@@ -8,6 +8,9 @@ var searchData=
   ['tp_5',['tp',['../classsrc_1_1BackcastPro_1_1order_1_1Order.html#af8090bf46da3e840983c610dbba99220',1,'src.BackcastPro.order.Order.tp()'],['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#aedc1d94b5dd2c0074b73c9efe5c66527',1,'src.BackcastPro.trade.Trade.tp(self)'],['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html#a67e7ea51ddee7fa7879f20eb137172cc',1,'src.BackcastPro.trade.Trade.tp(self, float price)']]],
   ['trade_6',['Trade',['../classsrc_1_1BackcastPro_1_1trade_1_1Trade.html',1,'src::BackcastPro::trade']]],
   ['trade_2epy_7',['trade.py',['../trade_8py.html',1,'']]],
-  ['trades_8',['trades',['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#ada36aaeda81cf7cc594bed138e3f6174',1,'src.BackcastPro._broker._Broker.trades'],['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a05005e4438f71a6971f4bc1fc764001e',1,'src.BackcastPro.backtest.Backtest.trades()']]],
-  ['trades_5fto_5fmarkers_9',['trades_to_markers',['../namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#a42835bf733e507666552d143c2dff0d3',1,'src::BackcastPro::api::chart']]]
+  ['trade_5fevent_8',['trade_event',['../classsrc_1_1BackcastPro_1_1api_1_1trade__event__publisher_1_1TradeEventPublisher.html#a34db9da663ac7e8e3b6501ea649790f6',1,'src::BackcastPro::api::trade_event_publisher::TradeEventPublisher']]],
+  ['trade_5fevent_5fpublisher_2epy_9',['trade_event_publisher.py',['../trade__event__publisher_8py.html',1,'']]],
+  ['tradeeventpublisher_10',['TradeEventPublisher',['../classsrc_1_1BackcastPro_1_1api_1_1trade__event__publisher_1_1TradeEventPublisher.html',1,'src::BackcastPro::api::trade_event_publisher']]],
+  ['trades_11',['trades',['../classsrc_1_1BackcastPro_1_1backtest_1_1Backtest.html#a05005e4438f71a6971f4bc1fc764001e',1,'src.BackcastPro.backtest.Backtest.trades()'],['../classsrc_1_1BackcastPro_1_1__broker_1_1__Broker.html#ada36aaeda81cf7cc594bed138e3f6174',1,'src.BackcastPro._broker._Broker.trades']]],
+  ['trades_5fto_5fmarkers_12',['trades_to_markers',['../namespacesrc_1_1BackcastPro_1_1api_1_1chart.html#a42835bf733e507666552d143c2dff0d3',1,'src::BackcastPro::api::chart']]]
 ];
