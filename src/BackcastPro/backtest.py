@@ -768,7 +768,8 @@ class Backtest:
 
         AnyWidgetのレンダリングが不要。app.setup内や_game_loop内から
         直接呼び出してBroadcastChannelにメッセージを送信できる。
-        mo.output.replace() を使用して動的にiframeを出力する。
+        data属性を持つdiv要素を出力し、フロントエンドのMutationObserverで
+        検出してBroadcastChannelに送信する。
 
         Example:
             # _game_loop内で使用可能
@@ -778,7 +779,10 @@ class Backtest:
                     bt.publish_state_headless()  # 動的に出力
         """
         import json
+        import base64
+        import time
         import marimo as mo
+        from marimo._output.hypertext import Html
 
         # 状態データを準備
         positions: dict[str, int] = {}
@@ -800,20 +804,20 @@ class Backtest:
         }
 
         state_json = json.dumps(state)
-        script = f'''
-        <div style="display:none;">
-            <script>
-                const channel = new BroadcastChannel('backtest_channel');
-                channel.postMessage({{
-                    type: 'backtest_update',
-                    data: {state_json}
-                }});
-            </script>
-        </div>
-        '''
-        # mo.output.replace() で動的に出力（スレッドからでも動作）
-        iframe = mo.iframe(script, height="0px")
-        mo.output.replace(iframe)
+        state_b64 = base64.b64encode(state_json.encode()).decode()
+
+        unique_id = f"marimo-bc-{self._step_index}-{int(time.time() * 1000)}"
+
+        html = (
+            f'<marimo-broadcast '
+            f'id="{unique_id}" '
+            f'channel="backtest_channel" '
+            f'type="backtest_update" '
+            f'payload="{state_b64}" '
+            f'style="display:none;"></marimo-broadcast>'
+        )
+
+        mo.output.replace(Html(html))
 
     def publish_trade_event_headless(
         self,
@@ -834,7 +838,9 @@ class Backtest:
             tag: 取引タグ（オプション）
         """
         import json
+        import base64
         import marimo as mo
+        from marimo._output.hypertext import Html
 
         event = {
             "event_type": event_type,
@@ -845,20 +851,16 @@ class Backtest:
         }
 
         event_json = json.dumps(event)
-        script = f'''
-        <div style="display:none;">
-            <script>
-                const channel = new BroadcastChannel('trade_event_channel');
-                channel.postMessage({{
-                    type: 'trade_event',
-                    data: {event_json}
-                }});
-            </script>
-        </div>
-        '''
-        # mo.output.append() で動的に出力（スレッドからでも動作）
-        iframe = mo.iframe(script, height="0px")
-        mo.output.append(iframe)
+        event_b64 = base64.b64encode(event_json.encode()).decode()
+
+        # data属性を持つdiv要素を出力（MutationObserverで検出される）
+        html = (
+            f'<div data-marimo-broadcast="trade_event_channel" '
+            f'data-marimo-type="trade_event" '
+            f'data-marimo-payload="{event_b64}" '
+            f'style="display:none;"></div>'
+        )
+        mo.output.append(Html(html))
 
     def enable_headless_trade_events(self):
         """
