@@ -148,6 +148,144 @@ def df_to_lwc_volume(df: pd.DataFrame, tz: str = "Asia/Tokyo") -> list[dict]:
     return records
 
 
+def df_to_lwc_indicators(
+    df: pd.DataFrame,
+    indicator_columns: list[str],
+    tz: str = "Asia/Tokyo",
+) -> dict[str, list[dict]]:
+    """
+    DataFrameの指標列をLightweight Charts形式に変換
+
+    Args:
+        df: 指標列を含むDataFrame
+        indicator_columns: 指標列名のリスト（例: ['SMA_20', 'SMA_50']）
+        tz: 元データのタイムゾーン
+
+    Returns:
+        指標名をキーとし、Lightweight Charts形式のデータリストを値とする辞書
+        NaN値は自動的にスキップされる
+    """
+    import warnings
+
+    result = {}
+
+    for col_name in indicator_columns:
+        if col_name not in df.columns:
+            warnings.warn(
+                f"指標列 '{col_name}' が見つかりません。スキップします。",
+                UserWarning,
+                stacklevel=2
+            )
+            continue
+
+        series_data = []
+        for idx, row in df.iterrows():
+            value = row[col_name]
+            # NaN値はスキップ（SMAの初期値など）
+            if pd.isna(value):
+                continue
+
+            series_data.append({
+                "time": to_lwc_timestamp(idx, tz),
+                "value": float(value),
+            })
+
+        if series_data:  # 空でない場合のみ追加
+            result[col_name] = series_data
+        else:
+            warnings.warn(
+                f"指標列 '{col_name}' にデータがありません（すべてNaN）。スキップします。",
+                UserWarning,
+                stacklevel=2
+            )
+
+    return result
+
+
+def get_last_indicators(
+    df: pd.DataFrame,
+    indicator_columns: list[str],
+    tz: str = "Asia/Tokyo",
+) -> dict[str, dict]:
+    """
+    DataFrameの最後の指標値を取得
+
+    Args:
+        df: 指標列を含むDataFrame
+        indicator_columns: 指標列名のリスト
+        tz: 元データのタイムゾーン
+
+    Returns:
+        指標名をキーとし、最後の値を値とする辞書
+        NaN値の場合は空辞書を返す
+    """
+    if len(df) == 0:
+        return {}
+
+    last_row = df.iloc[-1]
+    idx = df.index[-1]
+    time_value = to_lwc_timestamp(idx, tz)
+
+    result = {}
+    for col_name in indicator_columns:
+        if col_name not in df.columns:
+            continue
+
+        value = last_row[col_name]
+        if not pd.isna(value):
+            result[col_name] = {
+                "time": time_value,
+                "value": float(value),
+            }
+
+    return result
+
+
+def prepare_indicator_options(
+    indicator_columns: list[str],
+    user_options: dict = None,
+) -> dict[str, dict]:
+    """
+    指標の表示オプションを準備
+
+    Args:
+        indicator_columns: 指標列名のリスト
+        user_options: ユーザー指定のオプション辞書
+
+    Returns:
+        指標名をキーとし、オプション辞書を値とする辞書
+    """
+    DEFAULT_INDICATOR_COLORS = [
+        "#2196F3",  # Blue
+        "#FFC107",  # Amber
+        "#9C27B0",  # Purple
+        "#4CAF50",  # Green
+        "#FF5722",  # Deep Orange
+        "#00BCD4",  # Cyan
+        "#E91E63",  # Pink
+        "#8BC34A",  # Light Green
+    ]
+
+    result = {}
+    user_options = user_options or {}
+
+    for i, col_name in enumerate(indicator_columns):
+        # デフォルトオプション
+        default_opts = {
+            "color": DEFAULT_INDICATOR_COLORS[i % len(DEFAULT_INDICATOR_COLORS)],
+            "lineWidth": 2,
+            "title": col_name,
+        }
+
+        # ユーザー指定のオプションでマージ
+        if col_name in user_options:
+            default_opts.update(user_options[col_name])
+
+        result[col_name] = default_opts
+
+    return result
+
+
 class LightweightChartWidget(anywidget.AnyWidget):
     """
     Lightweight Charts ローソク足チャートウィジェット
@@ -244,6 +382,7 @@ class LightweightChartWidget(anywidget.AnyWidget):
     const MODEL_VOLUME_KEY = '__lwcVolume';
     const MODEL_OBSERVER_KEY = '__lwcObserver';
     const MODEL_EL_KEY = '__lwcElement';
+    const MODEL_INDICATOR_SERIES_KEY = '__lwcIndicatorSeries';
 
     async function render({ model, el }) {
         // 既存のチャートがあるか確認（べき等性のため）
@@ -335,6 +474,9 @@ class LightweightChartWidget(anywidget.AnyWidget):
             model[MODEL_VOLUME_KEY] = volumeSeries;
         }
 
+        // インジケーターライン系列（Map で管理）
+        model[MODEL_INDICATOR_SERIES_KEY] = new Map();
+
         // 初期データ設定
         const data = model.get("data") || [];
         if (data.length > 0) {
@@ -362,6 +504,27 @@ class LightweightChartWidget(anywidget.AnyWidget):
         const markers = model.get("markers") || [];
         if (markers.length > 0) {
             candleSeries.setMarkers(markers);
+        }
+
+        // インジケーターライン系列の初期化
+        const indicatorOptions = model.get("indicator_options") || {};
+        const indicatorData = model.get("indicator_series") || {};
+
+        for (const [name, options] of Object.entries(indicatorOptions)) {
+            const lineSeries = chart.addLineSeries({
+                color: options.color || '#2196F3',
+                lineWidth: options.lineWidth || 2,
+                title: options.title || name,
+                lastValueVisible: true,
+                priceLineVisible: false,
+            });
+
+            model[MODEL_INDICATOR_SERIES_KEY].set(name, lineSeries);
+
+            // 初期データがあれば設定
+            if (indicatorData[name] && indicatorData[name].length > 0) {
+                lineSeries.setData(indicatorData[name]);
+            }
         }
 
         // データ全体が変更された時
@@ -396,6 +559,56 @@ class LightweightChartWidget(anywidget.AnyWidget):
         model.on("change:markers", () => {
             const newMarkers = model.get("markers") || [];
             candleSeries.setMarkers(newMarkers);
+        });
+
+        // インジケーターデータ変更時（全データ更新）
+        model.on("change:indicator_series", () => {
+            const newIndicatorData = model.get("indicator_series") || {};
+            const indicatorSeriesMap = model[MODEL_INDICATOR_SERIES_KEY];
+
+            if (!indicatorSeriesMap) return;
+
+            for (const [name, series] of indicatorSeriesMap.entries()) {
+                if (newIndicatorData[name] && newIndicatorData[name].length > 0) {
+                    series.setData(newIndicatorData[name]);
+                }
+            }
+        });
+
+        // インジケーターオプション変更時（系列再作成）
+        model.on("change:indicator_options", () => {
+            const newOptions = model.get("indicator_options") || {};
+            const indicatorSeriesMap = model[MODEL_INDICATOR_SERIES_KEY];
+
+            if (!indicatorSeriesMap) return;
+
+            // 古い系列を削除
+            for (const [name, series] of indicatorSeriesMap.entries()) {
+                if (!newOptions[name]) {
+                    chart.removeSeries(series);
+                    indicatorSeriesMap.delete(name);
+                }
+            }
+
+            // 新しい系列を追加
+            const indicatorData = model.get("indicator_series") || {};
+            for (const [name, options] of Object.entries(newOptions)) {
+                if (!indicatorSeriesMap.has(name)) {
+                    const lineSeries = chart.addLineSeries({
+                        color: options.color || '#2196F3',
+                        lineWidth: options.lineWidth || 2,
+                        title: options.title || name,
+                        lastValueVisible: true,
+                        priceLineVisible: false,
+                    });
+
+                    indicatorSeriesMap.set(name, lineSeries);
+
+                    if (indicatorData[name] && indicatorData[name].length > 0) {
+                        lineSeries.setData(indicatorData[name]);
+                    }
+                }
+            }
         });
 
         // 最後のバーのみ更新（差分更新）
@@ -478,6 +691,48 @@ class LightweightChartWidget(anywidget.AnyWidget):
             }
         });
 
+        // インジケーターの差分更新（RAFバッチング）
+        let pendingIndicators = {};
+        let indicatorRafId = null;
+
+        const flushPendingIndicators = () => {
+            if (isDisposed || !model[MODEL_CHART_KEY]) {
+                pendingIndicators = {};
+                indicatorRafId = null;
+                return;
+            }
+
+            try {
+                const indicatorSeriesMap = model[MODEL_INDICATOR_SERIES_KEY];
+                if (!indicatorSeriesMap) return;
+
+                for (const [name, data] of Object.entries(pendingIndicators)) {
+                    const series = indicatorSeriesMap.get(name);
+                    if (series && data && typeof data.time === 'number' && typeof data.value === 'number') {
+                        series.update(data);
+                    }
+                }
+            } catch (e) {
+                console.debug('Indicator update skipped (disposed):', e);
+            } finally {
+                pendingIndicators = {};
+                indicatorRafId = null;
+            }
+        };
+
+        model.on("change:last_indicators", () => {
+            if (isDisposed) return;
+
+            const newIndicators = model.get("last_indicators");
+            if (!newIndicators || Object.keys(newIndicators).length === 0) return;
+
+            pendingIndicators = { ...pendingIndicators, ...newIndicators };
+
+            if (indicatorRafId === null) {
+                indicatorRafId = requestAnimationFrame(flushPendingIndicators);
+            }
+        });
+
         // リスナー設定前に発生した last_bar の変更を適用
         // （チャート作成中にイベントが発火した場合への対処）
         const currentLastBar = model.get("last_bar");
@@ -509,6 +764,13 @@ class LightweightChartWidget(anywidget.AnyWidget):
             }
             pendingBar = null;
 
+            // インジケーター RAF をキャンセル
+            if (indicatorRafId !== null) {
+                cancelAnimationFrame(indicatorRafId);
+                indicatorRafId = null;
+            }
+            pendingIndicators = {};
+
             // model にチャートが存在しない場合はスキップ
             if (!model[MODEL_CHART_KEY]) {
                 return;
@@ -532,6 +794,7 @@ class LightweightChartWidget(anywidget.AnyWidget):
             delete model[MODEL_VOLUME_KEY];
             delete model[MODEL_OBSERVER_KEY];
             delete model[MODEL_EL_KEY];
+            delete model[MODEL_INDICATOR_SERIES_KEY];
         };
 
         return cleanup;
@@ -554,6 +817,9 @@ class LightweightChartWidget(anywidget.AnyWidget):
     last_bar = traitlets.Dict({}).tag(sync=True)
     last_bar_packed = traitlets.Bytes(b"").tag(sync=True)  # バイナリプロトコル用
     options = traitlets.Dict({}).tag(sync=True)
+    indicator_series = traitlets.Dict({}).tag(sync=True)  # 指標データ
+    indicator_options = traitlets.Dict({}).tag(sync=True)  # 指標表示オプション
+    last_indicators = traitlets.Dict({}).tag(sync=True)  # 差分更新用
 
     def update_bar_fast(self, bar: dict) -> None:
         """バイナリプロトコルで高速更新 (INP改善用)
@@ -698,6 +964,8 @@ def chart_by_df(
     code: str = None,
     tz: str = "Asia/Tokyo",
     visible_bars: int = 60,
+    indicators: list[str] = None,
+    indicator_options: dict = None,
 ) -> LightweightChartWidget:
     """
     株価データからLightweight Chartsチャートを作成
@@ -712,11 +980,14 @@ def chart_by_df(
         code: 銘柄コード（trades のフィルタリング用）
         tz: タイムゾーン（デフォルト: Asia/Tokyo）
         visible_bars: 初期表示するバー数（デフォルト: 60本≒約2か月）
+        indicators: 表示する指標列名のリスト（例: ['SMA_20', 'SMA_50']）
+        indicator_options: 指標の表示オプション辞書
 
     Returns:
         LightweightChartWidget: anywidget ベースのチャートウィジェット
     """
-    # データを整形
+    # データを整形（indicators用に元のdfを保持）
+    original_df = df.copy()
     df = _prepare_chart_df(df)
 
     # ウィジェット作成
@@ -737,6 +1008,11 @@ def chart_by_df(
     # 売買マーカー設定
     if trades:
         widget.markers = trades_to_markers(trades, code, show_tags, tz)
+
+    # 指標データ設定
+    if indicators:
+        widget.indicator_options = prepare_indicator_options(indicators, indicator_options)
+        widget.indicator_series = df_to_lwc_indicators(original_df, indicators, tz)
 
     return widget
 

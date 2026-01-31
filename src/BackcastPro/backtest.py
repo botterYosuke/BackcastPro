@@ -470,6 +470,8 @@ class Backtest:
         height: int = 500,
         show_tags: bool = True,
         visible_bars: int = 60,
+        indicators: list[str] = None,
+        indicator_options: dict = None,
     ):
         """
         現在時点までのローソク足チャートを生成（売買マーカー付き）
@@ -483,6 +485,8 @@ class Backtest:
             height: チャートの高さ
             show_tags: 売買理由（tag）をチャートに表示するか
             visible_bars: 初期表示するバー数（デフォルト: 60本≒約2か月）
+            indicators: 表示する指標列名のリスト（例: ['SMA_20', 'SMA_50']）
+            indicator_options: 指標の表示オプション辞書
 
         Returns:
             LightweightChartWidget
@@ -527,14 +531,19 @@ class Backtest:
 
             if needs_full_update:
                 # 全データ更新
-                from .api.chart import df_to_lwc_data, trades_to_markers
+                from .api.chart import df_to_lwc_data, trades_to_markers, df_to_lwc_indicators, prepare_indicator_options
                 widget.data = df_to_lwc_data(df)
                 widget.markers = trades_to_markers(all_trades, code, show_tags)
+
+                # 指標データ全更新
+                if indicators:
+                    widget.indicator_options = prepare_indicator_options(indicators, indicator_options)
+                    widget.indicator_series = df_to_lwc_indicators(df, indicators)
             else:
                 # 差分更新: last_bar_packed (バイナリ) と data の両方を更新
                 # last_bar_packed: JS側でリアルタイム更新用（change:last_bar_packedイベント）
                 # data: 同期が失われた場合のフォールバック用
-                from .api.chart import df_to_lwc_data, get_last_bar, trades_to_markers
+                from .api.chart import df_to_lwc_data, get_last_bar, trades_to_markers, get_last_indicators
                 bar = get_last_bar(df)
                 # バイナリプロトコルで高速更新 (INP改善)
                 if hasattr(widget, "update_bar_fast"):
@@ -543,6 +552,12 @@ class Backtest:
                     widget.last_bar = bar
                 widget.data = df_to_lwc_data(df)  # フォールバック用に全データも更新
                 widget.markers = trades_to_markers(all_trades, code, show_tags)
+
+                # 指標データ差分更新
+                if indicators:
+                    last_ind = get_last_indicators(df, indicators)
+                    if last_ind:
+                        widget.last_indicators = last_ind
 
             self._chart_last_index[code] = current_idx
             return widget
@@ -558,6 +573,8 @@ class Backtest:
             title=f"{code} - {self.current_time}",
             code=code,
             visible_bars=visible_bars,
+            indicators=indicators,
+            indicator_options=indicator_options,
         )
 
         self._chart_widgets[code] = widget
