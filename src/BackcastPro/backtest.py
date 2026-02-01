@@ -802,7 +802,11 @@ class Backtest:
     # ヘッドレスパブリッシャーAPI（app.setup内でも動作可能）
     # =========================================================================
 
-    def publish_state_headless(self):
+    def publish_state_headless(
+        self,
+        status_label: str = "Backtest",
+        status_variant: str = "secondary",
+    ):
         """
         バックテスト状態をBroadcastChannelで公開（ヘッドレス版）
 
@@ -811,12 +815,16 @@ class Backtest:
         data属性を持つdiv要素を出力し、フロントエンドのMutationObserverで
         検出してBroadcastChannelに送信する。
 
+        Args:
+            status_label: HUDに表示するステータスラベル（例: "実行中", "停止中"）
+            status_variant: Badgeの色 ("default", "secondary", "destructive", "success", "outline")
+
         Example:
             # _game_loop内で使用可能
             def _game_loop():
                 while bt.is_finished == False:
                     bt.step()
-                    bt.publish_state_headless()  # 動的に出力
+                    bt.publish_state_headless(status_label="実行中", status_variant="success")
         """
         import json
         import base64
@@ -841,6 +849,8 @@ class Backtest:
             "closed_trades": len(self.closed_trades),
             "step_index": self._step_index,
             "total_steps": len(self.index) if hasattr(self, "index") else 0,
+            "status_label": status_label,
+            "status_variant": status_variant,
         }
 
         state_json = json.dumps(state)
