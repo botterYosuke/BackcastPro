@@ -306,22 +306,56 @@ class _Broker:
                 
                 adjusted_price_plus_commission = \
                     adjusted_price + self._commission(order.size, price) / abs(order.size)
-                
- 
-                # 注文サイズが比例的に指定された場合、
-                # マージンとスプレッド/手数料を考慮して、単位での真のサイズを事前計算
+
+                # 注文サイズが比例的に指定された場合の処理
                 size = order.size
                 if -1 < size < 1:
-                    size = copysign(int((self.margin_available * self._leverage * abs(size))
-                                        // adjusted_price_plus_commission), size)
-                    # 単一ユニットでも十分な現金/マージンがない
+                    if not self._hedging:
+                        # 同一銘柄の反対ポジションを取得
+                        opposite_position = sum(
+                            trade.size for trade in self.trades
+                            if trade.code == order.code and trade.is_long != order.is_long
+                        )
+
+                        # 同一銘柄の同方向ポジションを取得
+                        same_direction_position = sum(
+                            trade.size for trade in self.trades
+                            if trade.code == order.code and trade.is_long == order.is_long
+                        )
+
+                        if opposite_position:
+                            # 反対ポジションがある → 全クローズ
+                            size = -opposite_position
+                        elif same_direction_position:
+                            # 同方向ポジションがある → margin_availableで買い増し
+                            size = copysign(
+                                int((self.margin_available * self._leverage * abs(size))
+                                    // adjusted_price_plus_commission),
+                                size
+                            )
+                        else:
+                            # ポジションがない → 全資産で新規ポジション
+                            # margin_available ではなく equity を使用
+                            size = copysign(
+                                int((self.equity * self._leverage * abs(size))
+                                    // adjusted_price_plus_commission),
+                                size
+                            )
+                    else:
+                        # ヘッジングモードの場合は全資産ベースで計算
+                        size = copysign(
+                            int((self.equity * self._leverage * abs(size))
+                                // adjusted_price_plus_commission),
+                            size
+                        )
+
                     if not size:
                         warnings.warn(
                             f'{self._current_time}: ブローカーは相対サイズの注文を'
-                            f'不十分なマージンのためキャンセルしました。', category=UserWarning)
-                        # XXX: 注文はブローカーによってキャンセルされる？
+                            f'不十分な資産のためキャンセルしました。', category=UserWarning)
                         self.orders.remove(order)
                         continue
+
                 assert size == round(size)
                 need_size = int(size)
 
@@ -329,8 +363,8 @@ class _Broker:
                     # 既存の反対方向の取引をFIFOでクローズ/削減してポジションを埋める
                     # 既存の取引は調整価格でクローズされる（調整は購入時に既に行われているため）
                     for trade in list(self.trades):
-                        if trade.is_long == order.is_long:
-                            continue
+                        if trade.is_long == order.is_long or trade.code != order.code:
+                            continue  # 同方向 または 異なる銘柄 はスキップ
                         assert trade.size * order.size < 0
 
                         # 注文サイズがこの反対方向の既存取引より大きい場合、

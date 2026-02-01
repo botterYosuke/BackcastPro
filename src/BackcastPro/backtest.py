@@ -122,6 +122,7 @@ class Backtest:
         # チャートウィジェットキャッシュ（パフォーマンス最適化）
         self._chart_widgets: dict = {}
         self._chart_last_index: dict[str, int] = {}
+        self._chart_indicators: dict[str, tuple] = {}  # (indicators, indicator_options)
 
         # 戦略関数
         self._strategy: Optional[Callable[['Backtest'], None]] = None
@@ -347,6 +348,7 @@ class Backtest:
         # 明示的に指定された場合のみウィジェットをクリア
         if clear_chart_cache:
             self._chart_widgets = {}
+            self._chart_indicators = {}
         # 初期データ（最初の1行）でチャートをリセット
         self._current_data = {}
         if self._data:
@@ -497,6 +499,10 @@ class Backtest:
             else:
                 raise ValueError("複数銘柄がある場合はcodeを指定してください")
 
+        # indicators をキャッシュに保存（早期リターン前に）
+        if indicators:
+            self._chart_indicators[code] = (indicators, indicator_options)
+
         if not self._is_started or self._broker_instance is None:
             from .api.chart import LightweightChartWidget
             # キャッシュに登録して後から更新できるようにする
@@ -535,10 +541,12 @@ class Backtest:
                 widget.data = df_to_lwc_data(df)
                 widget.markers = trades_to_markers(all_trades, code, show_tags)
 
-                # 指標データ全更新
-                if indicators:
-                    widget.indicator_options = prepare_indicator_options(indicators, indicator_options)
-                    widget.indicator_series = df_to_lwc_indicators(df, indicators)
+                # 指標データ全更新（キャッシュからも取得を試みる）
+                effective_indicators = indicators or (self._chart_indicators.get(code, (None, None))[0])
+                effective_options = indicator_options or (self._chart_indicators.get(code, (None, None))[1])
+                if effective_indicators:
+                    widget.indicator_options = prepare_indicator_options(effective_indicators, effective_options)
+                    widget.indicator_series = df_to_lwc_indicators(df, effective_indicators)
             else:
                 # 差分更新: last_bar_packed (バイナリ) と data の両方を更新
                 # last_bar_packed: JS側でリアルタイム更新用（change:last_bar_packedイベント）
@@ -553,13 +561,17 @@ class Backtest:
                 widget.data = df_to_lwc_data(df)  # フォールバック用に全データも更新
                 widget.markers = trades_to_markers(all_trades, code, show_tags)
 
-                # 指標データ差分更新
-                if indicators:
-                    last_ind = get_last_indicators(df, indicators)
+                # 指標データ差分更新（キャッシュからも取得を試みる）
+                effective_indicators = indicators or (self._chart_indicators.get(code, (None, None))[0])
+                if effective_indicators:
+                    last_ind = get_last_indicators(df, effective_indicators)
                     if last_ind:
                         widget.last_indicators = last_ind
 
             self._chart_last_index[code] = current_idx
+            # indicators 設定をキャッシュ（update_chart用）
+            if indicators:
+                self._chart_indicators[code] = (indicators, indicator_options)
             return widget
 
         # 初回: 新規ウィジェット作成
@@ -579,6 +591,7 @@ class Backtest:
 
         self._chart_widgets[code] = widget
         self._chart_last_index[code] = current_idx
+        self._chart_indicators[code] = (indicators, indicator_options)
 
         return widget
 
@@ -626,6 +639,16 @@ class Backtest:
             from .api.chart import trades_to_markers
             all_trades = list(self._broker_instance.closed_trades) + list(self._broker_instance.trades)
             widget.markers = trades_to_markers(all_trades, code, show_tags=True)
+
+        # インジケーター更新（キャッシュから設定を取得）
+        if code in self._chart_indicators:
+            indicators, indicator_options = self._chart_indicators[code]
+            if indicators:
+                from .api.chart import df_to_lwc_indicators, prepare_indicator_options
+                widget.indicator_series = df_to_lwc_indicators(df, indicators)
+                # オプションが未設定の場合のみ設定
+                if not widget.indicator_options:
+                    widget.indicator_options = prepare_indicator_options(indicators, indicator_options)
 
     # =========================================================================
     # ステップ実行用プロパティ
