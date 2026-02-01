@@ -6,7 +6,12 @@
       "Bash(pnpm install)",
       "Bash(D:DocumentsBackcastPro.venvScriptspython.exe -m pytest D:DocumentsBackcastProteststest_achievements.py -v)",
       "Bash(powershell.exe -Command \"cd ''D:\\\\Documents\\\\BackcastPro''; .\\\\.venv\\\\Scripts\\\\python.exe -m pytest tests\\\\test_achievements.py -v\")",
-      "Bash(pushd \"D:\\\\Documents\\\\marimo\\\\frontend\")"
+      "Bash(pushd \"D:\\\\Documents\\\\marimo\\\\frontend\")",
+      "Bash(git -C \"D:/Documents/marimo\" show sasa/markdown:\"frontend/src/components/editor/renderers/cell-3d-wrapper.tsx\")",
+      "Bash(git -C \"D:/Documents/marimo\" show sasa/markdown:\"frontend/src/components/editor/renderers/cell-3d-wrapper.css\")"
+    ],
+    "additionalDirectories": [
+      "d:\\Documents\\BackcastPro"
     ]
   }
 }
