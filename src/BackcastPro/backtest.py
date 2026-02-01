@@ -60,10 +60,6 @@ class Backtest:
     `trade_on_close`が`True`の場合、成行注文は
     次のバーの始値ではなく、現在のバーの終値で約定されます。
 
-    `hedging`が`True`の場合、両方向の取引を同時に許可します。
-    `False`の場合、反対方向の注文は既存の取引を
-    [FIFO]方式で最初にクローズします。
-
     `exclusive_orders`が`True`の場合、各新しい注文は前の
     取引/ポジションを自動クローズし、各時点で最大1つの取引
     （ロングまたはショート）のみが有効になります。
@@ -81,7 +77,6 @@ class Backtest:
                 commission: Union[float, Tuple[float, float]] = .0,
                 margin: float = 1.,
                 trade_on_close=False,
-                hedging=False,
                 exclusive_orders=False,
                 finalize_trades=False,
                 ):
@@ -102,8 +97,7 @@ class Backtest:
         # 3. 後で残りの引数（おそらくdataなど）を渡すだけで_Brokerのインスタンスを作成できるようにする
         self._broker_factory = partial[_Broker](
             _Broker, cash=cash, spread=spread, commission=commission, margin=margin,
-            trade_on_close=trade_on_close, hedging=hedging,
-            exclusive_orders=exclusive_orders
+            trade_on_close=trade_on_close, exclusive_orders=exclusive_orders
         )
 
         self._results: Optional[pd.Series] = None

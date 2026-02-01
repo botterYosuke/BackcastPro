@@ -39,8 +39,6 @@ class _Broker:
         必要証拠金率（0 < margin <= 1）。レバレッジ = 1/margin として計算されます。
     trade_on_close : bool
         取引を終値で実行するかどうか。Trueの場合、次の始値ではなく現在の終値で取引します。
-    hedging : bool
-        ヘッジングモードの有効化。Trueの場合、反対方向のポジションを同時に保有できます。
     exclusive_orders : bool
         排他的注文モード。Trueの場合、新しい注文が前のポジションを自動的にクローズします。
     """
@@ -54,7 +52,7 @@ class _Broker:
     # 2. 保守性: 引数の順序を変更しても既存のコードが壊れない
     # 3. 可読性: 関数呼び出し時に何を渡しているかが分かりやすい
     def __init__(self, *, data, cash, spread, commission, margin,
-                 trade_on_close, hedging, exclusive_orders):
+                 trade_on_close, exclusive_orders):
         assert cash > 0, f"cash should be > 0, is {cash}"
         assert 0 < margin <= 1, f"margin should be between 0 and 1, is {margin}"
         self._data: dict[str, pd.DataFrame] = data
@@ -79,7 +77,6 @@ class _Broker:
         self._spread = spread
         self._leverage = 1 / margin
         self._trade_on_close = trade_on_close
-        self._hedging = hedging
         self._exclusive_orders = exclusive_orders
 
         self._equity = []
@@ -310,39 +307,31 @@ class _Broker:
                 # 注文サイズが比例的に指定された場合の処理
                 size = order.size
                 if -1 < size < 1:
-                    if not self._hedging:
-                        # 同一銘柄の反対ポジションを取得
-                        opposite_position = sum(
-                            trade.size for trade in self.trades
-                            if trade.code == order.code and trade.is_long != order.is_long
-                        )
+                    # 同一銘柄の反対ポジションを取得
+                    opposite_position = sum(
+                        trade.size for trade in self.trades
+                        if trade.code == order.code and trade.is_long != order.is_long
+                    )
 
-                        # 同一銘柄の同方向ポジションを取得
-                        same_direction_position = sum(
-                            trade.size for trade in self.trades
-                            if trade.code == order.code and trade.is_long == order.is_long
-                        )
+                    # 同一銘柄の同方向ポジションを取得
+                    same_direction_position = sum(
+                        trade.size for trade in self.trades
+                        if trade.code == order.code and trade.is_long == order.is_long
+                    )
 
-                        if opposite_position:
-                            # 反対ポジションがある → 全クローズ
-                            size = -opposite_position
-                        elif same_direction_position:
-                            # 同方向ポジションがある → margin_availableで買い増し
-                            size = copysign(
-                                int((self.margin_available * self._leverage * abs(size))
-                                    // adjusted_price_plus_commission),
-                                size
-                            )
-                        else:
-                            # ポジションがない → 全資産で新規ポジション
-                            # margin_available ではなく equity を使用
-                            size = copysign(
-                                int((self.equity * self._leverage * abs(size))
-                                    // adjusted_price_plus_commission),
-                                size
-                            )
+                    if opposite_position:
+                        # 反対ポジションがある → 全クローズ
+                        size = -opposite_position
+                    elif same_direction_position:
+                        # 同方向ポジションがある → margin_availableで買い増し
+                        size = copysign(
+                            int((self.margin_available * self._leverage * abs(size))
+                                // adjusted_price_plus_commission),
+                            size
+                        )
                     else:
-                        # ヘッジングモードの場合は全資産ベースで計算
+                        # ポジションがない → 全資産で新規ポジション
+                        # margin_available ではなく equity を使用
                         size = copysign(
                             int((self.equity * self._leverage * abs(size))
                                 // adjusted_price_plus_commission),
@@ -359,27 +348,26 @@ class _Broker:
                 assert size == round(size)
                 need_size = int(size)
 
-                if not self._hedging:
-                    # 既存の反対方向の取引をFIFOでクローズ/削減してポジションを埋める
-                    # 既存の取引は調整価格でクローズされる（調整は購入時に既に行われているため）
-                    for trade in list(self.trades):
-                        if trade.is_long == order.is_long or trade.code != order.code:
-                            continue  # 同方向 または 異なる銘柄 はスキップ
-                        assert trade.size * order.size < 0
+                # 既存の反対方向の取引をFIFOでクローズ/削減してポジションを埋める
+                # 既存の取引は調整価格でクローズされる（調整は購入時に既に行われているため）
+                for trade in list(self.trades):
+                    if trade.is_long == order.is_long or trade.code != order.code:
+                        continue  # 同方向 または 異なる銘柄 はスキップ
+                    assert trade.size * order.size < 0
 
-                        # 注文サイズがこの反対方向の既存取引より大きい場合、
-                        # 完全にクローズされる
-                        if abs(need_size) >= abs(trade.size):
-                            self._close_trade(trade, price, self._current_time)
-                            need_size += trade.size
-                        else:
-                            # 既存の取引が新しい注文より大きい場合、
-                            # 部分的にのみクローズされる
-                            self._reduce_trade(trade, price, need_size, self._current_time)
-                            need_size = 0
+                    # 注文サイズがこの反対方向の既存取引より大きい場合、
+                    # 完全にクローズされる
+                    if abs(need_size) >= abs(trade.size):
+                        self._close_trade(trade, price, self._current_time)
+                        need_size += trade.size
+                    else:
+                        # 既存の取引が新しい注文より大きい場合、
+                        # 部分的にのみクローズされる
+                        self._reduce_trade(trade, price, need_size, self._current_time)
+                        need_size = 0
 
-                        if not need_size:
-                            break
+                    if not need_size:
+                        break
 
                 # 注文をカバーするのに十分な流動性がない場合、ブローカーはそれをキャンセルする
                 if abs(need_size) * adjusted_price_plus_commission > \
