@@ -48,32 +48,36 @@ bt.buy(size省略) の場合:
 
 ### 修正1: 相対サイズ処理の変更
 
-[_broker.py:310-326](_broker.py#L310-L326) を以下のように変更:
+[_broker.py:307-346](_broker.py#L307-L346) を以下のように変更:
 
 ```python
 # 注文サイズが比例的に指定された場合の処理
 size = order.size
 if -1 < size < 1:
-    if not self._hedging:
-        # 同一銘柄の反対ポジションを取得
-        opposite_position = sum(
-            trade.size for trade in self.trades
-            if trade.code == order.code and trade.is_long != order.is_long
-        )
+    # 同一銘柄の反対ポジションを取得
+    opposite_position = sum(
+        trade.size for trade in self.trades
+        if trade.code == order.code and trade.is_long != order.is_long
+    )
 
-        if opposite_position:
-            # 反対ポジションがある → 全クローズ
-            size = -opposite_position
-        else:
-            # 反対ポジションがない → 全資産で新規ポジション
-            # margin_available ではなく equity を使用
-            size = copysign(
-                int((self.equity * self._leverage * abs(size))
-                    // adjusted_price_plus_commission),
-                size
-            )
+    # 同一銘柄の同方向ポジションを取得
+    same_direction_position = sum(
+        trade.size for trade in self.trades
+        if trade.code == order.code and trade.is_long == order.is_long
+    )
+
+    if opposite_position:
+        # 反対ポジションがある → 全クローズ
+        size = -opposite_position
+    elif same_direction_position:
+        # 同方向ポジションがある → margin_availableで買い増し
+        size = copysign(
+            int((self.margin_available * self._leverage * abs(size))
+                // adjusted_price_plus_commission),
+            size
+        )
     else:
-        # ヘッジングモードの場合は全資産ベースで計算
+        # ポジションがない → 全資産で新規ポジション
         size = copysign(
             int((self.equity * self._leverage * abs(size))
                 // adjusted_price_plus_commission),
@@ -116,11 +120,11 @@ for trade in list(self.trades):
 
 ## 部分的な相対サイズの扱い
 
-| 指定 | 反対ポジションあり | 反対ポジションなし |
-|------|-------------------|-------------------|
-| `size省略` (0.9999) | 全クローズ | 全力新規 |
-| `size=0.5` | **全クローズ** | 資産の50%で新規 |
-| `size=0.3` | **全クローズ** | 資産の30%で新規 |
+| 指定 | 反対ポジションあり | 同方向ポジションあり | ポジションなし |
+|------|-------------------|---------------------|---------------|
+| `size省略` (0.9999) | 全クローズ | margin_availableで買い増し | 全力新規 |
+| `size=0.5` | **全クローズ** | margin_availableの50%で買い増し | 資産の50%で新規 |
+| `size=0.3` | **全クローズ** | margin_availableの30%で買い増し | 資産の30%で新規 |
 
 **設計判断**: 反対ポジションがある場合、相対サイズの割合に関わらず**全クローズ**を優先する。
 
@@ -377,8 +381,9 @@ bt.sell(code=code)
 | L332 | 銘柄フィルタ追加（バグ修正） |
 
 - **破壊的変更**: 従来「余りマージンの99.99%」だった動作が「全力」に変わる
-- hedging モードでも `equity` ベースに変更
+- **ヘッジングモード廃止**: `hedging` パラメータを削除し、常にFIFO方式で動作
 - マルチシンボル環境での動作が正しくなる（L332修正）
+- 同方向ポジション追加時は `margin_available` で買い増し可能に
 
 ## リスクと対策
 
@@ -387,11 +392,13 @@ bt.sell(code=code)
 | 既存コードの動作変更 | 十分なテストカバレッジ |
 | 意図しない全力買い | ドキュメント更新で明記 |
 | L332修正の副作用 | マルチシンボルテストで検証 |
-| 同方向追加がキャンセル | 仕様として明記（絶対サイズ使用を推奨） |
+| hedging=True使用コード | 破壊的変更として明記 |
 
 ## 修正範囲サマリ
 
-| 行 | 修正内容 | 重要度 |
-|----|----------|--------|
-| L310-326 | 相対サイズ処理を変更 | 主目的 |
-| L332 | `trade.code != order.code` チェック追加 | バグ修正 |
+| ファイル | 変更内容 | 重要度 |
+|----------|----------|--------|
+| `_broker.py` L307-346 | 相対サイズ処理を変更（同方向買い増し追加） | 主目的 |
+| `_broker.py` L351-370 | FIFO処理の銘柄フィルタ追加 | バグ修正 |
+| `_broker.py` | `hedging` パラメータと `_hedging` 属性を削除 | 簡略化 |
+| `backtest.py` | `hedging` パラメータを削除 | 簡略化 |
