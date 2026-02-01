@@ -1,0 +1,1633 @@
+
+<!doctype html>
+<html lang="ja" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="トレーディング戦略のためのPythonバックテストライブラリ">
+      
+      
+      
+        <link rel="canonical" href="https://botteryosuke.github.io/BackcastPro/plans/fix-relative-size-option-c/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../img/logo.drawio.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>修正計画: 相対サイズの解釈変更（案C） - BackcastPro</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+JP:300,300i,400,400i,700,700i%7CFira+Code:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans JP";--md-code-font:"Fira Code"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#c" class="md-skip">
+          コンテンツにスキップ
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="ヘッダー">
+    <a href="../.." title="BackcastPro" class="md-header__button md-logo" aria-label="BackcastPro" data-md-component="logo">
+      
+  <img src="../../img/logo.drawio.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BackcastPro
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              修正計画: 相対サイズの解釈変更（案C）
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue"  aria-label="ダークモードに切り替え"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="ダークモードに切り替え" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="blue"  aria-label="ライトモードに切り替え"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="ライトモードに切り替え" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="検索" placeholder="検索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="検索">
+        
+        <button type="reset" class="md-search__icon md-icon" title="クリア" aria-label="クリア" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            検索を初期化
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/botterYosuke/BackcastPro" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    botterYosuke/BackcastPro
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="タブ" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  ホーム
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorial/" class="md-tabs__link">
+          
+  
+  
+  ユーザーガイド
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../developer-guide/" class="md-tabs__link">
+          
+  
+  
+  開発者向け
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../privacy/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  プライバシーポリシー
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="ナビゲーション" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="BackcastPro" class="md-nav__button md-logo" aria-label="BackcastPro" data-md-component="logo">
+      
+  <img src="../../img/logo.drawio.svg" alt="logo">
+
+    </a>
+    BackcastPro
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/botterYosuke/BackcastPro" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    botterYosuke/BackcastPro
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ホーム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ユーザーガイド
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ユーザーガイド
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    チュートリアル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    トラブルシューティング
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発者向け
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    開発者向け
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発者ガイド
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../execution-logic-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    約定ロジック分析
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-to-deploy-to-PyPI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyPIデプロイ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../privacy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    プライバシーポリシー
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        問題の概要
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#c_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正方針: 案C
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="修正方針: 案C">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        新しいロジック
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        期待動作
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正箇所
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="修正箇所">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#srcbackcastpro_brokerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ファイル: src/BackcastPro/_broker.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正1: 相対サイズ処理の変更
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-fifo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正2: 既存のFIFOクローズ処理に銘柄フィルタ追加（重大バグ修正）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        部分的な相対サイズの扱い
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        同方向ポジション追加時の動作
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="同方向ポジション追加時の動作">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#30030-btbuy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        例: 300株ロング保有中（30%使用）に bt.buy() 実行
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計判断
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        動作まとめ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        案Aとの違い
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="案Aとの違い">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        具体例
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        検証方法
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="検証方法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ユニットテスト
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        手動テスト
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backcastpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        backcast.py の簡略化確認
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装ステップ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        影響範囲
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        リスクと対策
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修正範囲サマリ
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="c">修正計画: 相対サイズの解釈変更（案C）<a class="headerlink" href="#c" title="Permanent link">&para;</a></h1>
+<h2 id="_1">問題の概要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p><code>bt.sell()</code> または <code>bt.buy()</code> で <code>size</code> を省略（相対サイズ=0.9999）した場合、反対ポジションを保有していてもクローズされず、マージン不足でキャンセルされる。</p>
+<h2 id="c_1">修正方針: 案C<a class="headerlink" href="#c_1" title="Permanent link">&para;</a></h2>
+<p>相対サイズ（-1 &lt; size &lt; 1）の解釈を根本的に変更する。</p>
+<table>
+<thead>
+<tr>
+<th>従来の解釈</th>
+<th>新しい解釈（案C）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「利用可能マージンの99.99%」</td>
+<td>「全ポジションクローズまたは全力買い/売り」</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_2">新しいロジック<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>bt.sell(size省略) の場合:
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  1. 同一銘柄のロングポジションあり？
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>     → Yes: 全ロングをクローズ
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>     → No:  全資産で新規空売り
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>bt.buy(size省略) の場合:
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  1. 同一銘柄のショートポジションあり？
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>     → Yes: 全ショートをクローズ
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>     → No:  全資産で新規買い
+</span></code></pre></div>
+<h2 id="_3">期待動作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>条件</th>
+<th>動作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sell(size省略)</code> &amp; ロング保有</td>
+<td>全ロングクローズ</td>
+</tr>
+<tr>
+<td><code>sell(size省略)</code> &amp; 保有なし</td>
+<td>全資産で新規ショート</td>
+</tr>
+<tr>
+<td><code>sell(size省略)</code> &amp; ショート保有</td>
+<td><code>margin_available</code>で売り増し</td>
+</tr>
+<tr>
+<td><code>buy(size省略)</code> &amp; ショート保有</td>
+<td>全ショートクローズ</td>
+</tr>
+<tr>
+<td><code>buy(size省略)</code> &amp; 保有なし</td>
+<td>全資産で新規ロング</td>
+</tr>
+<tr>
+<td><code>buy(size省略)</code> &amp; ロング保有</td>
+<td><code>margin_available</code>で買い増し</td>
+</tr>
+<tr>
+<td><code>sell(size=50)</code> &amp; 100株ロング</td>
+<td>50株クローズ</td>
+</tr>
+<tr>
+<td><code>sell(size=200)</code> &amp; 100株ロング</td>
+<td>100株クローズ + 100株新規ショート</td>
+</tr>
+<tr>
+<td><code>buy(size=200)</code> &amp; 100株ロング</td>
+<td>200株追加（合計300株）</td>
+</tr>
+<tr>
+<td><code>sell(size=200)</code> &amp; 100株ショート</td>
+<td>200株追加（合計-300株）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_4">修正箇所<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="srcbackcastpro_brokerpy">ファイル: <code>src/BackcastPro/_broker.py</code><a class="headerlink" href="#srcbackcastpro_brokerpy" title="Permanent link">&para;</a></h3>
+<h3 id="1">修正1: 相対サイズ処理の変更<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
+<p><a href="_broker.py#L307-L346">_broker.py:307-346</a> を以下のように変更:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># 注文サイズが比例的に指定された場合の処理</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">size</span> <span class="o">=</span> <span class="n">order</span><span class="o">.</span><span class="n">size</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="c1"># 同一銘柄の反対ポジションを取得</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">opposite_position</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="n">trade</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">trade</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trades</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="k">if</span> <span class="n">trade</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">order</span><span class="o">.</span><span class="n">code</span> <span class="ow">and</span> <span class="n">trade</span><span class="o">.</span><span class="n">is_long</span> <span class="o">!=</span> <span class="n">order</span><span class="o">.</span><span class="n">is_long</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="p">)</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="c1"># 同一銘柄の同方向ポジションを取得</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">same_direction_position</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="n">trade</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">trade</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trades</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="k">if</span> <span class="n">trade</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">order</span><span class="o">.</span><span class="n">code</span> <span class="ow">and</span> <span class="n">trade</span><span class="o">.</span><span class="n">is_long</span> <span class="o">==</span> <span class="n">order</span><span class="o">.</span><span class="n">is_long</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="p">)</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="k">if</span> <span class="n">opposite_position</span><span class="p">:</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>        <span class="c1"># 反対ポジションがある → 全クローズ</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>        <span class="n">size</span> <span class="o">=</span> <span class="o">-</span><span class="n">opposite_position</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="k">elif</span> <span class="n">same_direction_position</span><span class="p">:</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>        <span class="c1"># 同方向ポジションがある → margin_availableで買い増し</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>        <span class="n">size</span> <span class="o">=</span> <span class="n">copysign</span><span class="p">(</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>            <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_available</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_leverage</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">size</span><span class="p">))</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>                <span class="o">//</span> <span class="n">adjusted_price_plus_commission</span><span class="p">),</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>            <span class="n">size</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>        <span class="p">)</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>        <span class="c1"># ポジションがない → 全資産で新規ポジション</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>        <span class="n">size</span> <span class="o">=</span> <span class="n">copysign</span><span class="p">(</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>            <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">equity</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_leverage</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">size</span><span class="p">))</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>                <span class="o">//</span> <span class="n">adjusted_price_plus_commission</span><span class="p">),</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>            <span class="n">size</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>        <span class="p">)</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">size</span><span class="p">:</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_time</span><span class="si">}</span><span class="s1">: ブローカーは相対サイズの注文を&#39;</span>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>            <span class="sa">f</span><span class="s1">&#39;不十分な資産のためキャンセルしました。&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>        <span class="k">continue</span>
+</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>
+</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a><span class="k">assert</span> <span class="n">size</span> <span class="o">==</span> <span class="nb">round</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a><span class="n">need_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="2-fifo">修正2: 既存のFIFOクローズ処理に銘柄フィルタ追加（重大バグ修正）<a class="headerlink" href="#2-fifo" title="Permanent link">&para;</a></h3>
+<p><a href="_broker.py#L331-L333">_broker.py:331-333</a> の既存コードに銘柄チェックが欠如:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># 現在のコード（バグ）</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">trade</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trades</span><span class="p">):</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="k">if</span> <span class="n">trade</span><span class="o">.</span><span class="n">is_long</span> <span class="o">==</span> <span class="n">order</span><span class="o">.</span><span class="n">is_long</span><span class="p">:</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>        <span class="k">continue</span>  <span class="c1"># ← trade.code のチェックがない！</span>
+</span></code></pre></div>
+<p><strong>修正後:</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">for</span> <span class="n">trade</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trades</span><span class="p">):</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="k">if</span> <span class="n">trade</span><span class="o">.</span><span class="n">is_long</span> <span class="o">==</span> <span class="n">order</span><span class="o">.</span><span class="n">is_long</span> <span class="ow">or</span> <span class="n">trade</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="n">order</span><span class="o">.</span><span class="n">code</span><span class="p">:</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="k">continue</span>  <span class="c1"># 同方向 または 異なる銘柄 はスキップ</span>
+</span></code></pre></div>
+<blockquote>
+<p>⚠️ <strong>マルチシンボル環境で異なる銘柄のポジションを誤ってクローズするリスクを防止</strong></p>
+</blockquote>
+<hr />
+<h2 id="_5">部分的な相対サイズの扱い<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>指定</th>
+<th>反対ポジションあり</th>
+<th>同方向ポジションあり</th>
+<th>ポジションなし</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>size省略</code> (0.9999)</td>
+<td>全クローズ</td>
+<td>margin_availableで買い増し</td>
+<td>全力新規</td>
+</tr>
+<tr>
+<td><code>size=0.5</code></td>
+<td><strong>全クローズ</strong></td>
+<td>margin_availableの50%で買い増し</td>
+<td>資産の50%で新規</td>
+</tr>
+<tr>
+<td><code>size=0.3</code></td>
+<td><strong>全クローズ</strong></td>
+<td>margin_availableの30%で買い増し</td>
+<td>資産の30%で新規</td>
+</tr>
+</tbody>
+</table>
+<p><strong>設計判断</strong>: 反対ポジションがある場合、相対サイズの割合に関わらず**全クローズ**を優先する。</p>
+<p>理由:
+- 「売り注文を出す」という意図は「ロングを手放したい」と解釈
+- 部分クローズが必要な場合は絶対サイズ（<code>size=50</code>）を使用すべき</p>
+<hr />
+<h2 id="_6">同方向ポジション追加時の動作<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<p>相対サイズで同方向のポジションを追加しようとした場合の動作:</p>
+<h3 id="30030-btbuy">例: 300株ロング保有中（30%使用）に <code>bt.buy()</code> 実行<a class="headerlink" href="#30030-btbuy" title="Permanent link">&para;</a></h3>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>1. opposite_position = 0（反対ポジションなし）
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>2. same_direction_position = 300（同方向ポジションあり）
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>3. size = margin_available * leverage / price で計算
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>   margin_available = equity - margin_used
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>                    = 100万円 - 30万円（既存300株分）
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>                    = 70万円
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>   size = 70万円 * 0.9999 / 1000円 ≒ 699株
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>4. FIFOクローズ処理: 反対ポジションなし → スキップ
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>5. need_size = 699（そのまま）
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>6. 結果: 300株 + 699株 = 999株のロングポジション
+</span></code></pre></div>
+<h3 id="_7">設計判断<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>動作</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>margin_availableで買い増し</strong></td>
+<td>余剰資金を活用して同方向ポジションを追加</td>
+</tr>
+</tbody>
+</table>
+<p><strong>注意事項:</strong>
+- <code>margin_available</code>が0の場合（全力買い済み）はワーニングが出て注文キャンセル
+- 部分的な相対サイズ（<code>size=0.5</code>）は<code>margin_available</code>の50%で買い増し</p>
+<h3 id="_8">動作まとめ<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>シナリオ</th>
+<th>相対サイズ指定時の動作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>反対ポジションあり</td>
+<td>全クローズ ✅</td>
+</tr>
+<tr>
+<td>ポジションなし</td>
+<td>全力買い/売り ✅</td>
+</tr>
+<tr>
+<td>同方向ポジションあり</td>
+<td><code>margin_available</code>で買い増し ✅</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="a">案Aとの違い<a class="headerlink" href="#a" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>状況</th>
+<th>案A</th>
+<th>案C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>反対ポジションあり</td>
+<td>全クローズ</td>
+<td>全クローズ</td>
+</tr>
+<tr>
+<td>反対ポジションなし</td>
+<td><code>margin_available</code> の99.99%</td>
+<td><code>equity</code> の99.99%（全力）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">具体例<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p><strong>前提</strong>: 100万円で1000株保有中、<code>bt.sell()</code> を実行</p>
+<table>
+<thead>
+<tr>
+<th>案</th>
+<th>計算基準</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>案A</td>
+<td><code>margin_available ≒ 0</code></td>
+<td>0株 → キャンセル</td>
+</tr>
+<tr>
+<td>案C</td>
+<td>反対ポジション1000株</td>
+<td>1000株クローズ</td>
+</tr>
+</tbody>
+</table>
+<p><strong>前提</strong>: 100万円でポジションなし、<code>bt.buy()</code> を実行</p>
+<table>
+<thead>
+<tr>
+<th>案</th>
+<th>計算基準</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>案A</td>
+<td><code>margin_available = 100万</code></td>
+<td>約1000株購入</td>
+</tr>
+<tr>
+<td>案C</td>
+<td><code>equity = 100万</code></td>
+<td>約1000株購入（同じ）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_10">検証方法<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<h3 id="_11">ユニットテスト<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># tests/test_relative_size_option_c.py</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_sell_closes_long_position</span><span class="p">():</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;相対サイズのsellでロングポジションが全クローズされる&quot;&quot;&quot;</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">)</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_data</span><span class="p">({</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">toyota_data</span><span class="p">})</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="n">initial_position</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="k">assert</span> <span class="n">initial_position</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">sell</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>  <span class="c1"># size省略</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c1"># 全クローズ</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_buy_closes_short_position</span><span class="p">():</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;相対サイズのbuyでショートポジションが全クローズされる&quot;&quot;&quot;</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">)</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_data</span><span class="p">({</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">toyota_data</span><span class="p">})</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">sell</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>    <span class="n">initial_position</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-5-28"><a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a>    <span class="k">assert</span> <span class="n">initial_position</span> <span class="o">&lt;</span> <span class="mi">0</span>
+</span><span id="__span-5-29"><a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>
+</span><span id="__span-5-30"><a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>  <span class="c1"># size省略</span>
+</span><span id="__span-5-31"><a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-32"><a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c1"># 全クローズ</span>
+</span><span id="__span-5-33"><a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a>
+</span><span id="__span-5-34"><a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a>
+</span><span id="__span-5-35"><a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_sell_full_short_when_no_position</span><span class="p">():</span>
+</span><span id="__span-5-36"><a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;ポジションなしで相対サイズsellは全力空売り&quot;&quot;&quot;</span>
+</span><span id="__span-5-37"><a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">)</span>
+</span><span id="__span-5-38"><a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_data</span><span class="p">({</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">toyota_data</span><span class="p">})</span>
+</span><span id="__span-5-39"><a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span id="__span-5-40"><a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a>
+</span><span id="__span-5-41"><a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span id="__span-5-42"><a id="__codelineno-5-42" name="__codelineno-5-42" href="#__codelineno-5-42"></a>
+</span><span id="__span-5-43"><a id="__codelineno-5-43" name="__codelineno-5-43" href="#__codelineno-5-43"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">sell</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>  <span class="c1"># size省略</span>
+</span><span id="__span-5-44"><a id="__codelineno-5-44" name="__codelineno-5-44" href="#__codelineno-5-44"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-45"><a id="__codelineno-5-45" name="__codelineno-5-45" href="#__codelineno-5-45"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span>  <span class="c1"># 空売りポジション</span>
+</span><span id="__span-5-46"><a id="__codelineno-5-46" name="__codelineno-5-46" href="#__codelineno-5-46"></a>
+</span><span id="__span-5-47"><a id="__codelineno-5-47" name="__codelineno-5-47" href="#__codelineno-5-47"></a>
+</span><span id="__span-5-48"><a id="__codelineno-5-48" name="__codelineno-5-48" href="#__codelineno-5-48"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_buy_full_long_when_no_position</span><span class="p">():</span>
+</span><span id="__span-5-49"><a id="__codelineno-5-49" name="__codelineno-5-49" href="#__codelineno-5-49"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;ポジションなしで相対サイズbuyは全力買い&quot;&quot;&quot;</span>
+</span><span id="__span-5-50"><a id="__codelineno-5-50" name="__codelineno-5-50" href="#__codelineno-5-50"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">)</span>
+</span><span id="__span-5-51"><a id="__codelineno-5-51" name="__codelineno-5-51" href="#__codelineno-5-51"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_data</span><span class="p">({</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">toyota_data</span><span class="p">})</span>
+</span><span id="__span-5-52"><a id="__codelineno-5-52" name="__codelineno-5-52" href="#__codelineno-5-52"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span id="__span-5-53"><a id="__codelineno-5-53" name="__codelineno-5-53" href="#__codelineno-5-53"></a>
+</span><span id="__span-5-54"><a id="__codelineno-5-54" name="__codelineno-5-54" href="#__codelineno-5-54"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span id="__span-5-55"><a id="__codelineno-5-55" name="__codelineno-5-55" href="#__codelineno-5-55"></a>
+</span><span id="__span-5-56"><a id="__codelineno-5-56" name="__codelineno-5-56" href="#__codelineno-5-56"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>  <span class="c1"># size省略</span>
+</span><span id="__span-5-57"><a id="__codelineno-5-57" name="__codelineno-5-57" href="#__codelineno-5-57"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-58"><a id="__codelineno-5-58" name="__codelineno-5-58" href="#__codelineno-5-58"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>  <span class="c1"># ロングポジション</span>
+</span><span id="__span-5-59"><a id="__codelineno-5-59" name="__codelineno-5-59" href="#__codelineno-5-59"></a>
+</span><span id="__span-5-60"><a id="__codelineno-5-60" name="__codelineno-5-60" href="#__codelineno-5-60"></a>
+</span><span id="__span-5-61"><a id="__codelineno-5-61" name="__codelineno-5-61" href="#__codelineno-5-61"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_partial_relative_size_still_closes_all</span><span class="p">():</span>
+</span><span id="__span-5-62"><a id="__codelineno-5-62" name="__codelineno-5-62" href="#__codelineno-5-62"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;size=0.5 でも反対ポジションがあれば全クローズ&quot;&quot;&quot;</span>
+</span><span id="__span-5-63"><a id="__codelineno-5-63" name="__codelineno-5-63" href="#__codelineno-5-63"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">)</span>
+</span><span id="__span-5-64"><a id="__codelineno-5-64" name="__codelineno-5-64" href="#__codelineno-5-64"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_data</span><span class="p">({</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">toyota_data</span><span class="p">})</span>
+</span><span id="__span-5-65"><a id="__codelineno-5-65" name="__codelineno-5-65" href="#__codelineno-5-65"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span id="__span-5-66"><a id="__codelineno-5-66" name="__codelineno-5-66" href="#__codelineno-5-66"></a>
+</span><span id="__span-5-67"><a id="__codelineno-5-67" name="__codelineno-5-67" href="#__codelineno-5-67"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-5-68"><a id="__codelineno-5-68" name="__codelineno-5-68" href="#__codelineno-5-68"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-69"><a id="__codelineno-5-69" name="__codelineno-5-69" href="#__codelineno-5-69"></a>    <span class="n">initial_position</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-5-70"><a id="__codelineno-5-70" name="__codelineno-5-70" href="#__codelineno-5-70"></a>    <span class="k">assert</span> <span class="n">initial_position</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</span><span id="__span-5-71"><a id="__codelineno-5-71" name="__codelineno-5-71" href="#__codelineno-5-71"></a>
+</span><span id="__span-5-72"><a id="__codelineno-5-72" name="__codelineno-5-72" href="#__codelineno-5-72"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">sell</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>  <span class="c1"># 部分的な相対サイズ（sell内部で-0.5に変換）</span>
+</span><span id="__span-5-73"><a id="__codelineno-5-73" name="__codelineno-5-73" href="#__codelineno-5-73"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-74"><a id="__codelineno-5-74" name="__codelineno-5-74" href="#__codelineno-5-74"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c1"># それでも全クローズ</span>
+</span><span id="__span-5-75"><a id="__codelineno-5-75" name="__codelineno-5-75" href="#__codelineno-5-75"></a>
+</span><span id="__span-5-76"><a id="__codelineno-5-76" name="__codelineno-5-76" href="#__codelineno-5-76"></a>
+</span><span id="__span-5-77"><a id="__codelineno-5-77" name="__codelineno-5-77" href="#__codelineno-5-77"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_multi_symbol_isolation</span><span class="p">():</span>
+</span><span id="__span-5-78"><a id="__codelineno-5-78" name="__codelineno-5-78" href="#__codelineno-5-78"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;異なる銘柄のポジションに影響しないことを確認&quot;&quot;&quot;</span>
+</span><span id="__span-5-79"><a id="__codelineno-5-79" name="__codelineno-5-79" href="#__codelineno-5-79"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">)</span>
+</span><span id="__span-5-80"><a id="__codelineno-5-80" name="__codelineno-5-80" href="#__codelineno-5-80"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_data</span><span class="p">({</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">toyota_data</span><span class="p">,</span> <span class="s2">&quot;6758&quot;</span><span class="p">:</span> <span class="n">sony_data</span><span class="p">})</span>
+</span><span id="__span-5-81"><a id="__codelineno-5-81" name="__codelineno-5-81" href="#__codelineno-5-81"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span id="__span-5-82"><a id="__codelineno-5-82" name="__codelineno-5-82" href="#__codelineno-5-82"></a>
+</span><span id="__span-5-83"><a id="__codelineno-5-83" name="__codelineno-5-83" href="#__codelineno-5-83"></a>    <span class="c1"># 両方の銘柄でポジション取得</span>
+</span><span id="__span-5-84"><a id="__codelineno-5-84" name="__codelineno-5-84" href="#__codelineno-5-84"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-5-85"><a id="__codelineno-5-85" name="__codelineno-5-85" href="#__codelineno-5-85"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;6758&quot;</span><span class="p">)</span>
+</span><span id="__span-5-86"><a id="__codelineno-5-86" name="__codelineno-5-86" href="#__codelineno-5-86"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-87"><a id="__codelineno-5-87" name="__codelineno-5-87" href="#__codelineno-5-87"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</span><span id="__span-5-88"><a id="__codelineno-5-88" name="__codelineno-5-88" href="#__codelineno-5-88"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;6758&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</span><span id="__span-5-89"><a id="__codelineno-5-89" name="__codelineno-5-89" href="#__codelineno-5-89"></a>
+</span><span id="__span-5-90"><a id="__codelineno-5-90" name="__codelineno-5-90" href="#__codelineno-5-90"></a>    <span class="c1"># 7203のみ売却</span>
+</span><span id="__span-5-91"><a id="__codelineno-5-91" name="__codelineno-5-91" href="#__codelineno-5-91"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">sell</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-5-92"><a id="__codelineno-5-92" name="__codelineno-5-92" href="#__codelineno-5-92"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-93"><a id="__codelineno-5-93" name="__codelineno-5-93" href="#__codelineno-5-93"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>  <span class="c1"># クローズ</span>
+</span><span id="__span-5-94"><a id="__codelineno-5-94" name="__codelineno-5-94" href="#__codelineno-5-94"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;6758&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>   <span class="c1"># 影響なし</span>
+</span><span id="__span-5-95"><a id="__codelineno-5-95" name="__codelineno-5-95" href="#__codelineno-5-95"></a>
+</span><span id="__span-5-96"><a id="__codelineno-5-96" name="__codelineno-5-96" href="#__codelineno-5-96"></a>
+</span><span id="__span-5-97"><a id="__codelineno-5-97" name="__codelineno-5-97" href="#__codelineno-5-97"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_multi_symbol_fifo_isolation</span><span class="p">():</span>
+</span><span id="__span-5-98"><a id="__codelineno-5-98" name="__codelineno-5-98" href="#__codelineno-5-98"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;FIFOクローズ処理が他銘柄に影響しないことを確認&quot;&quot;&quot;</span>
+</span><span id="__span-5-99"><a id="__codelineno-5-99" name="__codelineno-5-99" href="#__codelineno-5-99"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">)</span>
+</span><span id="__span-5-100"><a id="__codelineno-5-100" name="__codelineno-5-100" href="#__codelineno-5-100"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_data</span><span class="p">({</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">toyota_data</span><span class="p">,</span> <span class="s2">&quot;6758&quot;</span><span class="p">:</span> <span class="n">sony_data</span><span class="p">})</span>
+</span><span id="__span-5-101"><a id="__codelineno-5-101" name="__codelineno-5-101" href="#__codelineno-5-101"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span id="__span-5-102"><a id="__codelineno-5-102" name="__codelineno-5-102" href="#__codelineno-5-102"></a>
+</span><span id="__span-5-103"><a id="__codelineno-5-103" name="__codelineno-5-103" href="#__codelineno-5-103"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</span><span id="__span-5-104"><a id="__codelineno-5-104" name="__codelineno-5-104" href="#__codelineno-5-104"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;6758&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</span><span id="__span-5-105"><a id="__codelineno-5-105" name="__codelineno-5-105" href="#__codelineno-5-105"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-106"><a id="__codelineno-5-106" name="__codelineno-5-106" href="#__codelineno-5-106"></a>
+</span><span id="__span-5-107"><a id="__codelineno-5-107" name="__codelineno-5-107" href="#__codelineno-5-107"></a>    <span class="c1"># 7203を200株売り（100クローズ + 100新規ショート）</span>
+</span><span id="__span-5-108"><a id="__codelineno-5-108" name="__codelineno-5-108" href="#__codelineno-5-108"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">sell</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+</span><span id="__span-5-109"><a id="__codelineno-5-109" name="__codelineno-5-109" href="#__codelineno-5-109"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-110"><a id="__codelineno-5-110" name="__codelineno-5-110" href="#__codelineno-5-110"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">100</span>  <span class="c1"># ショートポジション</span>
+</span><span id="__span-5-111"><a id="__codelineno-5-111" name="__codelineno-5-111" href="#__codelineno-5-111"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;6758&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">100</span>   <span class="c1"># 影響なし</span>
+</span><span id="__span-5-112"><a id="__codelineno-5-112" name="__codelineno-5-112" href="#__codelineno-5-112"></a>
+</span><span id="__span-5-113"><a id="__codelineno-5-113" name="__codelineno-5-113" href="#__codelineno-5-113"></a>
+</span><span id="__span-5-114"><a id="__codelineno-5-114" name="__codelineno-5-114" href="#__codelineno-5-114"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_same_direction_relative_size_cancelled</span><span class="p">():</span>
+</span><span id="__span-5-115"><a id="__codelineno-5-115" name="__codelineno-5-115" href="#__codelineno-5-115"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;同方向ポジション保有中に相対サイズ買いはマージン不足でキャンセル&quot;&quot;&quot;</span>
+</span><span id="__span-5-116"><a id="__codelineno-5-116" name="__codelineno-5-116" href="#__codelineno-5-116"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">1_000_000</span><span class="p">)</span>
+</span><span id="__span-5-117"><a id="__codelineno-5-117" name="__codelineno-5-117" href="#__codelineno-5-117"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_data</span><span class="p">({</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">toyota_data</span><span class="p">})</span>
+</span><span id="__span-5-118"><a id="__codelineno-5-118" name="__codelineno-5-118" href="#__codelineno-5-118"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span id="__span-5-119"><a id="__codelineno-5-119" name="__codelineno-5-119" href="#__codelineno-5-119"></a>
+</span><span id="__span-5-120"><a id="__codelineno-5-120" name="__codelineno-5-120" href="#__codelineno-5-120"></a>    <span class="c1"># まず全力買い</span>
+</span><span id="__span-5-121"><a id="__codelineno-5-121" name="__codelineno-5-121" href="#__codelineno-5-121"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-5-122"><a id="__codelineno-5-122" name="__codelineno-5-122" href="#__codelineno-5-122"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-123"><a id="__codelineno-5-123" name="__codelineno-5-123" href="#__codelineno-5-123"></a>    <span class="n">initial_position</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-5-124"><a id="__codelineno-5-124" name="__codelineno-5-124" href="#__codelineno-5-124"></a>    <span class="k">assert</span> <span class="n">initial_position</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</span><span id="__span-5-125"><a id="__codelineno-5-125" name="__codelineno-5-125" href="#__codelineno-5-125"></a>
+</span><span id="__span-5-126"><a id="__codelineno-5-126" name="__codelineno-5-126" href="#__codelineno-5-126"></a>    <span class="c1"># 同方向に相対サイズで追加買い → マージン不足でキャンセル</span>
+</span><span id="__span-5-127"><a id="__codelineno-5-127" name="__codelineno-5-127" href="#__codelineno-5-127"></a>    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">warns</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="s2">&quot;不十分な資産&quot;</span><span class="p">):</span>
+</span><span id="__span-5-128"><a id="__codelineno-5-128" name="__codelineno-5-128" href="#__codelineno-5-128"></a>        <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>  <span class="c1"># size省略 = 相対サイズ</span>
+</span><span id="__span-5-129"><a id="__codelineno-5-129" name="__codelineno-5-129" href="#__codelineno-5-129"></a>        <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-130"><a id="__codelineno-5-130" name="__codelineno-5-130" href="#__codelineno-5-130"></a>
+</span><span id="__span-5-131"><a id="__codelineno-5-131" name="__codelineno-5-131" href="#__codelineno-5-131"></a>    <span class="c1"># ポジションは変わらない（注文がキャンセルされたため）</span>
+</span><span id="__span-5-132"><a id="__codelineno-5-132" name="__codelineno-5-132" href="#__codelineno-5-132"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">initial_position</span>
+</span></code></pre></div>
+<h3 id="_12">手動テスト<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<p><code>backcast.py</code> サンプルで以下を確認:
+1. BUY後にSELLでポジションがクローズされる
+2. デッドクロス時に <code>pos=0</code> になる
+3. 複数回のBUY/SELLサイクルが正常動作</p>
+<h3 id="backcastpy">backcast.py の簡略化確認<a class="headerlink" href="#backcastpy" title="Permanent link">&para;</a></h3>
+<p>修正後、現在のワークアラウンド:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 現在（L122-124）</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">for</span> <span class="n">trade</span> <span class="ow">in</span> <span class="n">bt</span><span class="o">.</span><span class="n">trades</span><span class="p">:</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="k">if</span> <span class="n">trade</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">code</span><span class="p">:</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>        <span class="n">trade</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></code></pre></div>
+<p>が以下に簡略化できることを確認:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 修正後</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">bt</span><span class="o">.</span><span class="n">sell</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="_13">実装ステップ<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
+<ol class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>_broker.py</code> L310-326 を修正（相対サイズ処理）</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>_broker.py</code> L332 を修正（銘柄フィルタ追加）</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> ユニットテストを作成・実行</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>backcast.py</code> で手動検証</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>backcast.py</code> のワークアラウンドを簡略化して動作確認</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 既存テストの回帰確認</li>
+</ol>
+<h2 id="_14">影響範囲<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>箇所</th>
+<th>変更内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L310-326</td>
+<td>相対サイズ処理を <code>equity</code> ベースに変更</td>
+</tr>
+<tr>
+<td>L332</td>
+<td>銘柄フィルタ追加（バグ修正）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>破壊的変更</strong>: 従来「余りマージンの99.99%」だった動作が「全力」に変わる</li>
+<li><strong>ヘッジングモード廃止</strong>: <code>hedging</code> パラメータを削除し、常にFIFO方式で動作</li>
+<li>マルチシンボル環境での動作が正しくなる（L332修正）</li>
+<li>同方向ポジション追加時は <code>margin_available</code> で買い増し可能に</li>
+</ul>
+<h2 id="_15">リスクと対策<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>リスク</th>
+<th>対策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>既存コードの動作変更</td>
+<td>十分なテストカバレッジ</td>
+</tr>
+<tr>
+<td>意図しない全力買い</td>
+<td>ドキュメント更新で明記</td>
+</tr>
+<tr>
+<td>L332修正の副作用</td>
+<td>マルチシンボルテストで検証</td>
+</tr>
+<tr>
+<td>hedging=True使用コード</td>
+<td>破壊的変更として明記</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_16">修正範囲サマリ<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>変更内容</th>
+<th>重要度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_broker.py</code> L307-346</td>
+<td>相対サイズ処理を変更（同方向買い増し追加）</td>
+<td>主目的</td>
+</tr>
+<tr>
+<td><code>_broker.py</code> L351-370</td>
+<td>FIFO処理の銘柄フィルタ追加</td>
+<td>バグ修正</td>
+</tr>
+<tr>
+<td><code>_broker.py</code></td>
+<td><code>hedging</code> パラメータと <code>_hedging</code> 属性を削除</td>
+<td>簡略化</td>
+</tr>
+<tr>
+<td><code>backtest.py</code></td>
+<td><code>hedging</code> パラメータを削除</td>
+<td>簡略化</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  ページトップへ戻る
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2024-2025 botterYosuke
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/botterYosuke/BackcastPro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://discord.gg/fzJTbpzE" target="_blank" rel="noopener" title="discord.gg" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/BackcastPro/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.code.annotate", "navigation.instant", "navigation.tabs", "navigation.top", "navigation.footer", "search.highlight", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
