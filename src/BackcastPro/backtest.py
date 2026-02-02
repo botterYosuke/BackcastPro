@@ -79,6 +79,7 @@ class Backtest:
                 trade_on_close=False,
                 exclusive_orders=False,
                 finalize_trades=False,
+                color_theme: str = "dark",
                 ):
 
         if not isinstance(spread, Number):
@@ -117,6 +118,17 @@ class Backtest:
         self._chart_widgets: dict = {}
         self._chart_last_index: dict[str, int] = {}
         self._chart_indicators: dict[str, tuple] = {}  # (indicators, indicator_options)
+
+        # チャートの色テーマ（バリデーション付き）
+        valid_themes = ("dark", "light")
+        if color_theme not in valid_themes:
+            warnings.warn(
+                f"Unknown color_theme '{color_theme}'. Using 'dark' as default. "
+                f"Valid themes: {valid_themes}",
+                stacklevel=2
+            )
+            color_theme = "dark"
+        self._color_theme: str = color_theme
 
         # 戦略関数
         self._strategy: Optional[Callable[['Backtest'], None]] = None
@@ -469,6 +481,17 @@ class Backtest:
     # 可視化
     # =========================================================================
 
+    def _build_chart_options(self, height: int, visible_bars: int) -> dict:
+        """チャートオプション辞書を構築（テーマ色を含む）"""
+        from .api.chart import get_theme_colors
+        theme_colors = get_theme_colors(self._color_theme)
+        return {
+            "height": height,
+            "showVolume": False,
+            "visibleBars": visible_bars,
+            **theme_colors,
+        }
+
     def chart(
         self,
         code: str = None,
@@ -508,16 +531,16 @@ class Backtest:
 
         if not self._is_started or self._broker_instance is None:
             from .api.chart import LightweightChartWidget
-            # キャッシュに登録して後から更新できるようにする
             if code not in self._chart_widgets:
                 self._chart_widgets[code] = LightweightChartWidget()
+            self._chart_widgets[code].options = self._build_chart_options(height, visible_bars)
             return self._chart_widgets[code]
 
         if code not in self._current_data or len(self._current_data[code]) == 0:
             from .api.chart import LightweightChartWidget
-            # キャッシュに登録して後から更新できるようにする
             if code not in self._chart_widgets:
                 self._chart_widgets[code] = LightweightChartWidget()
+            self._chart_widgets[code].options = self._build_chart_options(height, visible_bars)
             return self._chart_widgets[code]
 
         df = self._current_data[code]
@@ -531,6 +554,9 @@ class Backtest:
             widget = self._chart_widgets[code]
             last_idx = self._chart_last_index.get(code, 0)
 
+            # テーマ色を含むオプションを更新（キャッシュヒット時も常に適用）
+            widget.options = self._build_chart_options(height, visible_bars)
+
             # 巻き戻しまたは大きなジャンプの場合は全データ更新
             needs_full_update = (
                 last_idx == 0 or
@@ -540,9 +566,10 @@ class Backtest:
 
             if needs_full_update:
                 # 全データ更新
-                from .api.chart import df_to_lwc_data, trades_to_markers, df_to_lwc_indicators, prepare_indicator_options, get_last_bar
+                from .api.chart import df_to_lwc_data, trades_to_markers, df_to_lwc_indicators, prepare_indicator_options, get_last_bar, get_theme_colors
+                theme_colors = get_theme_colors(self._color_theme)
                 widget.data = df_to_lwc_data(df)
-                widget.markers = trades_to_markers(all_trades, code, show_tags)
+                widget.markers = trades_to_markers(all_trades, code, show_tags, theme_colors=theme_colors)
 
                 # last_bar も設定（全データ更新時）
                 bar = get_last_bar(df)
@@ -561,7 +588,8 @@ class Backtest:
                 # 差分更新: last_bar_packed (バイナリ) と data の両方を更新
                 # last_bar_packed: JS側でリアルタイム更新用（change:last_bar_packedイベント）
                 # data: 同期が失われた場合のフォールバック用
-                from .api.chart import df_to_lwc_data, get_last_bar, trades_to_markers, get_last_indicators
+                from .api.chart import df_to_lwc_data, get_last_bar, trades_to_markers, get_last_indicators, get_theme_colors
+                theme_colors = get_theme_colors(self._color_theme)
                 bar = get_last_bar(df)
                 # バイナリプロトコルで高速更新 (INP改善)
                 if hasattr(widget, "update_bar_fast"):
@@ -569,7 +597,7 @@ class Backtest:
                 else:
                     widget.last_bar = bar
                 widget.data = df_to_lwc_data(df)  # フォールバック用に全データも更新
-                widget.markers = trades_to_markers(all_trades, code, show_tags)
+                widget.markers = trades_to_markers(all_trades, code, show_tags, theme_colors=theme_colors)
 
                 # 指標データ差分更新（キャッシュからも取得を試みる）
                 effective_indicators = indicators or (self._chart_indicators.get(code, (None, None))[0])
@@ -597,6 +625,7 @@ class Backtest:
             visible_bars=visible_bars,
             indicators=indicators,
             indicator_options=indicator_options,
+            theme=self._color_theme,
         )
 
         # 初回作成時にlast_barを設定
@@ -653,9 +682,10 @@ class Backtest:
 
         # マーカー更新
         if self._broker_instance:
-            from .api.chart import trades_to_markers
+            from .api.chart import trades_to_markers, get_theme_colors
+            theme_colors = get_theme_colors(self._color_theme)
             all_trades = list(self._broker_instance.closed_trades) + list(self._broker_instance.trades)
-            widget.markers = trades_to_markers(all_trades, code, show_tags=True)
+            widget.markers = trades_to_markers(all_trades, code, show_tags=True, theme_colors=theme_colors)
 
         # インジケーター更新（キャッシュから設定を取得）
         if code in self._chart_indicators:

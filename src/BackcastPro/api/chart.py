@@ -49,6 +49,42 @@ class MarkerData(TypedDict):
     text: str
 
 
+# =========================================================================
+# テーマ定義
+# =========================================================================
+
+CHART_THEMES: dict[str, dict[str, str]] = {
+    "dark": {
+        "backgroundColor": "#1e1e1e",
+        "textColor": "#d1d4dc",
+        "gridColor": "#2B2B43",
+        "upColor": "#26a69a",
+        "downColor": "#ef5350",
+        "exitColor": "#2196F3",
+    },
+    "light": {
+        "backgroundColor": "#ffffff",
+        "textColor": "#191919",
+        "gridColor": "#e1e1e1",
+        "upColor": "#26a69a",
+        "downColor": "#ef5350",
+        "exitColor": "#2196F3",
+    },
+}
+
+
+def get_theme_colors(theme: str = "dark") -> dict[str, str]:
+    """テーマ名から色設定を取得
+
+    Args:
+        theme: テーマ名 ("dark" または "light")
+
+    Returns:
+        テーマの色設定辞書
+    """
+    return CHART_THEMES.get(theme, CHART_THEMES["dark"])
+
+
 def to_lwc_timestamp(idx, tz: str = "Asia/Tokyo") -> int:
     """
     インデックスをLightweight Charts用UTCタイムスタンプに変換
@@ -427,8 +463,8 @@ class LightweightChartWidget(anywidget.AnyWidget):
                 textColor: options.textColor || '#d1d4dc',
             },
             grid: {
-                vertLines: { color: '#2B2B43' },
-                horzLines: { color: '#2B2B43' },
+                vertLines: { color: options.gridColor || '#2B2B43' },
+                horzLines: { color: options.gridColor || '#2B2B43' },
             },
             timeScale: {
                 timeVisible: true,
@@ -450,12 +486,14 @@ class LightweightChartWidget(anywidget.AnyWidget):
         }
 
         // ローソク足シリーズ
+        const upColor = options.upColor || '#26a69a';
+        const downColor = options.downColor || '#ef5350';
         const candleSeries = chart.addCandlestickSeries({
-            upColor: '#26a69a',
-            downColor: '#ef5350',
+            upColor: upColor,
+            downColor: downColor,
             borderVisible: false,
-            wickUpColor: '#26a69a',
-            wickDownColor: '#ef5350',
+            wickUpColor: upColor,
+            wickDownColor: downColor,
         });
         model[MODEL_SERIES_KEY] = candleSeries;
 
@@ -464,7 +502,7 @@ class LightweightChartWidget(anywidget.AnyWidget):
         const showVolume = options.showVolume !== false;
         if (showVolume) {
             volumeSeries = chart.addHistogramSeries({
-                color: '#26a69a',
+                color: upColor,
                 priceFormat: { type: 'volume' },
                 priceScaleId: 'volume',
             });
@@ -901,6 +939,7 @@ def trades_to_markers(
     code: str = None,
     show_tags: bool = True,
     tz: str = "Asia/Tokyo",
+    theme_colors: dict[str, str] | None = None,
 ) -> list[dict]:
     """
     TradeオブジェクトをLightweight Chartsマーカー形式に変換
@@ -910,10 +949,16 @@ def trades_to_markers(
         code: 銘柄コード（フィルタリング用）
         show_tags: 売買理由（tag）を表示するか
         tz: 元データのタイムゾーン
+        theme_colors: テーマの色設定辞書
 
     Returns:
         Lightweight Charts形式のマーカーリスト
     """
+    colors = theme_colors or get_theme_colors("dark")
+    up_color = colors.get("upColor", "#26a69a")
+    down_color = colors.get("downColor", "#ef5350")
+    exit_color = colors.get("exitColor", "#2196F3")
+
     markers = []
 
     for trade in trades:
@@ -932,7 +977,7 @@ def trades_to_markers(
         markers.append({
             "time": to_lwc_timestamp(trade.entry_time, tz),
             "position": "belowBar" if is_long else "aboveBar",
-            "color": "#26a69a" if is_long else "#ef5350",
+            "color": up_color if is_long else down_color,
             "shape": "arrowUp" if is_long else "arrowDown",
             "text": entry_text,
         })
@@ -945,7 +990,7 @@ def trades_to_markers(
             markers.append({
                 "time": to_lwc_timestamp(exit_time, tz),
                 "position": "aboveBar" if is_long else "belowBar",
-                "color": "#2196F3",
+                "color": exit_color,
                 "shape": "circle",
                 "text": f"EXIT ({pnl:+.0f})",
             })
@@ -968,6 +1013,7 @@ def chart_by_df(
     visible_bars: int = 60,
     indicators: list[str] = None,
     indicator_options: dict = None,
+    theme: str = "dark",
 ) -> LightweightChartWidget:
     """
     株価データからLightweight Chartsチャートを作成
@@ -984,6 +1030,7 @@ def chart_by_df(
         visible_bars: 初期表示するバー数（デフォルト: 60本≒約2か月）
         indicators: 表示する指標列名のリスト（例: ['SMA_20', 'SMA_50']）
         indicator_options: 指標の表示オプション辞書
+        theme: 色テーマ ("dark" または "light")
 
     Returns:
         LightweightChartWidget: anywidget ベースのチャートウィジェット
@@ -992,12 +1039,16 @@ def chart_by_df(
     original_df = df.copy()
     df = _prepare_chart_df(df)
 
+    # テーマ色を取得
+    theme_colors = get_theme_colors(theme)
+
     # ウィジェット作成
     widget = LightweightChartWidget()
     widget.options = {
         "height": height,
         "showVolume": show_volume,
         "visibleBars": visible_bars,
+        **theme_colors,
     }
 
     # ローソク足データ設定
@@ -1009,7 +1060,7 @@ def chart_by_df(
 
     # 売買マーカー設定
     if trades:
-        widget.markers = trades_to_markers(trades, code, show_tags, tz)
+        widget.markers = trades_to_markers(trades, code, show_tags, tz, theme_colors)
 
     # 指標データ設定
     if indicators:
