@@ -1054,7 +1054,8 @@
 <li><strong>シンプルな戦略実装</strong>: 関数ベースで <code>buy()</code> / <code>sell()</code> を呼ぶだけ</li>
 <li><strong>統計の自動計算</strong>: 代表的なパフォーマンス指標を同梱</li>
 <li><strong>リスク管理</strong>: <code>sl</code> と <code>tp</code> に標準対応</li>
-<li><strong>可視化</strong>: <code>chart()</code> で plotly ローソク足チャート生成</li>
+<li><strong>可視化</strong>: <code>chart()</code> で Lightweight Charts ローソク足チャート生成</li>
+<li><strong>インジケーター表示</strong>: <code>chart()</code> でSMAなどのテクニカル指標をオーバーレイ</li>
 <li><strong>marimo連携</strong>: スライダーで時間を操作しながらリアルタイム可視化</li>
 </ul>
 <pre class="mermaid"><code>flowchart TD
@@ -1101,8 +1102,8 @@
 <td>売り注文</td>
 </tr>
 <tr>
-<td><code>chart(code)</code></td>
-<td>チャート生成</td>
+<td><code>chart(code, indicators, ...)</code></td>
+<td>チャート生成（インジケーター対応）</td>
 </tr>
 <tr>
 <td><code>finalize()</code></td>
@@ -1111,6 +1112,14 @@
 <tr>
 <td><code>run_with_strategy(func)</code></td>
 <td>一括実行</td>
+</tr>
+<tr>
+<td><code>get_state_snapshot()</code></td>
+<td>現在状態を辞書で取得</td>
+</tr>
+<tr>
+<td><code>add_trade_callback(func)</code></td>
+<td>取引イベントコールバック登録</td>
 </tr>
 </tbody>
 </table>
@@ -1146,6 +1155,10 @@
 <tr>
 <td><code>current_time</code></td>
 <td>現在の日時</td>
+</tr>
+<tr>
+<td><code>step_index</code></td>
+<td>現在のステップインデックス</td>
 </tr>
 <tr>
 <td><code>progress</code></td>
