@@ -251,30 +251,22 @@ class db_stocks_board(db_manager):
             raise
 
 
-    def load_stock_board_from_cache(self, code: str, at: datetime) -> pd.DataFrame:
+    def load_stock_board_from_cache(self, code: str, at: datetime = None, from_: datetime = None, to: datetime = None) -> pd.DataFrame:
         """
-        指定時刻の板情報をDuckDBから取得（指定時刻以前で最も近いデータを返す）
+        板情報をDuckDBから取得
 
         Args:
             code (str): 銘柄コード
-            at (datetime): 取得時刻
+            at (datetime, optional): 取得時刻（指定時刻以前で最も近いデータを1行返す）
+            from_ (datetime, optional): 開始時刻
+            to (datetime, optional): 終了時刻
 
         Returns:
-            pd.DataFrame: 板情報データ（1行）
+            pd.DataFrame: 板情報データ
         """
         try:
             if not self.isEnable:
                 return pd.DataFrame()
-
-            if at is None:
-                return pd.DataFrame()
-
-            if isinstance(at, str):
-                at = datetime.strptime(at, '%Y-%m-%d %H:%M:%S')
-            target_timestamp = at.strftime('%Y-%m-%d %H:%M:%S')
-            # 同じ日の範囲に限定
-            date_start = at.strftime('%Y-%m-%d') + ' 00:00:00'
-            date_end = at.strftime('%Y-%m-%d') + ' 23:59:59'
 
             table_name = "stocks_board"
 
@@ -290,30 +282,82 @@ class db_stocks_board(db_manager):
                     return pd.DataFrame()
 
                 for search_code in codes_to_try:
-                    # 指定時刻以前で最も近いデータを取得（同じ日に限定）
-                    query = f'''
-                        SELECT * FROM {table_name}
-                        WHERE "Code" = ? AND "Timestamp" <= ? AND "Timestamp" >= ?
-                        ORDER BY "Timestamp" DESC
-                        LIMIT 1
-                    '''
-                    df = db.execute(query, [search_code, target_timestamp, date_start]).fetchdf()
+                    # atが指定された場合: 指定時刻以前で最も近いデータを1行返す
+                    if at is not None:
+                        if isinstance(at, str):
+                            at = datetime.strptime(at, '%Y-%m-%d %H:%M:%S')
+                        target_timestamp = at.strftime('%Y-%m-%d %H:%M:%S')
+                        # 同じ日の範囲に限定
+                        date_start = at.strftime('%Y-%m-%d') + ' 00:00:00'
+                        date_end = at.strftime('%Y-%m-%d') + ' 23:59:59'
 
-                    # 指定時刻以前にデータがなければ、指定時刻以後で最も近いデータを取得（同じ日に限定）
-                    if df.empty:
-                        query_after = f'''
+                        # 指定時刻以前で最も近いデータを取得（同じ日に限定）
+                        query = f'''
                             SELECT * FROM {table_name}
-                            WHERE "Code" = ? AND "Timestamp" > ? AND "Timestamp" <= ?
-                            ORDER BY "Timestamp" ASC
+                            WHERE "Code" = ? AND "Timestamp" <= ? AND "Timestamp" >= ?
+                            ORDER BY "Timestamp" DESC
                             LIMIT 1
                         '''
-                        df = db.execute(query_after, [search_code, target_timestamp, date_end]).fetchdf()
+                        df = db.execute(query, [search_code, target_timestamp, date_start]).fetchdf()
 
-                    if not df.empty:
-                        logger.info(f"板情報をDuckDBから読み込みました: {search_code} (時刻: {df['Timestamp'].iloc[0]})")
-                        return df
+                        # 指定時刻以前にデータがなければ、指定時刻以後で最も近いデータを取得（同じ日に限定）
+                        if df.empty:
+                            query_after = f'''
+                                SELECT * FROM {table_name}
+                                WHERE "Code" = ? AND "Timestamp" > ? AND "Timestamp" <= ?
+                                ORDER BY "Timestamp" ASC
+                                LIMIT 1
+                            '''
+                            df = db.execute(query_after, [search_code, target_timestamp, date_end]).fetchdf()
 
-                logger.info(f"指定日 {at.strftime('%Y-%m-%d')} の板情報がありません: {code}")
+                        if not df.empty:
+                            logger.info(f"板情報をDuckDBから読み込みました: {search_code} (時刻: {df['Timestamp'].iloc[0]})")
+                            return df
+
+                        logger.info(f"指定日 {at.strftime('%Y-%m-%d')} の板情報がありません: {code}")
+
+                    # from_とtoが指定された場合: 範囲内のデータを返す
+                    elif from_ is not None or to is not None:
+                        conditions = [f'"Code" = ?']
+                        params = [search_code]
+
+                        if from_ is not None:
+                            if isinstance(from_, str):
+                                from_ = datetime.strptime(from_, '%Y-%m-%d %H:%M:%S')
+                            conditions.append('"Timestamp" >= ?')
+                            params.append(from_.strftime('%Y-%m-%d %H:%M:%S'))
+
+                        if to is not None:
+                            if isinstance(to, str):
+                                to = datetime.strptime(to, '%Y-%m-%d %H:%M:%S')
+                            conditions.append('"Timestamp" <= ?')
+                            params.append(to.strftime('%Y-%m-%d %H:%M:%S'))
+
+                        where_clause = ' AND '.join(conditions)
+                        query = f'''
+                            SELECT * FROM {table_name}
+                            WHERE {where_clause}
+                            ORDER BY "Timestamp" ASC
+                        '''
+                        df = db.execute(query, params).fetchdf()
+
+                        if not df.empty:
+                            logger.info(f"板情報をDuckDBから読み込みました: {search_code} ({len(df)}件)")
+                            return df
+
+                    # 引数なしの場合: 全データを返す
+                    else:
+                        query = f'''
+                            SELECT * FROM {table_name}
+                            WHERE "Code" = ?
+                            ORDER BY "Timestamp" ASC
+                        '''
+                        df = db.execute(query, [search_code]).fetchdf()
+
+                        if not df.empty:
+                            logger.info(f"板情報をDuckDBから読み込みました: {search_code} ({len(df)}件)")
+                            return df
+
                 return pd.DataFrame()
 
         except Exception as e:

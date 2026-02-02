@@ -126,15 +126,15 @@ class Test_e_api_Cache:
                 # ログイン成功レスポンスをモック
                 mock_response = MagicMock()
                 mock_response.content = json.dumps({
-                    '287': '0',  # p_errno
-                    '688': '0',  # sResultCode
-                    '872': 'https://test.request.url',  # sUrlRequest
-                    '870': 'https://test.master.url',   # sUrlMaster
-                    '871': 'https://test.price.url',    # sUrlPrice
-                    '868': 'https://test.event.url',    # sUrlEvent
-                    '869': 'https://test.websocket.url', # sUrlEventWebSocket
-                    '288': '2',  # p_no
-                    '290': datetime.now().strftime('%Y.%m.%d-%H:%M:%S.%f')[:-3]  # p_sd_date
+                    'p_errno': '0',
+                    'sResultCode': '0',
+                    'sUrlRequest': 'https://test.request.url',
+                    'sUrlMaster': 'https://test.master.url',
+                    'sUrlPrice': 'https://test.price.url',
+                    'sUrlEvent': 'https://test.event.url',
+                    'sUrlEventWebSocket': 'https://test.websocket.url',
+                    'p_no': '2',
+                    'p_sd_date': datetime.now().strftime('%Y.%m.%d-%H:%M:%S.%f')[:-3]
                 }).encode('shift-jis')
                 mock_response.apparent_encoding = 'shift-jis'
                 mock_get.return_value = mock_response

@@ -540,9 +540,16 @@ class Backtest:
 
             if needs_full_update:
                 # 全データ更新
-                from .api.chart import df_to_lwc_data, trades_to_markers, df_to_lwc_indicators, prepare_indicator_options
+                from .api.chart import df_to_lwc_data, trades_to_markers, df_to_lwc_indicators, prepare_indicator_options, get_last_bar
                 widget.data = df_to_lwc_data(df)
                 widget.markers = trades_to_markers(all_trades, code, show_tags)
+
+                # last_bar も設定（全データ更新時）
+                bar = get_last_bar(df)
+                if hasattr(widget, "update_bar_fast"):
+                    widget.update_bar_fast(bar)
+                else:
+                    widget.last_bar = bar
 
                 # 指標データ全更新（キャッシュからも取得を試みる）
                 effective_indicators = indicators or (self._chart_indicators.get(code, (None, None))[0])
@@ -578,7 +585,7 @@ class Backtest:
             return widget
 
         # 初回: 新規ウィジェット作成
-        from .api.chart import chart_by_df
+        from .api.chart import chart_by_df, get_last_bar
         widget = chart_by_df(
             df,
             trades=all_trades,
@@ -591,6 +598,13 @@ class Backtest:
             indicators=indicators,
             indicator_options=indicator_options,
         )
+
+        # 初回作成時にlast_barを設定
+        bar = get_last_bar(df)
+        if hasattr(widget, "update_bar_fast"):
+            widget.update_bar_fast(bar)
+        else:
+            widget.last_bar = bar
 
         self._chart_widgets[code] = widget
         self._chart_last_index[code] = current_idx

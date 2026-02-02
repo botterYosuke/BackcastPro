@@ -57,9 +57,8 @@ class TestDbStocksInfo(unittest.TestCase):
             # Ensure the directory exists
             os.makedirs(os.path.dirname(test_path), exist_ok=True)
             
-            # Call the method
-            code = "dummy_code" 
-            result = self.db_info._download_from_ftp(code, test_path)
+            # Call the method (db_stocks_info uses single file, no code parameter)
+            result = self.db_info._download_from_ftp(test_path)
             
             # Assertions
             self.assertTrue(result, "Download should return True on success")
@@ -83,7 +82,7 @@ class TestDbStocksInfo(unittest.TestCase):
             
             test_path = os.path.join(self.test_cache_dir, "test_fail.duckdb")
             
-            result = self.db_info._download_from_ftp("dummy_code", test_path)
+            result = self.db_info._download_from_ftp(test_path)
             
             self.assertFalse(result, "Download should return False on connection error")
             self.assertFalse(os.path.exists(test_path), "File should not exist")
@@ -99,7 +98,7 @@ class TestDbStocksInfo(unittest.TestCase):
             
             test_path = os.path.join(self.test_cache_dir, "test_notfound.duckdb")
             
-            result = self.db_info._download_from_ftp("dummy_code", test_path)
+            result = self.db_info._download_from_ftp(test_path)
             
             self.assertFalse(result, "Download should return False if file not found on server")
 

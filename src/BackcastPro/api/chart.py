@@ -844,6 +844,8 @@ class LightweightChartWidget(anywidget.AnyWidget):
             self.last_bar_packed = msgpack.packb(
                 [bar[k] for k in required_keys]
             )
+            # last_bar も同時に更新（テストやデバッグ用）
+            self.last_bar = bar
         except (ImportError, Exception):
             # msgpack が利用できない場合は JSON にフォールバック
             self.last_bar = bar

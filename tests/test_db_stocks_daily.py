@@ -53,7 +53,7 @@ class TestDbStocksDaily(unittest.TestCase):
             mock_ftp.retrbinary.side_effect = side_effect_retrbinary
 
             code = "9999"
-            test_path = os.path.join(self.test_cache_dir, "stocks", f"{code}.duckdb")
+            test_path = os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb")
             os.makedirs(os.path.dirname(test_path), exist_ok=True)
             
             result = self.db_daily._download_from_ftp(code, test_path)
@@ -66,7 +66,7 @@ class TestDbStocksDaily(unittest.TestCase):
         code = "1111"
         # We need a DB connection. Since get_db is a context manager using the cache dir, 
         # let's manually create a db file and connect to avoid FTP logic triggering in get_db
-        db_path = os.path.join(self.test_cache_dir, "stocks", f"{code}.duckdb")
+        db_path = os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb")
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
         
         con = duckdb.connect(db_path)
@@ -139,7 +139,7 @@ class TestDbStocksDaily(unittest.TestCase):
             self.db_daily.save_stock_prices(code, df)
         
         # 2. Check DB content manually
-        db_path = os.path.join(self.test_cache_dir, "stocks", f"{code}.duckdb")
+        db_path = os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb")
         self.assertTrue(os.path.exists(db_path))
         
         con = duckdb.connect(db_path)
@@ -170,7 +170,8 @@ class TestDbStocksDaily(unittest.TestCase):
         )
         self.assertEqual(len(loaded_df_filtered), 1)
         # 2024-01-02 should be the only one
-        self.assertEqual(pd.to_datetime(loaded_df_filtered['Date'].iloc[0]), datetime(2024,1,2))
+        # Note: Date is set as index after loading, so we access via index
+        self.assertEqual(pd.to_datetime(loaded_df_filtered.index[0]), datetime(2024,1,2))
         
     def test_duplicates_handling(self):
         """Test that duplicates are not inserted"""
@@ -188,7 +189,7 @@ class TestDbStocksDaily(unittest.TestCase):
             # Second save (same data)
             self.db_daily.save_stock_prices(code, df)
             
-        con = duckdb.connect(os.path.join(self.test_cache_dir, "stocks", f"{code}.duckdb"))
+        con = duckdb.connect(os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb"))
         try:
             count = con.execute("SELECT COUNT(*) FROM stocks_daily").fetchone()[0]
             # Should still be 1
