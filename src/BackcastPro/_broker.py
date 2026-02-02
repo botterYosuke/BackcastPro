@@ -454,6 +454,18 @@ class _Broker:
         # Trade開始時ではなくここで適用
         closed_trade._commissions = commission + trade_open_commission
 
+        # 取引クローズイベントコールバックを呼び出し
+        if self._on_trade_event:
+            # ロングをクローズ → SELL、ショートをクローズ → BUY
+            event_type = "SELL" if trade.size > 0 else "BUY"
+            try:
+                self._on_trade_event(event_type, closed_trade)
+            except Exception as e:
+                warnings.warn(
+                    f'Trade event callback raised an exception: {e}',
+                    category=UserWarning
+                )
+
     def _open_trade(self, code: str, price: float, size: int,
                     sl: Optional[float], tp: Optional[float], current_time: pd.Timestamp, tag):
         trade = Trade(self, code, size, price, current_time, tag)
