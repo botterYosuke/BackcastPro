@@ -121,6 +121,9 @@ class Backtest:
         # 戦略関数
         self._strategy: Optional[Callable[['Backtest'], None]] = None
 
+        # 取引コールバックリスト（複数登録可能）
+        self._trade_callbacks: list[Callable[[str, 'Trade'], None]] = []
+
         # データを設定（set_data内でstart()が自動的に呼ばれる）
         self.set_data(data)
 
@@ -252,15 +255,17 @@ class Backtest:
                 ts: i for i, ts in enumerate(df.index)
             }
 
-        # 取引イベントパブリッシャーが既に設定されている場合、コールバックを登録
+        # 取引イベントパブリッシャーをコールバックリストに追加（重複防止）
         if hasattr(self, "_trade_event_publisher") and self._trade_event_publisher:
-            def on_trade(event_type: str, trade):
+            def on_trade_publish(event_type: str, trade):
                 self._trade_event_publisher.emit_from_trade(trade, is_opening=True)
-            self._broker_instance.set_on_trade_event(on_trade)
+            # 関数オブジェクトの同一性比較はできないので、フラグで重複チェック
+            if not getattr(self, "_trade_event_publisher_registered", False):
+                self._trade_callbacks.append(on_trade_publish)
+                self._trade_event_publisher_registered = True
 
-        # ヘッドレス取引イベントが有効な場合、コールバックを設定
-        if getattr(self, '_headless_trade_events_enabled', False):
-            self._setup_headless_trade_callback()
+        # 全コールバックをブローカーに設定
+        self._setup_trade_callbacks()
 
         return self
 
@@ -350,6 +355,10 @@ class Backtest:
                 if len(df) > 0:
                     self._current_data[code] = df.iloc[:1]
         self._update_all_charts()
+
+        # 取引コールバックを新しいブローカーに再登録
+        self._setup_trade_callbacks()
+
         return self
 
     def goto(self, step: int, strategy: Callable[['Backtest'], None] = None) -> 'Backtest':
@@ -708,6 +717,11 @@ class Backtest:
         return self._step_index / len(self.index)
 
     @property
+    def step_index(self) -> int:
+        """現在のステップインデックス（read-only）"""
+        return self._step_index
+
+    @property
     def trades(self) -> List:
         """アクティブな取引リスト"""
         if not self._is_started or self._broker_instance is None:
@@ -727,6 +741,58 @@ class Backtest:
         if not self._is_started or self._broker_instance is None:
             return []
         return list(self._broker_instance.orders)
+
+    # =========================================================================
+    # 状態スナップショット / コールバック API
+    # =========================================================================
+
+    def get_state_snapshot(self) -> dict:
+        """現在の状態を辞書で返す（marimo非依存）
+
+        Returns:
+            dict: current_time, progress, equity, cash, position, positions,
+                  closed_trades, step_index, total_steps を含む辞書
+        """
+        positions: dict[str, int] = {}
+        for trade in self.trades:
+            code = trade.code
+            positions[code] = positions.get(code, 0) + trade.size
+
+        return {
+            "current_time": str(self.current_time) if self.current_time else "-",
+            "progress": float(self.progress),
+            "equity": float(self.equity),
+            "cash": float(self.cash),
+            "position": self.position,
+            "positions": positions,
+            "closed_trades": len(self.closed_trades),
+            "step_index": self.step_index,
+            "total_steps": len(self.index) if hasattr(self, "index") else 0,
+        }
+
+    def add_trade_callback(
+        self, callback: Callable[[str, 'Trade'], None]
+    ) -> None:
+        """取引発生時のコールバックを追加（複数登録可能）
+
+        Args:
+            callback: (event_type: 'BUY'|'SELL', trade) を受け取る関数
+        """
+        self._trade_callbacks.append(callback)
+        # 既にブローカーが存在する場合は即座に反映
+        if self._broker_instance:
+            self._setup_trade_callbacks()
+
+    def _setup_trade_callbacks(self) -> None:
+        """全コールバックをブローカーに設定"""
+        if not self._trade_callbacks:
+            return
+
+        def emit_all(event_type: str, trade):
+            for cb in self._trade_callbacks:
+                cb(event_type, trade)
+
+        self._broker_instance.set_on_trade_event(emit_all)
 
     # =========================================================================
     # finalize / run
@@ -792,153 +858,3 @@ class Backtest:
         # partialで初期化されている場合、初期化時のcommission値を返す
         return self._broker_factory.keywords.get('commission', 0)
 
-    # =========================================================================
-    # ヘッドレスパブリッシャーAPI（app.setup内でも動作可能）
-    # =========================================================================
-
-    def publish_state_headless(
-        self,
-        status_label: str = "Backtest",
-        status_variant: str = "secondary",
-    ):
-        """
-        バックテスト状態をBroadcastChannelで公開（ヘッドレス版）
-
-        AnyWidgetのレンダリングが不要。app.setup内や_game_loop内から
-        直接呼び出してBroadcastChannelにメッセージを送信できる。
-        data属性を持つdiv要素を出力し、フロントエンドのMutationObserverで
-        検出してBroadcastChannelに送信する。
-
-        Args:
-            status_label: HUDに表示するステータスラベル（例: "実行中", "停止中"）
-            status_variant: Badgeの色 ("default", "secondary", "destructive", "success", "outline")
-
-        Example:
-            # _game_loop内で使用可能
-            def _game_loop():
-                while bt.is_finished == False:
-                    bt.step()
-                    bt.publish_state_headless(status_label="実行中", status_variant="success")
-        """
-        import json
-        import base64
-        import time
-        import marimo as mo
-        from marimo._output.hypertext import Html
-
-        # 状態データを準備
-        positions: dict[str, int] = {}
-        if self._broker_instance and self._broker_instance.trades:
-            for trade in self._broker_instance.trades:
-                code = trade.code
-                positions[code] = positions.get(code, 0) + trade.size
-
-        state = {
-            "current_time": str(self.current_time) if self.current_time else "-",
-            "progress": float(self.progress),
-            "equity": float(self.equity),
-            "cash": float(self.cash),
-            "position": self.position,
-            "positions": positions,
-            "closed_trades": len(self.closed_trades),
-            "step_index": self._step_index,
-            "total_steps": len(self.index) if hasattr(self, "index") else 0,
-            "status_label": status_label,
-            "status_variant": status_variant,
-        }
-
-        state_json = json.dumps(state)
-        state_b64 = base64.b64encode(state_json.encode()).decode()
-
-        unique_id = f"marimo-bc-{self._step_index}-{int(time.time() * 1000)}"
-
-        html = (
-            f'<marimo-broadcast '
-            f'id="{unique_id}" '
-            f'channel="backtest_channel" '
-            f'type="backtest_update" '
-            f'payload="{state_b64}" '
-            f'style="display:none;"></marimo-broadcast>'
-        )
-
-        mo.output.replace(Html(html))
-
-    def publish_trade_event_headless(
-        self,
-        event_type: str,
-        code: str,
-        size: int,
-        price: float,
-        tag: Optional[str] = None
-    ):
-        """
-        取引イベントをBroadcastChannelで公開（ヘッドレス版）
-
-        Args:
-            event_type: 'BUY' または 'SELL'
-            code: 銘柄コード
-            size: 取引数量（正の値）
-            price: 約定価格
-            tag: 取引タグ（オプション）
-        """
-        import json
-        import base64
-        import marimo as mo
-        from marimo._output.hypertext import Html
-
-        event = {
-            "event_type": event_type,
-            "code": code,
-            "size": abs(size),
-            "price": float(price),
-            "tag": str(tag) if tag else None,
-        }
-
-        event_json = json.dumps(event)
-        event_b64 = base64.b64encode(event_json.encode()).decode()
-
-        # data属性を持つdiv要素を出力（MutationObserverで検出される）
-        html = (
-            f'<div data-marimo-broadcast="trade_event_channel" '
-            f'data-marimo-type="trade_event" '
-            f'data-marimo-payload="{event_b64}" '
-            f'style="display:none;"></div>'
-        )
-        mo.output.append(Html(html))
-
-    def enable_headless_trade_events(self):
-        """
-        取引イベントをヘッドレスモードで自動発行するよう設定
-
-        bt.buy() / bt.sell() が成立した際に自動的に
-        publish_trade_event_headless() が呼び出される。
-        ウィジェットのレンダリングが不要。app.setup内や_game_loop内から使用可能。
-
-        Example:
-            # _game_loop内で使用可能
-            def _game_loop():
-                bt.enable_headless_trade_events()  # 最初に1回呼び出し
-                while bt.is_finished == False:
-                    bt.step()
-                    bt.publish_state_headless()
-        """
-        self._headless_trade_events_enabled = True
-
-        # ブローカーが既に存在する場合はコールバックを設定
-        if self._broker_instance:
-            self._setup_headless_trade_callback()
-
-    def _setup_headless_trade_callback(self):
-        """ヘッドレス取引イベント用のコールバックを設定"""
-        if not getattr(self, '_headless_trade_events_enabled', False):
-            return
-
-        def on_trade(event_type: str, trade):
-            self.publish_trade_event_headless(
-                event_type=event_type,
-                code=trade.code,
-                size=trade.size,
-                price=trade.entry_price,
-                tag=getattr(trade, 'tag', None)
-            )
-        self._broker_instance.set_on_trade_event(on_trade)
