@@ -51,7 +51,8 @@ print(results)
 - **シンプルな戦略実装**: 関数ベースで `buy()` / `sell()` を呼ぶだけ
 - **統計の自動計算**: 代表的なパフォーマンス指標を同梱
 - **リスク管理**: `sl` と `tp` に標準対応
-- **可視化**: `chart()` で plotly ローソク足チャート生成
+- **可視化**: `chart()` で Lightweight Charts ローソク足チャート生成
+- **インジケーター表示**: `chart()` でSMAなどのテクニカル指標をオーバーレイ
 - **marimo連携**: スライダーで時間を操作しながらリアルタイム可視化
 
 ```mermaid
@@ -78,9 +79,11 @@ flowchart TD
 | `goto(step, strategy)` | 指定位置まで進める |
 | `buy(code, size, tag, ...)` | 買い注文 |
 | `sell(code, size, tag, ...)` | 売り注文 |
-| `chart(code)` | チャート生成 |
+| `chart(code, indicators, ...)` | チャート生成（インジケーター対応） |
 | `finalize()` | 統計計算 |
 | `run_with_strategy(func)` | 一括実行 |
+| `get_state_snapshot()` | 現在状態を辞書で取得 |
+| `add_trade_callback(func)` | 取引イベントコールバック登録 |
 
 ### プロパティ
 
@@ -92,6 +95,7 @@ flowchart TD
 | `equity` | 現在の資産 |
 | `cash` | 現在の現金 |
 | `current_time` | 現在の日時 |
+| `step_index` | 現在のステップインデックス |
 | `progress` | 進捗率（0.0〜1.0） |
 | `is_finished` | 完了フラグ |
 | `trades` | アクティブな取引 |

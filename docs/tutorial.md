@@ -319,6 +319,49 @@ info = mo.md(f"""
 mo.vstack([slider, chart, info])
 ```
 
+## インジケーターの表示
+
+チャートにSMAなどのテクニカルインジケーターを重ねて表示できます。
+
+### 基本的な使い方
+
+```python
+# データにインジケーターを追加
+df['SMA_20'] = df['Close'].rolling(20).mean()
+df['SMA_50'] = df['Close'].rolling(50).mean()
+
+bt = Backtest(data={code: df}, cash=10000)
+
+# インジケーター付きチャート
+chart = bt.chart(indicators=['SMA_20', 'SMA_50'])
+```
+
+### カスタムスタイル
+
+色や線の太さをカスタマイズできます。
+
+```python
+chart = bt.chart(
+    indicators=['SMA_20', 'SMA_50'],
+    indicator_options={
+        'SMA_20': {'color': '#2196F3', 'lineWidth': 2, 'title': '20日移動平均'},
+        'SMA_50': {'color': '#FFC107', 'lineWidth': 3, 'title': '50日移動平均'}
+    }
+)
+```
+
+### marimoでのリプレイモード
+
+```python
+import marimo as mo
+
+slider = mo.ui.slider(start=1, stop=len(bt.index), value=50, label="時間")
+bt.goto(slider.value, strategy=my_strategy)
+chart = bt.chart(indicators=['SMA_20', 'SMA_50'])
+
+mo.vstack([slider, chart])
+```
+
 ## 次のステップ
 
 ### 1. より複雑な戦略の実装
@@ -400,6 +443,19 @@ A: 以下の方法を試してください：
 
 A: 複数銘柄を扱う場合は `bt.position` ではなく `bt.position_of(code)` を使用してください。
 `position` は全銘柄合計のため、個別銘柄のポジションを正確に取得できません。
+
+### Q: size を省略した時の動作は？
+
+A: 反対ポジションがある場合は全クローズ、ない場合は全力で新規ポジションを取ります。
+
+| 条件 | 動作 |
+|------|------|
+| `bt.sell()` でロング保有中 | 全ロングをクローズ |
+| `bt.buy()` でショート保有中 | 全ショートをクローズ |
+| ポジションなし | 全資産で新規ポジション |
+| 同方向ポジション保有中 | `margin_available` で買い増し |
+
+明示的にサイズを指定したい場合は `bt.buy(size=100)` のように指定してください。
 
 ## まとめ
 
