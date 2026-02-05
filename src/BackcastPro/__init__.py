@@ -15,15 +15,10 @@ from .backtest import Backtest
 from .api.stocks_price import get_stock_daily
 from .api.stocks_board import get_stock_board
 from .api.stocks_info import get_stock_info
-from .api.chart import chart, chart_by_df
-from .api.board import board
 
 __all__ = [
     'Backtest',
     'get_stock_daily',
     'get_stock_board',
     'get_stock_info',
-    'chart',
-    'chart_by_df',
-    'board'
 ]

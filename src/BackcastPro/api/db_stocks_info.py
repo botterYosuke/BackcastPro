@@ -213,48 +213,11 @@ class db_stocks_info(db_manager):
             db.close()
 
     def _download_from_ftp(self, local_path: str) -> bool:
-        """
-        FTPサーバーからDuckDBファイルをダウンロード
-        """
-        import ftplib
-        
-        FTP_HOST = 'backcast.i234.me'
-        FTP_USER = 'sasaco_worker'
-        FTP_PASSWORD = 'S#1y9c%7o9'
-        FTP_PORT = 21
-        REMOTE_DIR = '/StockData/jp'
-        
-        try:
-            with ftplib.FTP() as ftp:
-                ftp.connect(FTP_HOST, FTP_PORT)
-                ftp.login(FTP_USER, FTP_PASSWORD)
-                
-                remote_file = "listed_info.duckdb"
-                
-                # ファイルサイズ確認（存在確認も兼ねる）
-                try:
-                    ftp.voidcmd(f"TYPE I")
-                    size = ftp.size(remote_file)
-                    if size is None: # sizeコマンドがサポートされていない場合のフォールバックは省略
-                        pass
-                except Exception:
-                    logger.debug(f"FTPサーバーにファイルが見つかりません: {remote_file}")
-                    return False
+        """FTPサーバーからDuckDBファイルをダウンロード"""
+        from .ftp_client import FTPClient
 
-                logger.info(f"FTPダウンロード開始: {remote_file} -> {local_path}")
-                
-                with open(local_path, 'wb') as f:
-                    ftp.retrbinary(f"RETR {remote_file}", f.write)
-                
-                logger.info(f"FTPダウンロード完了: {local_path}")
-                return True
-                
-        except Exception as e:
-            logger.warning(f"FTPダウンロード失敗: {e}")
-            # ダウンロード中の不完全なファイルが残っている場合は削除
-            if os.path.exists(local_path):
-                try:
-                    os.remove(local_path)
-                except:
-                    pass
+        client = FTPClient()
+        if not client.config.is_configured():
+            logger.debug("FTP credentials not configured")
             return False
+        return client.download_listed_info(local_path)

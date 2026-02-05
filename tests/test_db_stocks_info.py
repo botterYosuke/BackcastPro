@@ -32,75 +32,47 @@ class TestDbStocksInfo(unittest.TestCase):
 
     def test_download_from_ftp_success(self):
         """Test successful download from FTP"""
-        # Ensure ftplib is imported so patch works correctly if lazy loaded
-        import ftplib
-        
-        with patch('ftplib.FTP') as mock_ftp_cls:
-            mock_ftp = mock_ftp_cls.return_value
-            # Context manager return value must be set to the mock instance
-            mock_ftp.__enter__.return_value = mock_ftp
-            
-            # Setup mock to simulate success
-            mock_ftp.connect.return_value = None
-            mock_ftp.login.return_value = None
-            mock_ftp.voidcmd.return_value = "200 Type set to I"
-            mock_ftp.size.return_value = 1024 
-            
-            # Mock retrbinary to write something to the file
-            def side_effect_retrbinary(cmd, callback):
-                callback(b'dummy content')
-            mock_ftp.retrbinary.side_effect = side_effect_retrbinary
+        with patch('BackcastPro.api.ftp_client.FTPClient') as mock_ftp_client_cls:
+            mock_client = MagicMock()
+            mock_ftp_client_cls.return_value = mock_client
+            mock_client.config.is_configured.return_value = True
+            mock_client.download_listed_info.return_value = True
 
-            # Use a temp path for the download target
             test_path = os.path.join(self.test_cache_dir, "test_downloaded.duckdb")
-            
-            # Ensure the directory exists
             os.makedirs(os.path.dirname(test_path), exist_ok=True)
-            
-            # Call the method (db_stocks_info uses single file, no code parameter)
+
             result = self.db_info._download_from_ftp(test_path)
-            
-            # Assertions
+
             self.assertTrue(result, "Download should return True on success")
-            mock_ftp.connect.assert_called()
-            mock_ftp.login.assert_called()
-            mock_ftp.retrbinary.assert_called()
-            
-            # Check file exists and content is correct
-            self.assertTrue(os.path.exists(test_path), "Downloaded file should exist")
-            with open(test_path, 'rb') as f:
-                self.assertEqual(f.read(), b'dummy content')
+            mock_client.download_listed_info.assert_called_once_with(test_path)
 
     def test_download_from_ftp_failure_connection(self):
         """Test failure during FTP connection"""
-        with patch('ftplib.FTP') as mock_ftp_cls:
-            mock_ftp = mock_ftp_cls.return_value
-            mock_ftp.__enter__.return_value = mock_ftp
-            
-            # Simulate connection error
-            mock_ftp.connect.side_effect = Exception("Connection error")
-            
-            test_path = os.path.join(self.test_cache_dir, "test_fail.duckdb")
-            
-            result = self.db_info._download_from_ftp(test_path)
-            
-            self.assertFalse(result, "Download should return False on connection error")
-            self.assertFalse(os.path.exists(test_path), "File should not exist")
+        with patch('BackcastPro.api.ftp_client.FTPClient') as mock_ftp_client_cls:
+            mock_client = MagicMock()
+            mock_ftp_client_cls.return_value = mock_client
+            mock_client.config.is_configured.return_value = True
+            mock_client.download_listed_info.return_value = False
 
-    def test_download_from_ftp_file_not_found(self):
-        """Test behavior when file is not found on server (size check fails)"""
-        with patch('ftplib.FTP') as mock_ftp_cls:
-            mock_ftp = mock_ftp_cls.return_value
-            mock_ftp.__enter__.return_value = mock_ftp
-            
-            # Simulate file not found by raising exception on size/voidcmd check
-            mock_ftp.voidcmd.side_effect = Exception("File not found check")
-            
-            test_path = os.path.join(self.test_cache_dir, "test_notfound.duckdb")
-            
+            test_path = os.path.join(self.test_cache_dir, "test_fail.duckdb")
+
             result = self.db_info._download_from_ftp(test_path)
-            
-            self.assertFalse(result, "Download should return False if file not found on server")
+
+            self.assertFalse(result, "Download should return False on connection error")
+
+    def test_download_from_ftp_not_configured(self):
+        """Test behavior when FTP is not configured"""
+        with patch('BackcastPro.api.ftp_client.FTPClient') as mock_ftp_client_cls:
+            mock_client = MagicMock()
+            mock_ftp_client_cls.return_value = mock_client
+            mock_client.config.is_configured.return_value = False
+
+            test_path = os.path.join(self.test_cache_dir, "test_notconfigured.duckdb")
+
+            result = self.db_info._download_from_ftp(test_path)
+
+            self.assertFalse(result, "Download should return False if FTP not configured")
+            mock_client.download_listed_info.assert_not_called()
 
 if __name__ == '__main__':
     unittest.main()

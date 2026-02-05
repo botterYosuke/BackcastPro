@@ -1,4 +1,3 @@
-from .lib.jquants import jquants
 from .db_stocks_info import db_stocks_info
 import sys
 import pandas as pd
@@ -16,25 +15,13 @@ class stocks_info:
 
     def __init__(self):
         self.db = db_stocks_info()
-        self.jq = jquants()
 
     def get_japanese_listed_info(self, code = "", date: datetime = None) -> pd.DataFrame:
 
         # DBファイルの準備（存在しなければFTPからダウンロードを試行）
         self.db.ensure_db_ready()
 
-        # 1) J-Quantsから取得
-        if self.jq.isEnable:
-            df = self.jq.get_listed_info(code=code, date=date)
-            # Codeをが4文字にする
-            df['Code'] = df['Code'].str[:4]
-            if df is not None and not df.empty:
-                # DataFrameをcacheフォルダに保存
-                ## 非同期、遅延を避けるためデーモンスレッドで実行
-                threading.Thread(target=self.db.save_listed_info, args=(df,), daemon=True).start()
-                return df
-
-        # 2) cacheフォルダから取得
+        # cacheフォルダから取得
         df = self.db.load_listed_info_from_cache(code, date)
         if df.empty:
             # 空のDataFrameの場合は次のデータソースを試す

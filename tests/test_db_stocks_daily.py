@@ -36,30 +36,20 @@ class TestDbStocksDaily(unittest.TestCase):
             del os.environ['BACKCASTPRO_CACHE_DIR']
 
     def test_download_from_ftp_success(self):
-        # Ensure ftplib is imported so patch works
-        import ftplib
-        
-        with patch('ftplib.FTP') as mock_ftp_cls:
-            mock_ftp = mock_ftp_cls.return_value
-            mock_ftp.__enter__.return_value = mock_ftp
-            
-            mock_ftp.connect.return_value = None
-            mock_ftp.login.return_value = None
-            mock_ftp.voidcmd.return_value = "200 Type set to I"
-            mock_ftp.size.return_value = 1024 
-            
-            def side_effect_retrbinary(cmd, callback):
-                callback(b'dummy content')
-            mock_ftp.retrbinary.side_effect = side_effect_retrbinary
+        with patch('BackcastPro.api.ftp_client.FTPClient') as mock_ftp_client_cls:
+            mock_client = MagicMock()
+            mock_ftp_client_cls.return_value = mock_client
+            mock_client.config.is_configured.return_value = True
+            mock_client.download_stocks_daily.return_value = True
 
             code = "9999"
             test_path = os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb")
             os.makedirs(os.path.dirname(test_path), exist_ok=True)
-            
+
             result = self.db_daily._download_from_ftp(code, test_path)
-            
+
             self.assertTrue(result)
-            self.assertTrue(os.path.exists(test_path))
+            mock_client.download_stocks_daily.assert_called_once_with(code, test_path)
 
     def test_metadata_operations(self):
         """Test _save_metadata and _get_metadata"""

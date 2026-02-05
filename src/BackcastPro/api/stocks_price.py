@@ -1,7 +1,3 @@
-from .lib.jquants import jquants
-from .lib.e_api import e_api
-from .lib.kabusap import kabusap
-from .lib.stooq import stooq_daily_quotes
 from .db_stocks_daily import db_stocks_daily
 from .lib.util import _Timestamp
 
@@ -40,44 +36,8 @@ class stocks_price:
         self.db.ensure_db_ready(code)
 
         # 1) cacheフォルダから取得
-        df = self.db.load_stock_prices_from_cache(code, norm_from, norm_to)
+        df = self.db.load_stock_prices_from_cache(code, from_, to)
         if df is not None and not df.empty:
-            return df
-
-        # 2) 立花証券 e-支店から取得
-        if not hasattr(self, "e_shiten"):
-            self.e_shiten = e_api()
-        if self.e_shiten.isEnable:
-            df = self.e_shiten.get_daily_quotes(code=code, from_=norm_from, to=norm_to)
-            if df is not None and not df.empty:
-                # DataFrameをcacheフォルダに保存
-                ## 非同期、遅延を避けるためデーモンスレッドで実行
-                threading.Thread(
-                    target=self.db.save_stock_prices, args=(code, df), daemon=True
-                ).start()
-                return df
-
-        # 3) J-Quantsから取得
-        if not hasattr(self, "jq"):
-            self.jq = jquants()
-        if self.jq.isEnable:
-            df = self.jq.get_daily_quotes(code=code, from_=norm_from, to=norm_to)
-            if df is not None and not df.empty:
-                # DataFrameをcacheフォルダに保存
-                ## 非同期、遅延を避けるためデーモンスレッドで実行
-                threading.Thread(
-                    target=self.db.save_stock_prices, args=(code, df), daemon=True
-                ).start()
-                return df
-
-        # 4) stooqから取得
-        df = stooq_daily_quotes(code=code, from_=norm_from, to=norm_to)
-        if df is not None and not df.empty:
-            # DataFrameをcacheフォルダに保存
-            ## 非同期、遅延を避けるためデーモンスレッドで実行
-            threading.Thread(
-                target=self.db.save_stock_prices, args=(code, df), daemon=True
-            ).start()
             return df
 
         raise ValueError(f"日本株式銘柄の取得に失敗しました: {code}")

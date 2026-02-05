@@ -15,6 +15,33 @@ from ._broker import _Broker
 from ._stats import compute_stats
 
 
+class _ChartState:
+    """チャート状態管理（chart.py の ChartStateManager と互換）"""
+
+    def __init__(self, color_theme: str = "dark"):
+        self.widgets: dict = {}
+        self.last_index: dict[str, int] = {}
+        self.indicators: dict[str, tuple] = {}
+        # 色テーマのバリデーション
+        valid_themes = ("dark", "light")
+        if color_theme not in valid_themes:
+            import warnings
+            warnings.warn(
+                f"Unknown color_theme '{color_theme}'. Using 'dark' as default. "
+                f"Valid themes: {valid_themes}",
+                stacklevel=3
+            )
+            color_theme = "dark"
+        self.color_theme: str = color_theme
+
+    def reset(self, clear_cache: bool = False) -> None:
+        """チャート状態をリセット"""
+        self.last_index = {}
+        if clear_cache:
+            self.widgets = {}
+            self.indicators = {}
+
+
 class Backtest:
     """
     特定のデータに対してバックテストを実行します。
@@ -114,21 +141,8 @@ class Backtest:
         # パフォーマンス最適化: 各銘柄の index position マッピング
         self._index_positions: dict[str, dict] = {}
 
-        # チャートウィジェットキャッシュ（パフォーマンス最適化）
-        self._chart_widgets: dict = {}
-        self._chart_last_index: dict[str, int] = {}
-        self._chart_indicators: dict[str, tuple] = {}  # (indicators, indicator_options)
-
-        # チャートの色テーマ（バリデーション付き）
-        valid_themes = ("dark", "light")
-        if color_theme not in valid_themes:
-            warnings.warn(
-                f"Unknown color_theme '{color_theme}'. Using 'dark' as default. "
-                f"Valid themes: {valid_themes}",
-                stacklevel=2
-            )
-            color_theme = "dark"
-        self._color_theme: str = color_theme
+        # チャート状態管理（chart.py と互換）
+        self._chart_state = _ChartState(color_theme)
 
         # 戦略関数
         self._strategy: Optional[Callable[['Backtest'], None]] = None
@@ -326,21 +340,10 @@ class Backtest:
 
         self._step_index += 1
 
-        # チャート自動更新
-        self._update_all_charts()
-
         if self._step_index >= len(self.index):
             self._is_finished = True
 
         return not self._is_finished
-
-    def _update_all_charts(self) -> None:
-        """保持している全チャートウィジェットを更新"""
-        for code, widget in self._chart_widgets.items():
-            try:
-                self.update_chart(widget, code)
-            except Exception:
-                pass  # ウィジェット破棄時のエラーを無視
 
     def reset(self, *, clear_chart_cache: bool = False) -> 'Backtest':
         """
@@ -354,19 +357,12 @@ class Backtest:
         self._step_index = 0
         self._is_finished = False
         self._results = None
-        # インデックスをリセット（次回chart()で全データ更新）
-        self._chart_last_index = {}
-        # 明示的に指定された場合のみウィジェットをクリア
-        if clear_chart_cache:
-            self._chart_widgets = {}
-            self._chart_indicators = {}
-        # 初期データ（最初の1行）でチャートをリセット
+        # 初期データ（最初の1行）でリセット
         self._current_data = {}
         if self._data:
             for code, df in self._data.items():
                 if len(df) > 0:
                     self._current_data[code] = df.iloc[:1]
-        self._update_all_charts()
 
         # 取引コールバックを新しいブローカーに再登録
         self._setup_trade_callbacks()
@@ -476,226 +472,6 @@ class Backtest:
             size = 1 - sys.float_info.epsilon
 
         return self._broker_instance.new_order(code, -size, limit, stop, sl, tp, tag)
-
-    # =========================================================================
-    # 可視化
-    # =========================================================================
-
-    def _build_chart_options(self, height: int, visible_bars: int) -> dict:
-        """チャートオプション辞書を構築（テーマ色を含む）"""
-        from .api.chart import get_theme_colors
-        theme_colors = get_theme_colors(self._color_theme)
-        return {
-            "height": height,
-            "showVolume": False,
-            "visibleBars": visible_bars,
-            **theme_colors,
-        }
-
-    def chart(
-        self,
-        code: str = None,
-        height: int = 500,
-        show_tags: bool = True,
-        visible_bars: int = 60,
-        indicators: list[str] = None,
-        indicator_options: dict = None,
-    ):
-        """
-        現在時点までのローソク足チャートを生成（売買マーカー付き）
-
-        差分更新対応:
-        - 初回呼び出し: 全データでウィジェット作成
-        - 2回目以降: 既存ウィジェットを再利用し差分更新
-
-        Args:
-            code: 銘柄コード
-            height: チャートの高さ
-            show_tags: 売買理由（tag）をチャートに表示するか
-            visible_bars: 初期表示するバー数（デフォルト: 60本≒約2か月）
-            indicators: 表示する指標列名のリスト（例: ['SMA_20', 'SMA_50']）
-            indicator_options: 指標の表示オプション辞書
-
-        Returns:
-            LightweightChartWidget
-        """
-        if code is None:
-            if len(self._data) == 1:
-                code = list(self._data.keys())[0]
-            else:
-                raise ValueError("複数銘柄がある場合はcodeを指定してください")
-
-        # indicators をキャッシュに保存（早期リターン前に）
-        if indicators:
-            self._chart_indicators[code] = (indicators, indicator_options)
-
-        if not self._is_started or self._broker_instance is None:
-            from .api.chart import LightweightChartWidget
-            if code not in self._chart_widgets:
-                self._chart_widgets[code] = LightweightChartWidget()
-            self._chart_widgets[code].options = self._build_chart_options(height, visible_bars)
-            return self._chart_widgets[code]
-
-        if code not in self._current_data or len(self._current_data[code]) == 0:
-            from .api.chart import LightweightChartWidget
-            if code not in self._chart_widgets:
-                self._chart_widgets[code] = LightweightChartWidget()
-            self._chart_widgets[code].options = self._build_chart_options(height, visible_bars)
-            return self._chart_widgets[code]
-
-        df = self._current_data[code]
-        current_idx = len(df)
-
-        # 全取引（アクティブ + 決済済み）を取得
-        all_trades = list(self._broker_instance.closed_trades) + list(self._broker_instance.trades)
-
-        # キャッシュ確認
-        if code in self._chart_widgets:
-            widget = self._chart_widgets[code]
-            last_idx = self._chart_last_index.get(code, 0)
-
-            # テーマ色を含むオプションを更新（キャッシュヒット時も常に適用）
-            widget.options = self._build_chart_options(height, visible_bars)
-
-            # 巻き戻しまたは大きなジャンプの場合は全データ更新
-            needs_full_update = (
-                last_idx == 0 or
-                current_idx < last_idx or
-                current_idx - last_idx > 1
-            )
-
-            if needs_full_update:
-                # 全データ更新
-                from .api.chart import df_to_lwc_data, trades_to_markers, df_to_lwc_indicators, prepare_indicator_options, get_last_bar, get_theme_colors
-                theme_colors = get_theme_colors(self._color_theme)
-                widget.data = df_to_lwc_data(df)
-                widget.markers = trades_to_markers(all_trades, code, show_tags, theme_colors=theme_colors)
-
-                # last_bar も設定（全データ更新時）
-                bar = get_last_bar(df)
-                if hasattr(widget, "update_bar_fast"):
-                    widget.update_bar_fast(bar)
-                else:
-                    widget.last_bar = bar
-
-                # 指標データ全更新（キャッシュからも取得を試みる）
-                effective_indicators = indicators or (self._chart_indicators.get(code, (None, None))[0])
-                effective_options = indicator_options or (self._chart_indicators.get(code, (None, None))[1])
-                if effective_indicators:
-                    widget.indicator_options = prepare_indicator_options(effective_indicators, effective_options)
-                    widget.indicator_series = df_to_lwc_indicators(df, effective_indicators)
-            else:
-                # 差分更新: last_bar_packed (バイナリ) と data の両方を更新
-                # last_bar_packed: JS側でリアルタイム更新用（change:last_bar_packedイベント）
-                # data: 同期が失われた場合のフォールバック用
-                from .api.chart import df_to_lwc_data, get_last_bar, trades_to_markers, get_last_indicators, get_theme_colors
-                theme_colors = get_theme_colors(self._color_theme)
-                bar = get_last_bar(df)
-                # バイナリプロトコルで高速更新 (INP改善)
-                if hasattr(widget, "update_bar_fast"):
-                    widget.update_bar_fast(bar)
-                else:
-                    widget.last_bar = bar
-                widget.data = df_to_lwc_data(df)  # フォールバック用に全データも更新
-                widget.markers = trades_to_markers(all_trades, code, show_tags, theme_colors=theme_colors)
-
-                # 指標データ差分更新（キャッシュからも取得を試みる）
-                effective_indicators = indicators or (self._chart_indicators.get(code, (None, None))[0])
-                if effective_indicators:
-                    last_ind = get_last_indicators(df, effective_indicators)
-                    if last_ind:
-                        widget.last_indicators = last_ind
-
-            self._chart_last_index[code] = current_idx
-            # indicators 設定をキャッシュ（update_chart用）
-            if indicators:
-                self._chart_indicators[code] = (indicators, indicator_options)
-            return widget
-
-        # 初回: 新規ウィジェット作成
-        from .api.chart import chart_by_df, get_last_bar
-        widget = chart_by_df(
-            df,
-            trades=all_trades,
-            height=height,
-            show_tags=show_tags,
-            show_volume=False,
-            title=f"{code} - {self.current_time}",
-            code=code,
-            visible_bars=visible_bars,
-            indicators=indicators,
-            indicator_options=indicator_options,
-            theme=self._color_theme,
-        )
-
-        # 初回作成時にlast_barを設定
-        bar = get_last_bar(df)
-        if hasattr(widget, "update_bar_fast"):
-            widget.update_bar_fast(bar)
-        else:
-            widget.last_bar = bar
-
-        self._chart_widgets[code] = widget
-        self._chart_last_index[code] = current_idx
-        self._chart_indicators[code] = (indicators, indicator_options)
-
-        return widget
-
-    def update_chart(self, widget, code: str = None) -> None:
-        """
-        既存チャートウィジェットを差分更新（軽量）
-
-        chart()と異なり、ウィジェット作成やキャッシュ管理をスキップし、
-        データとマーカーの更新のみを行う。高頻度更新に最適。
-
-        Args:
-            widget: chart()で作成したLightweightChartWidget
-            code: 銘柄コード（省略時は最初のデータを使用）
-
-        Example:
-            # セル1: チャート作成（一度だけ）
-            chart_widget = bt.chart(code=code)
-
-            # セル2: 差分更新（AutoRefreshで繰り返し）
-            bt.update_chart(chart_widget, code)
-        """
-        if code is None:
-            code = next(iter(self._data.keys()), None)
-        if code is None:
-            return
-
-        if code not in self._current_data or len(self._current_data[code]) == 0:
-            return
-
-        df = self._current_data[code]
-
-        # 全データ更新（新しいバーを追加するため）
-        from .api.chart import df_to_lwc_data, get_last_bar
-        widget.data = df_to_lwc_data(df)
-
-        # last_bar も更新（リアルタイム描画用）
-        bar = get_last_bar(df)
-        if hasattr(widget, "update_bar_fast"):
-            widget.update_bar_fast(bar)
-        else:
-            widget.last_bar = bar
-
-        # マーカー更新
-        if self._broker_instance:
-            from .api.chart import trades_to_markers, get_theme_colors
-            theme_colors = get_theme_colors(self._color_theme)
-            all_trades = list(self._broker_instance.closed_trades) + list(self._broker_instance.trades)
-            widget.markers = trades_to_markers(all_trades, code, show_tags=True, theme_colors=theme_colors)
-
-        # インジケーター更新（キャッシュから設定を取得）
-        if code in self._chart_indicators:
-            indicators, indicator_options = self._chart_indicators[code]
-            if indicators:
-                from .api.chart import df_to_lwc_indicators, prepare_indicator_options
-                widget.indicator_series = df_to_lwc_indicators(df, indicators)
-                # オプションが未設定の場合のみ設定
-                if not widget.indicator_options:
-                    widget.indicator_options = prepare_indicator_options(indicators, indicator_options)
 
     # =========================================================================
     # ステップ実行用プロパティ
