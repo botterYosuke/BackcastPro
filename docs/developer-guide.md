@@ -25,7 +25,7 @@ BackcastProの開発に参加するためのガイドです。
 
 1. **リポジトリをクローン**
 ```powershell
-git clone https://github.com/BackcastPro/BackcastPro.git
+git clone https://github.com/botterYosuke/BackcastPro.git
 cd BackcastPro
 ```
 
@@ -38,7 +38,6 @@ python -m venv .venv
 3. **依存関係をインストール**
 ```powershell
 python -m pip install -e .
-python -m pip install -r requirements.txt
 ```
 
 4. **開発用依存関係をインストール**
@@ -69,20 +68,25 @@ BackcastPro/
 │   └── BackcastPro/
 │       ├── __init__.py          # メインパッケージ
 │       ├── backtest.py          # バックテストエンジン
-│       ├── strategy.py          # 戦略基底クラス
 │       ├── _broker.py           # ブローカー実装
 │       ├── _stats.py            # 統計計算
 │       ├── order.py             # 注文クラス
 │       ├── position.py          # ポジションクラス
 │       ├── trade.py             # トレードクラス
-│       └── data/
+│       └── api/                 # データ取得API
 │           ├── __init__.py
-│           └── JapanStock.py    # データ取得
+│           ├── stocks_price.py  # 日足データ取得
+│           ├── stocks_board.py  # 板情報取得
+│           ├── stocks_info.py   # 銘柄情報取得
+│           ├── db_manager.py    # データベース管理
+│           ├── db_stocks_daily.py
+│           ├── db_stocks_board.py
+│           ├── db_stocks_info.py
+│           └── ftp_client.py    # FTPクライアント
 ├── tests/                       # テストファイル
 ├── docs/                        # ドキュメント
-├── examples/                    # サンプルコード
+│   └── examples/                # サンプルコード
 ├── pyproject.toml              # プロジェクト設定
-├── requirements.txt            # 依存関係
 └── README.md                   # プロジェクト説明
 ```
 
@@ -92,38 +96,45 @@ BackcastPro/
 
 #### 1. Backtestクラス
 - バックテストの実行を管理
-- データと戦略を統合
+- データと戦略関数を統合
+- ステップ実行・一括実行をサポート
 - 結果の計算と返却
 
-#### 2. Strategyクラス
-- トレーディング戦略の基底クラス
-- ユーザーが戦略を実装するためのインターフェース
+#### 2. 戦略関数（function-based API）
+- ユーザーが定義する戦略ロジック
+- `def my_strategy(bt): ...` 形式
+- `bt.buy()` / `bt.sell()` で売買指示
 
 #### 3. _Brokerクラス
 - 注文の実行と管理
 - ポジションとトレードの追跡
 - 手数料とスプレッドの計算
 
-#### 4. データモジュール
+#### 4. APIモジュール
 - 外部APIからのデータ取得
-- データの前処理と変換
+- DuckDBを使ったローカルキャッシュ
+- 日本株価・板情報・銘柄情報の取得
 
 ### データフロー
 
 ```
 1. データ取得
    ↓
-2. 戦略初期化 (Strategy.init)
+2. バックテスト初期化 (Backtest.__init__)
    ↓
-3. バックテスト実行 (Backtest.run)
+3. 戦略関数設定 (set_strategy)
    ↓
-4. 各タイムスタンプで戦略実行 (Strategy.next(current_time))
+4. バックテスト開始 (start)
    ↓
-5. 注文処理 (_Broker.next(current_time))
+5. 各ステップで戦略関数実行 (strategy(bt))
    ↓
-6. 統計計算 (_stats.compute_stats)
+6. 1バー進める (step)
    ↓
-7. 結果返却
+7. 注文処理 (_Broker.next)
+   ↓
+8. 統計計算 (finalize)
+   ↓
+9. 結果返却 (pd.Series)
 ```
 
 ### クラス図
@@ -132,50 +143,54 @@ BackcastPro/
 classDiagram
     class Backtest {
         +data: dict[str, DataFrame]
-        +strategy: Strategy
+        +set_strategy(func)
+        +start()
+        +step() bool
+        +goto(step, strategy)
+        +buy(**kwargs) Order
+        +sell(**kwargs) Order
         +run() Series
+        +finalize() Series
+        +get_state_snapshot() dict
     }
-    
-    class Strategy {
-        +init()
-        +next(current_time)
-        +buy() Order
-        +sell() Order
-    }
-    
+
     class _Broker {
         +equity: float
+        +cash: float
         +position: Position
         +trades: List[Trade]
         +next(current_time)
-        +new_order() Order
+        +new_order(**kwargs) Order
     }
-    
+
     class Order {
+        +code: str
         +size: float
         +limit: float
         +stop: float
         +sl: float
         +tp: float
+        +tag: object
     }
-    
+
     class Position {
         +size: float
         +is_long: bool
         +is_short: bool
         +close()
     }
-    
+
     class Trade {
+        +code: str
         +entry_price: float
         +exit_price: float
+        +entry_time: Timestamp
+        +exit_time: Timestamp
         +pl: float
         +close()
     }
-    
-    Backtest --> Strategy
+
     Backtest --> _Broker
-    Strategy --> _Broker
     _Broker --> Order
     _Broker --> Position
     _Broker --> Trade
@@ -192,9 +207,9 @@ classDiagram
 
 ### 命名規則
 
-- **クラス名**: PascalCase (例: `Backtest`, `Strategy`)
-- **関数名**: snake_case (例: `run`, `calculate_stats`)
-- **変数名**: snake_case (例: `data`, `strategy`)
+- **クラス名**: PascalCase (例: `Backtest`, `_Broker`)
+- **関数名**: snake_case (例: `run`, `compute_stats`)
+- **変数名**: snake_case (例: `data`, `step_index`)
 - **定数名**: UPPER_SNAKE_CASE (例: `DEFAULT_CASH`)
 
 ### ドキュメント
@@ -209,28 +224,28 @@ classDiagram
 def calculate_rsi(data: pd.DataFrame, period: int = 14) -> pd.Series:
     """
     RSI（相対力指数）を計算します。
-    
+
     Args:
         data: OHLCVデータを含むDataFrame
         period: RSIの計算期間（デフォルト: 14）
-    
+
     Returns:
         RSI値を含むSeries
-    
+
     Raises:
         ValueError: データが空の場合
     """
     if data.empty:
         raise ValueError("データが空です")
-    
+
     # RSI計算ロジック
     delta = data['Close'].diff()
     gain = delta.clip(lower=0.0)
     loss = -delta.clip(upper=0.0)
-    
+
     avg_gain = gain.rolling(period, min_periods=period).mean()
     avg_loss = loss.rolling(period, min_periods=period).mean()
-    
+
     rs = avg_gain / (avg_loss.replace(0, pd.NA))
     return 100 - (100 / (1 + rs))
 ```
@@ -241,13 +256,20 @@ def calculate_rsi(data: pd.DataFrame, period: int = 14) -> pd.Series:
 
 ```
 tests/
-├── test_backtest.py      # バックテストのテスト
-├── test_strategy.py      # 戦略のテスト
-├── test_broker.py        # ブローカーのテスト
-├── test_data.py          # データ取得のテスト
-└── fixtures/             # テストデータ
-    ├── sample_data.csv
-    └── test_strategies.py
+├── test_backtest_api.py              # バックテストAPIのテスト
+├── test_backtest_chart_auto_update.py # チャート自動更新のテスト
+├── test_backtest_set_data.py         # データ設定のテスト
+├── test_backtest_step_loop.py        # ステップ実行のテスト
+├── test_db_stocks_board.py           # 板情報DBのテスト
+├── test_db_stocks_daily.py           # 日足DBのテスト
+├── test_db_stocks_info.py            # 銘柄情報DBのテスト
+├── test_e_api.py                     # 外部APIのテスト
+├── test_ftp_client.py                # FTPクライアントのテスト
+├── test_indicators.py                # インジケーターのテスト
+├── test_j-quants.py                  # J-Quantsのテスト
+├── test_stooq.py                     # Stooqのテスト
+├── test_relative_size_option_c.py    # 相対サイズオプションのテスト
+└── marimo_test_indicators.py         # marimoインジケーターテスト
 ```
 
 ### テストの実行
@@ -260,7 +282,7 @@ python -m pytest
 python -m pytest --cov=BackcastPro
 
 # 特定のテストを実行
-python -m pytest tests/test_backtest.py
+python -m pytest tests/test_backtest_api.py
 
 # 詳細な出力で実行
 python -m pytest -v
@@ -271,16 +293,15 @@ python -m pytest -v
 ```python
 import pytest
 import pandas as pd
-from BackcastPro import Backtest, Strategy
+from BackcastPro import Backtest
 
-class TestStrategy(Strategy):
-    def init(self):
-        pass
-    
-    def next(self, current_time):
-        for code, df in self.data.items():
-            if len(df) == 1:
-                self.buy(code=code)
+
+def test_strategy(bt):
+    """テスト用の戦略関数"""
+    for code, df in bt.data.items():
+        if len(df) == 1 and bt.position_of(code) == 0:
+            bt.buy(code=code, tag="test_buy")
+
 
 def test_backtest_basic():
     """基本的なバックテストのテスト"""
@@ -292,31 +313,37 @@ def test_backtest_basic():
         'Close': [104, 105, 106],
         'Volume': [1000, 1100, 1200]
     }, index=pd.date_range('2023-01-01', periods=3))
-    
-    # バックテストを実行
-    bt = Backtest({'TEST': data}, TestStrategy, cash=10000)
-    results = bt.run()
-    
-    # 結果を検証
-    assert results['Return [%]'] > 0
-    assert results['# Trades'] > 0
-    assert results['_strategy'] == 'TestStrategy'
 
-def test_strategy_buy_sell():
-    """戦略の買い売りロジックのテスト"""
-    strategy = TestStrategy(None, None)
-    
-    # モックデータでテスト
-    mock_data = pd.DataFrame({
-        'Close': [100, 101, 102]
-    })
-    strategy._data = mock_data
-    
-    # 戦略を実行
-    strategy.next(pd.Timestamp('2023-01-01'))
-    
+    # バックテストを実行
+    bt = Backtest(data={'TEST': data}, cash=10000)
+    bt.set_strategy(test_strategy)
+    results = bt.run()
+
     # 結果を検証
-    assert strategy.position.size > 0
+    assert results['Return [%]'] >= 0
+    assert results['# Trades'] >= 0
+
+
+def test_step_execution():
+    """ステップ実行のテスト"""
+    data = pd.DataFrame({
+        'Open': [100, 101, 102],
+        'High': [105, 106, 107],
+        'Low': [99, 100, 101],
+        'Close': [104, 105, 106],
+        'Volume': [1000, 1100, 1200]
+    }, index=pd.date_range('2023-01-01', periods=3))
+
+    bt = Backtest(data={'TEST': data}, cash=10000)
+
+    count = 0
+    while not bt.is_finished:
+        test_strategy(bt)
+        bt.step()
+        count += 1
+
+    assert count == 3
+    assert bt.is_finished
 ```
 
 ### フィクスチャの使用
@@ -333,22 +360,23 @@ def sample_data():
         'Volume': [1000, 1100, 1200, 1300, 1400]
     }, index=pd.date_range('2023-01-01', periods=5))
 
+
 @pytest.fixture
 def simple_strategy():
-    """シンプルな戦略のフィクスチャ"""
-    class SimpleStrategy(Strategy):
-        def init(self):
-            pass
-        def next(self, current_time):
-            if len(self.data) == 1:
-                self.buy()
-    return SimpleStrategy
+    """シンプルな戦略関数のフィクスチャ"""
+    def strategy(bt):
+        for code, df in bt.data.items():
+            if len(df) == 1 and bt.position_of(code) == 0:
+                bt.buy(code=code)
+    return strategy
+
 
 def test_with_fixtures(sample_data, simple_strategy):
     """フィクスチャを使用したテスト"""
-    bt = Backtest(sample_data, simple_strategy)
+    bt = Backtest(data={'TEST': sample_data}, cash=10000)
+    bt.set_strategy(simple_strategy)
     results = bt.run()
-    assert results['Return [%]'] > 0
+    assert results['Return [%]'] >= 0
 ```
 
 ## コントリビューション
@@ -424,12 +452,12 @@ PRを作成する際は以下を含めてください：
 1. **バージョン更新**
 ```toml
 # pyproject.toml の version を更新
-version = "0.1.0"
+version = "0.4.0"
 ```
 
 2. **CHANGELOG更新**
 ```markdown
-## [0.1.0] - 2023-01-01
+## [0.4.0] - 2025-01-01
 
 ### Added
 - 新機能A
@@ -451,18 +479,18 @@ python -m pytest --cov=BackcastPro
 
 4. **ビルド**
 ```powershell
-python -m build
+uv build
 ```
 
 5. **PyPIにアップロード**
 ```powershell
-python -m twine upload dist/*
+uv publish
 ```
 
 6. **Gitタグ作成**
 ```powershell
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.4.0
+git push origin v0.4.0
 ```
 
 ### 自動化
@@ -485,17 +513,25 @@ from BackcastPro import Backtest
 
 def profile_backtest():
     """バックテストのプロファイリング"""
+    def my_strategy(bt):
+        for code, df in bt.data.items():
+            if len(df) > 20 and bt.position_of(code) == 0:
+                sma = df['Close'].rolling(20).mean().iloc[-1]
+                if df['Close'].iloc[-1] < sma:
+                    bt.buy(code=code)
+
     # プロファイリングを開始
     profiler = cProfile.Profile()
     profiler.enable()
-    
+
     # バックテストを実行
-    bt = Backtest(data, MyStrategy)
+    bt = Backtest(data={'TEST': data}, cash=10000)
+    bt.set_strategy(my_strategy)
     results = bt.run()
-    
+
     # プロファイリングを停止
     profiler.disable()
-    
+
     # 結果を表示
     stats = pstats.Stats(profiler)
     stats.sort_stats('cumulative')
@@ -513,18 +549,24 @@ import os
 
 def monitor_memory():
     """メモリ使用量を監視"""
+    def my_strategy(bt):
+        for code, df in bt.data.items():
+            if bt.position_of(code) == 0:
+                bt.buy(code=code)
+
     process = psutil.Process(os.getpid())
-    
+
     # バックテスト前
     memory_before = process.memory_info().rss / 1024 / 1024  # MB
-    
+
     # バックテスト実行
-    bt = Backtest(data, MyStrategy)
+    bt = Backtest(data={'TEST': data}, cash=10000)
+    bt.set_strategy(my_strategy)
     results = bt.run()
-    
+
     # バックテスト後
     memory_after = process.memory_info().rss / 1024 / 1024  # MB
-    
+
     print(f"メモリ使用量: {memory_after - memory_before:.2f} MB")
 ```
 

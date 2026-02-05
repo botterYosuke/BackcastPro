@@ -1,5 +1,5 @@
 from .db_stocks_daily import db_stocks_daily
-from .lib.util import _Timestamp
+from trading_data.lib.util import _Timestamp
 
 import pandas as pd
 import threading
