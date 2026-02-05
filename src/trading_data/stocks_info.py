@@ -29,11 +29,12 @@ class stocks_info:
             return None
 
         df = self.jq.get_listed_info(code=code, date=date)
-        # Codeを4文字にする
-        df['Code'] = df['Code'].str[:4]
 
         if df is None or df.empty:
             return None
+
+        # Codeを4文字にする
+        df['Code'] = df['Code'].str[:4]
 
         return df
 
