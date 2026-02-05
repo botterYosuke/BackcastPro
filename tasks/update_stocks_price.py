@@ -23,8 +23,8 @@ from logging.handlers import RotatingFileHandler
 
 import pandas as pd
 
-from TradingData.stocks_price import stocks_price
-from TradingData.stocks_info import stocks_info
+from trading_data.stocks_price import stocks_price
+from trading_data.stocks_info import stocks_info
 
 logger = logging.getLogger(__name__)
 

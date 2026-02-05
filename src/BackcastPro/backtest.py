@@ -345,14 +345,8 @@ class Backtest:
 
         return not self._is_finished
 
-    def reset(self, *, clear_chart_cache: bool = False) -> 'Backtest':
-        """
-        バックテストをリセットして最初から
-
-        Args:
-            clear_chart_cache: チャートウィジェットキャッシュをクリアするか
-                              （デフォルト: False でウィジェットは再利用）
-        """
+    def reset(self) -> 'Backtest':
+        """バックテストをリセットして最初から"""
         self._broker_instance = self._broker_factory(data=self._data)
         self._step_index = 0
         self._is_finished = False
