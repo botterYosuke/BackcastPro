@@ -97,9 +97,6 @@ def __(bt, code, mo, my_strategy, slider):
     # スライダー位置まで進める
     bt.goto(slider.value, strategy=my_strategy)
 
-    # チャート生成
-    chart = bt.chart(code=code, height=500, show_tags=True)
-
     # 情報パネル
     info = mo.md(f"""
     ## 状況
@@ -114,8 +111,8 @@ def __(bt, code, mo, my_strategy, slider):
     | 決済済取引 | {len(bt.closed_trades)} 件 |
     """)
 
-    mo.vstack([chart, info])
-    return chart, info
+    mo.vstack([info])
+    return (info,)
 
 
 @app.cell
