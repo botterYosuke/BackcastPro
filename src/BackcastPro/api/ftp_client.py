@@ -1,7 +1,7 @@
 """
-FTPクライアントユーティリティ
+FTPSクライアントユーティリティ
 
-BackcastProのFTP操作を一元管理するモジュール。
+BackcastProのFTPS操作を一元管理するモジュール。
 ダウンロード・アップロード機能を提供する。
 """
 import ftplib
@@ -11,6 +11,18 @@ from dataclasses import dataclass
 from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+
+class _NatFriendlyFTP_TLS(ftplib.FTP_TLS):
+    """NAT越しでもPASVが動くFTP_TLS。
+
+    サーバーがPASVレスポンスで内部IPを返す場合、
+    制御接続のホストに差し替える。
+    """
+
+    def makepasv(self):
+        _host, port = super().makepasv()
+        return self.host, port
 
 
 @dataclass
@@ -58,9 +70,10 @@ class FTPClient:
             成功時True、失敗時False
         """
         try:
-            with ftplib.FTP() as ftp:
+            with _NatFriendlyFTP_TLS() as ftp:
                 ftp.connect(self.config.host, self.config.port)
                 ftp.login(self.config.username, self.config.password)
+                ftp.prot_p()
 
                 # ファイル存在確認
                 try:
@@ -105,9 +118,10 @@ class FTPClient:
             成功時True、失敗時False
         """
         try:
-            with ftplib.FTP() as ftp:
+            with _NatFriendlyFTP_TLS() as ftp:
                 ftp.connect(self.config.host, self.config.port, timeout=60)
                 ftp.login(self.config.username, self.config.password)
+                ftp.prot_p()
                 ftp.set_pasv(True)
 
                 # ディレクトリに移動（必要なら作成）
@@ -171,9 +185,10 @@ class FTPClient:
         results: dict[str, list] = {'success': [], 'failed': []}
 
         try:
-            with ftplib.FTP() as ftp:
+            with _NatFriendlyFTP_TLS() as ftp:
                 ftp.connect(self.config.host, self.config.port, timeout=60)
                 ftp.login(self.config.username, self.config.password)
+                ftp.prot_p()
                 ftp.set_pasv(True)
 
                 for local_path, remote_path in files:

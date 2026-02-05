@@ -1,11 +1,11 @@
 """
-BackcastPro package entry point.
+trading_data package entry point.
 
-This module provides access to the main BackcastPro functionality.
+This module provides access to the main trading_data functionality.
 """
 
-# Import everything from the BackcastPro package
-from .BackcastPro import *
+# Import everything from the trading_data package
+from .trading_data import *
 
-# Also make the BackcastPro package directly accessible
-import BackcastPro
+# Also make the trading_data package directly accessible
+import trading_data

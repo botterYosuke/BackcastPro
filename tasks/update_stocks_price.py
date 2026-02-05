@@ -12,19 +12,26 @@
     python update_stocks_price.py                    # 全銘柄処理
     python update_stocks_price.py --codes 7203,8306  # 特定銘柄のみ
     python update_stocks_price.py --dry-run          # FTPアップロードをスキップ
+    python update_stocks_price.py --workers 8        # 並列ワーカー数を指定
 """
 import os
 import sys
 import logging
 import argparse
+import threading
+import queue
+import time
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging.handlers import RotatingFileHandler
 
 import pandas as pd
 
 from trading_data.stocks_price import stocks_price
 from trading_data.stocks_info import stocks_info
+from trading_data.lib.e_api import e_api
+from trading_data.lib.jquants import jquants as jquants_cls
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +110,12 @@ def parse_arguments() -> argparse.Namespace:
         default=7,
         help='取得する過去日数（デフォルト: 7）'
     )
+    parser.add_argument(
+        '--workers',
+        type=int,
+        default=4,
+        help='並列ワーカー数（デフォルト: 4）'
+    )
     return parser.parse_args()
 
 
@@ -180,61 +193,82 @@ def merge_with_jquants_priority(
     return merged
 
 
-def fetch_and_merge_stock_price(
-    sp: stocks_price,
+def _fetch_with_retry(
+    fetch_fn,
     code: str,
     from_: datetime,
-    to: datetime
-) -> tuple[pd.DataFrame | None, str | None]:
+    to: datetime,
+    max_attempts: int = 3,
+) -> pd.DataFrame | None:
+    """指数バックオフ付きリトライ（Stooq/J-Quants用）"""
+    for attempt in range(1, max_attempts + 1):
+        try:
+            return fetch_fn(code, from_, to)
+        except Exception:
+            if attempt == max_attempts:
+                raise
+            wait = min(1 * (2 ** (attempt - 1)), 10)
+            logger.debug(
+                f"  Retry {attempt}/{max_attempts} for {code}, "
+                f"wait {wait}s"
+            )
+            time.sleep(wait)
+
+
+def process_stock(
+    code: str,
+    tachibana_df: pd.DataFrame | None,
+    from_date: datetime,
+    to_date: datetime,
+) -> tuple[str, bool, int, str | None]:
     """
-    フォールバック + J-Quants優先ロジックで株価取得
-
-    1. tachibana を試行
-    2. tachibana 失敗時は stooq を試行
-    3. 1 or 2 の成功に関わらず jquants も取得
-    4. jquants のデータで上書き（同じ日付のレコードを置換）
-
-    Returns:
-        (DataFrame, source文字列) のタプル
+    パイプラインのConsumer: Tachibana結果を受け取り
+    Stooqフォールバック → J-Quants取得 → マージ → DuckDB保存
     """
-    base_df = None
-    source = None
+    sp = stocks_price()
+    base_df = tachibana_df
+    source = 'tachibana' if (
+        base_df is not None and not base_df.empty
+    ) else None
 
-    # Step 1: Tachibana を試行
-    try:
-        base_df = sp._fetch_from_tachibana(code, from_, to)
-        if base_df is not None and not base_df.empty:
-            source = 'tachibana'
-            logger.debug(f"  Tachibana: {len(base_df)} records")
-    except Exception as e:
-        logger.debug(f"  Tachibana failed: {e}")
-
-    # Step 2: Tachibana 失敗時は Stooq を試行
+    # Stooq fallback（Tachibana失敗時のみ）
     if base_df is None or base_df.empty:
         try:
-            base_df = sp._fetch_from_stooq(code, from_, to)
+            base_df = _fetch_with_retry(
+                sp._fetch_from_stooq, code, from_date, to_date
+            )
             if base_df is not None and not base_df.empty:
                 source = 'stooq'
-                logger.debug(f"  Stooq: {len(base_df)} records")
+                logger.debug(f"  Stooq {code}: {len(base_df)} records")
         except Exception as e:
-            logger.debug(f"  Stooq failed: {e}")
+            logger.debug(f"  Stooq {code} failed: {e}")
 
-    # Step 3: J-Quants は常に取得し、上書き
+    # J-Quants（常に取得）
     jquants_df = None
     try:
-        jquants_df = sp._fetch_from_jquants(code, from_, to)
+        jquants_df = _fetch_with_retry(
+            sp._fetch_from_jquants, code, from_date, to_date
+        )
         if jquants_df is not None and not jquants_df.empty:
-            logger.debug(f"  J-Quants: {len(jquants_df)} records")
+            logger.debug(f"  J-Quants {code}: {len(jquants_df)} records")
     except Exception as e:
-        logger.debug(f"  J-Quants failed: {e}")
+        logger.debug(f"  J-Quants {code} failed: {e}")
 
-    # Step 4: マージ（J-Quants優先）
+    # マージ（J-Quants優先）
     if jquants_df is not None and not jquants_df.empty:
-        merged_df = merge_with_jquants_priority(base_df, jquants_df)
-        final_source = 'jquants' if source is None else f'{source}+jquants'
-        return merged_df, final_source
+        final_df = merge_with_jquants_priority(base_df, jquants_df)
+        final_source = (
+            'jquants' if source is None else f'{source}+jquants'
+        )
+    else:
+        final_df = base_df
+        final_source = source
 
-    return base_df, source
+    # DuckDB保存
+    if final_df is not None and not final_df.empty:
+        sp.db.save_stock_prices(code, final_df)
+        return code, True, len(final_df), final_source
+    return code, False, 0, None
 
 
 def upload_to_ftp(modified_codes: list[str], dry_run: bool = False) -> dict:
@@ -271,21 +305,39 @@ def upload_to_ftp(modified_codes: list[str], dry_run: bool = False) -> dict:
     cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', '.')
     local_dir = os.path.join(cache_dir, 'stocks_daily')
 
-    logger.info(f"FTP接続中: {client.config.host}:{client.config.port}")
-
+    # upload_multiple() で単一FTPS接続でバッチアップロード
+    files = []
     for code in modified_codes:
         local_path = os.path.join(local_dir, f"{code}.duckdb")
-
         if not os.path.exists(local_path):
             logger.warning(f"ローカルファイルなし: {local_path}")
             results['failed'].append((code, "File not found"))
             continue
+        remote_path = f"{client.STOCKS_DAILY_DIR}/{code}.duckdb"
+        files.append((local_path, remote_path))
 
-        if client.upload_stocks_daily(code, local_path):
-            results['success'].append(code)
-            logger.debug(f"  アップロード完了: {code}.duckdb")
-        else:
-            results['failed'].append((code, "Upload failed"))
+    if not files:
+        logger.info("アップロード対象ファイルなし")
+        return results
+
+    logger.info(
+        f"FTPバッチアップロード開始: "
+        f"{client.config.host}:{client.config.port} "
+        f"({len(files)} ファイル)"
+    )
+    ftp_results = client.upload_multiple(files)
+
+    # upload_multiple の結果を code ベースに変換
+    for local_path in ftp_results.get('success', []):
+        filename = os.path.basename(local_path)
+        code = filename.replace('.duckdb', '')
+        results['success'].append(code)
+    for item in ftp_results.get('failed', []):
+        if isinstance(item, tuple):
+            local_path, reason = item
+            filename = os.path.basename(local_path)
+            code = filename.replace('.duckdb', '')
+            results['failed'].append((code, reason))
 
     logger.info("FTPアップロード処理完了")
 
@@ -322,27 +374,87 @@ def main():
     from_date, to_date = get_fetch_date_range(args.days)
     logger.info(f"取得期間: {from_date.strftime('%Y-%m-%d')} 〜 {to_date.strftime('%Y-%m-%d')}")
 
-    # 3. 各銘柄の株価取得
+    # 3. パイプライン方式で株価取得
+    #    Producer: Tachibana直列 → Queue → Consumer: Stooq/J-Quants/Save並列
     sp = stocks_price()
+    # シングルトンをスレッド開始前に事前初期化
+    # （スレッド間の lazy-init 競合を防止）
+    sp.e_shiten = e_api()
+    sp.jq = jquants_cls()
     modified_codes = []
+    tachibana_queue = queue.Queue()
 
-    for i, code in enumerate(codes, 1):
-        logger.info(f"[{i}/{len(codes)}] {code} 処理中...")
+    def tachibana_producer():
+        """Tachibana APIを直列で呼び出し、結果をキューに流す"""
         try:
-            df, source = fetch_and_merge_stock_price(sp, code, from_date, to_date)
-            if df is not None and not df.empty:
-                sp.db.save_stock_prices(code, df)
-                modified_codes.append(code)
-                summary.success_count += 1
-                logger.info(f"  → 成功 (source: {source}, records: {len(df)})")
-            else:
+            for i, code in enumerate(codes, 1):
+                tachi_df = None
+                try:
+                    tachi_df = sp._fetch_from_tachibana(
+                        code, from_date, to_date
+                    )
+                    if tachi_df is not None and not tachi_df.empty:
+                        logger.debug(
+                            f"  [{i}/{len(codes)}] Tachibana {code}: "
+                            f"{len(tachi_df)} records"
+                        )
+                except Exception as e:
+                    logger.debug(f"  Tachibana {code} failed: {e}")
+                tachibana_queue.put((code, tachi_df))
+        finally:
+            tachibana_queue.put(None)  # 終了シグナル（必ず送信）
+
+    producer = threading.Thread(
+        target=tachibana_producer, daemon=True
+    )
+    producer.start()
+
+    logger.info(f"パイプライン開始 (workers={args.workers})")
+
+    futures = {}
+    with ThreadPoolExecutor(max_workers=args.workers) as executor:
+        # キューからTachibana結果を受け取り、Consumer に投入
+        while True:
+            item = tachibana_queue.get()
+            if item is None:
+                break
+            code, tachi_df = item
+            future = executor.submit(
+                process_stock, code, tachi_df, from_date, to_date
+            )
+            futures[future] = code
+
+        # 全Consumerの完了を待ち、結果を集計
+        total = len(futures)
+        completed = 0
+        for future in as_completed(futures):
+            completed += 1
+            try:
+                code, ok, count, source = future.result()
+                if ok:
+                    modified_codes.append(code)
+                    summary.success_count += 1
+                    logger.debug(
+                        f"  {code} → 成功 "
+                        f"(source: {source}, records: {count})"
+                    )
+                else:
+                    summary.failed_count += 1
+                    summary.errors.append((code, "No data returned"))
+                    logger.warning(f"  {code} → データなし")
+            except Exception as e:
+                code = futures[future]
                 summary.failed_count += 1
-                summary.errors.append((code, "No data returned"))
-                logger.warning(f"  → データなし")
-        except Exception as e:
-            summary.failed_count += 1
-            summary.errors.append((code, str(e)))
-            logger.error(f"  → 失敗: {e}")
+                summary.errors.append((code, str(e)))
+                logger.error(f"  {code} → 失敗: {e}")
+            if completed % 100 == 0 or completed == total:
+                logger.info(
+                    f"進捗: {completed}/{total} "
+                    f"(成功={summary.success_count}, "
+                    f"失敗={summary.failed_count})"
+                )
+
+    producer.join()
 
     # 4. FTPアップロード
     logger.info("-" * 50)
