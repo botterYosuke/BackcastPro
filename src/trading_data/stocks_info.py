@@ -1,4 +1,5 @@
-from .db_stocks_info import db_stocks_info
+from .lib.jquants import jquants
+from BackcastPro.api.db_stocks_info import db_stocks_info
 import sys
 import pandas as pd
 import threading
@@ -15,13 +16,41 @@ class stocks_info:
 
     def __init__(self):
         self.db = db_stocks_info()
+        self.jq = jquants()
+
+    def _fetch_from_jquants(self, code: str = "", date: datetime = None) -> pd.DataFrame | None:
+        """
+        J-Quantsから銘柄情報を取得する
+
+        Returns:
+            pd.DataFrame | None: 取得成功時はDataFrame、失敗または無効時はNone
+        """
+        if not self.jq.isEnable:
+            return None
+
+        df = self.jq.get_listed_info(code=code, date=date)
+        # Codeを4文字にする
+        df['Code'] = df['Code'].str[:4]
+
+        if df is None or df.empty:
+            return None
+
+        return df
 
     def get_japanese_listed_info(self, code = "", date: datetime = None) -> pd.DataFrame:
 
         # DBファイルの準備（存在しなければFTPからダウンロードを試行）
         self.db.ensure_db_ready()
 
-        # cacheフォルダから取得
+        # 1) J-Quantsから取得
+        df = self._fetch_from_jquants(code=code, date=date)
+        if df is not None:
+            # DataFrameをcacheフォルダに保存
+            # 非同期、遅延を避けるためデーモンスレッドで実行
+            threading.Thread(target=self.db.save_listed_info, args=(df,), daemon=True).start()
+            return df
+
+        # 2) cacheフォルダから取得
         df = self.db.load_listed_info_from_cache(code, date)
         if df.empty:
             # 空のDataFrameの場合は次のデータソースを試す

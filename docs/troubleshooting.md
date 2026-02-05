@@ -30,7 +30,7 @@ python -m venv .venv
 python -m pip install -e .
 ```
 
-### 問題: `ImportError: cannot import name 'Strategy'`
+### 問題: `ImportError: cannot import name 'XXX'`
 
 **原因:** 古いバージョンがインストールされている、またはインストールが不完全
 
@@ -40,7 +40,10 @@ python -m pip install -e .
 python -m pip uninstall BackcastPro -y
 
 # 最新版を再インストール
-python -m pip install BackcastPro
+python -m pip install --upgrade BackcastPro
+
+# インストールを確認
+python -c "from BackcastPro import Backtest, get_stock_daily, get_stock_board, get_stock_info; print('OK')"
 ```
 
 ### 問題: 依存関係の競合
@@ -59,26 +62,28 @@ python -m pip install BackcastPro
 
 ## データ関連の問題
 
-### 問題: `ValueError: data must be a pandas.DataFrame with columns`
+### 問題: `TypeError: data[XXX] must be a pandas.DataFrame with columns`
 
 **原因:** データが辞書形式でない、またはDataFrameでない
 
 **解決方法:**
 ```python
 # 正しい形式: 辞書で銘柄コードをキーとしてDataFrameを渡す
-data = {
-    '7203.JP': toyota_data,
-    '6758.JP': sony_data
-}
-bt = Backtest(data, MyStrategy)
+bt = Backtest(
+    data={
+        '7203.T': toyota_data,
+        '6758.T': sony_data
+    },
+    cash=10000
+)
 
 # 単一銘柄の場合も辞書形式で渡す
-bt = Backtest({'7203.JP': toyota_data}, MyStrategy)
+bt = Backtest(data={'7203.T': toyota_data}, cash=10000)
 ```
 
-### 問題: `ValueError: data must be a pandas.DataFrame with columns` (旧形式)
+### 問題: `ValueError: data must be a pandas.DataFrame with columns`
 
-**原因:** データがDataFrameでない、または必要な列がない
+**原因:** DataFrameに必要な列がない
 
 **解決方法:**
 ```python
@@ -163,48 +168,66 @@ if data is None or len(data) == 0:
 
 ## 戦略実装の問題
 
-### 問題: `TypeError: strategy must be a Strategy sub-type`
+### 問題: 戦略関数が呼ばれない
 
-**原因:** 戦略クラスがStrategyを継承していない
+**原因:** `set_strategy()` を呼んでいない、または戦略関数のシグネチャが間違っている
 
 **解決方法:**
 ```python
-from BackcastPro import Strategy
+from BackcastPro import Backtest
 
-# 正しい実装
-class MyStrategy(Strategy):  # Strategyを継承
-    def init(self):
-        pass
-    
-    def next(self):
-        pass
+# 正しい実装: 関数ベースの戦略
+def my_strategy(bt):
+    """戦略関数は (bt) を引数に取る"""
+    for code, df in bt.data.items():
+        if len(df) < 2:
+            continue
 
-# 間違った実装
-class WrongStrategy:  # Strategyを継承していない
-    def init(self):
-        pass
-    
-    def next(self):
-        pass
+        pos = bt.position_of(code)
+        if pos == 0:
+            bt.buy(code=code, tag="entry")
+
+# 方法1: set_strategy + run
+bt = Backtest(data={'TEST': df}, cash=10000)
+bt.set_strategy(my_strategy)
+results = bt.run()
+
+# 方法2: 手動ループ
+bt = Backtest(data={'TEST': df}, cash=10000)
+while not bt.is_finished:
+    my_strategy(bt)
+    bt.step()
+results = bt.finalize()
 ```
 
-### 問題: `AttributeError: 'MyStrategy' object has no attribute 'data'`
+### 問題: `AttributeError: 'Backtest' object has no attribute 'XXX'`
 
-**原因:** `init()`メソッドで`self.data`にアクセスしている
+**原因:** 存在しないプロパティやメソッドにアクセスしている
 
 **解決方法:**
 ```python
-class MyStrategy(Strategy):
-    def init(self):
-        # 正しい: self.dataを使用
-        for code, df in self.data.items():
-            df['SMA'] = df.Close.rolling(20).mean()
-    
-    def next(self):
-        # 正しい: self.dataを使用
-        for code, df in self.data.items():
-            if df.SMA.iloc[-1] > df.Close.iloc[-1]:
-                self.buy(code=code)
+def my_strategy(bt):
+    # 利用可能なプロパティ
+    bt.data             # 現在時点までのデータ (dict)
+    bt.equity           # 現在の資産
+    bt.cash             # 現在の現金
+    bt.current_time     # 現在の日時
+    bt.progress         # 進捗率（0.0〜1.0）
+    bt.step_index       # 現在のステップインデックス
+    bt.is_finished      # 完了フラグ
+    bt.position         # 全銘柄合計ポジション
+    bt.trades           # アクティブな取引
+    bt.closed_trades    # 決済済み取引
+    bt.orders           # 未約定の注文
+
+    for code, df in bt.data.items():
+        # 個別銘柄のポジション取得
+        pos = bt.position_of(code)
+
+        if pos == 0:
+            bt.buy(code=code, tag="entry")
+        elif pos > 0:
+            bt.sell(code=code, tag="exit")
 ```
 
 ### 問題: 戦略が動作しない
@@ -213,21 +236,32 @@ class MyStrategy(Strategy):
 
 **解決方法:**
 ```python
-class DebugStrategy(Strategy):
-    def init(self):
-        print("戦略初期化完了")
-        print("データ形状:", self.data.shape)
-        print("データ列:", self.data.columns.tolist())
-    
-    def next(self):
-        for code, df in self.data.items():
-            print(f"現在のバー: {len(df)}")
-            print(f"現在の終値: {df.Close.iloc[-1]}")
-            
-            # デバッグ情報を出力
-            if len(df) % 100 == 0:  # 100バーごとに出力
-                print(f"エクイティ: {self.equity}")
-                print(f"ポジション: {self.position.size}")
+def debug_strategy(bt):
+    """デバッグ用の戦略"""
+    for code, df in bt.data.items():
+        print(f"銘柄: {code}")
+        print(f"データ行数: {len(df)}")
+        print(f"最新終値: {df['Close'].iloc[-1] if len(df) > 0 else 'N/A'}")
+        print(f"ポジション: {bt.position_of(code)}")
+        print(f"資産: {bt.equity:,.0f}")
+        print("---")
+
+        if len(df) >= 2:
+            c0 = df['Close'].iloc[-2]
+            c1 = df['Close'].iloc[-1]
+
+            if bt.position_of(code) == 0 and c1 < c0:
+                print(f"買い注文: {code}")
+                bt.buy(code=code, tag="dip")
+
+bt = Backtest(data={'TEST': df}, cash=10000)
+bt.set_strategy(debug_strategy)
+
+# 最初の10ステップだけ実行してデバッグ
+bt.start()
+for i in range(min(10, len(bt.index))):
+    bt.step()
+    print(f"ステップ {i+1} 完了\n")
 ```
 
 ## バックテスト実行の問題
@@ -238,19 +272,18 @@ class DebugStrategy(Strategy):
 
 **解決方法:**
 ```python
-class MyStrategy(Strategy):
-    def next(self):
-        # 正しい: 資産割合（0-1の間）
-        self.buy(size=0.1)  # 10%の資産を使用
-        
-        # 正しい: 整数単位
-        self.buy(size=100)  # 100株
-        
-        # 間違った: 負の値
-        # self.buy(size=-100)  # エラー
-        
-        # 間違った: 1より大きい割合
-        # self.buy(size=1.5)  # エラー
+def my_strategy(bt):
+    # 正しい: 資産割合（0-1の間）
+    bt.buy(size=0.1)  # 10%の資産を使用
+
+    # 正しい: 整数単位
+    bt.buy(size=100)  # 100株
+
+    # 間違った: 負の値
+    # bt.buy(size=-100)  # エラー
+
+    # 間違った: 1より大きい割合
+    # bt.buy(size=1.5)  # エラー
 ```
 
 ### 問題: バックテストが終了しない
@@ -263,20 +296,16 @@ class MyStrategy(Strategy):
 print(f"データサイズ: {len(data)}")
 
 # 2. 戦略のロジックを簡素化して切り分け
-class SimpleStrategy(Strategy):
-    def init(self):
-        pass
-    
-    def next(self):
-        for code, df in self.data.items():
-            if len(df) == 1:
-                self.buy(code=code)
-                return
+def simple_strategy(bt):
+    for code, df in bt.data.items():
+        if len(df) == 1 and bt.position_of(code) == 0:
+            bt.buy(code=code)
 
-# 3. 長時間実行を避けるためにデータ期間を短くする
-data = data.tail(2000)
+# 3. データ期間を短くする
+short_data = data.tail(100)
 
-bt = Backtest({'TEST': data}, SimpleStrategy)
+bt = Backtest(data={'TEST': short_data}, cash=10000)
+bt.set_strategy(simple_strategy)
 results = bt.run()
 ```
 
@@ -293,26 +322,25 @@ print("データの最後の5行:")
 print(data.tail())
 
 # 2. 戦略の動作を確認
-class LoggingStrategy(Strategy):
-    def init(self):
-        self.trades = []
-    
-    def next(self):
-        # 取引ログを記録
-        for code, df in self.data.items():
-            if len(df) == 1:
-                self.buy(code=code)
-                self.trades.append(('BUY', df.Close.iloc[-1]))
-            
-            # 定期的にログを出力
-            if len(df) % 100 == 0:
-                print(f"バー {len(df)}: エクイティ {self.equity}")
+def logging_strategy(bt):
+    """ロギング付き戦略"""
+    for code, df in bt.data.items():
+        if len(df) == 1 and bt.position_of(code) == 0:
+            price = df['Close'].iloc[-1]
+            bt.buy(code=code, tag="entry")
+            print(f"買い注文: {code} @ {price}")
+
+        if len(df) % 100 == 0:
+            print(f"バー {len(df)}: 資産 {bt.equity:,.0f}, 現金 {bt.cash:,.0f}")
+
+bt = Backtest(data={'TEST': data}, cash=10000, commission=0.001)
+bt.set_strategy(logging_strategy)
+results = bt.run()
 
 # 3. パラメータを確認
-bt = Backtest({'TEST': data}, LoggingStrategy, cash=10000, commission=0.001)
 print("バックテストパラメータ:")
-print(f"初期資金: {bt._cash}")
-print(f"手数料: {bt._commission}")
+print(f"現金残高: {bt.cash}")
+print(f"手数料: {bt.commission}")
 ```
 
 ## パフォーマンスの問題
@@ -324,33 +352,28 @@ print(f"手数料: {bt._commission}")
 **解決方法:**
 ```python
 # 1. データサイズを削減
-data = data.tail(1000)  # 最新1000バーのみ使用
+short_data = data.tail(1000)  # 最新1000バーのみ使用
 
-# 2. 計算を最適化
-class OptimizedStrategy(Strategy):
-    def init(self):
-        # 事前計算でパフォーマンスを向上
-        for code, df in self.data.items():
-            df['SMA'] = df.Close.rolling(20).mean()
-            df['RSI'] = calculate_rsi(df)
-    
-    def next(self):
-        # 事前計算された値を参照
-        for code, df in self.data.items():
-            if df.SMA.iloc[-1] > df.Close.iloc[-1]:
-                self.buy(code=code)
+# 2. 事前計算でパフォーマンスを向上
+data['SMA_20'] = data['Close'].rolling(20).mean()
+data['SMA_50'] = data['Close'].rolling(50).mean()
 
-# 3. 不要な計算を削除
-class SimpleStrategy(Strategy):
-    def init(self):
-        # 必要最小限の計算のみ
-        pass
-    
-    def next(self):
-        # シンプルなロジック
-        for code, df in self.data.items():
-            if len(df) == 1:
-                self.buy(code=code)
+bt = Backtest(data={'TEST': data}, cash=10000)
+
+def optimized_strategy(bt):
+    """事前計算された値を参照"""
+    for code, df in bt.data.items():
+        if len(df) < 50:
+            continue
+
+        sma20 = df['SMA_20'].iloc[-1]
+        sma50 = df['SMA_50'].iloc[-1]
+
+        if bt.position_of(code) == 0 and sma20 > sma50:
+            bt.buy(code=code, tag="golden_cross")
+
+bt.set_strategy(optimized_strategy)
+results = bt.run()
 ```
 
 ### 問題: メモリ使用量が大きい
@@ -370,13 +393,6 @@ data = data.astype({
 
 # 2. 不要な列を削除
 data = data[['Open', 'High', 'Low', 'Close', 'Volume']]
-
-# 3. データを分割して処理
-chunk_size = 1000
-for i in range(0, len(data), chunk_size):
-    chunk = data.iloc[i:i+chunk_size]
-    bt = Backtest({'CHUNK': chunk}, MyStrategy)
-    results = bt.run()
 ```
 
 ## エラーメッセージ一覧
@@ -386,12 +402,12 @@ for i in range(0, len(data), chunk_size):
 | エラーメッセージ | 原因 | 解決方法 |
 |------------------|------|----------|
 | `ModuleNotFoundError: No module named 'BackcastPro'` | インストールされていない | `pip install BackcastPro` |
-| `TypeError: strategy must be a Strategy sub-type` | 戦略クラスがStrategyを継承していない | `class MyStrategy(Strategy):` |
-| `ValueError: data must be a pandas.DataFrame` | データがDataFrameでない | `pd.DataFrame(data)` |
+| `TypeError: data[XXX] must be a pandas.DataFrame` | データがDataFrameでない | `pd.DataFrame(data)` |
 | `ValueError: Some OHLC values are missing` | 欠損値がある | `data.dropna()` |
-| `ValueError: sizeは正の資産割合または正の整数単位である必要があります` | 取引サイズが無効 | `size=0.1` または `size=100` |
+| `ValueError: sizeは正の資産割合または...` | 取引サイズが無効 | `size=0.1` または `size=100` |
+| `RuntimeError: start() を呼び出してください` | バックテスト未開始 | `bt.start()` または `Backtest(data=...)` |
+| `ValueError: 複数銘柄がある場合はcodeを指定してください` | 複数銘柄でcode未指定 | `bt.buy(code='7203.T')` |
 | `requests.RequestException: Failed to fetch data` | API接続エラー | インターネット接続を確認 |
-| `AttributeError: 'MyStrategy' object has no attribute 'data'` | `init()`で`self.data`にアクセス | `init()`では`self.data`を使用可能 |
 
 ### デバッグのヒント
 
@@ -408,26 +424,28 @@ print("データ列:", data.columns.tolist())
 print("欠損値:", data.isnull().sum())
 ```
 
-3. **戦略の動作を確認する**
+3. **状態スナップショットを確認する**
 ```python
-class DebugStrategy(Strategy):
-    def init(self):
-        print("戦略初期化")
-    
-    def next(self):
-        for code, df in self.data.items():
-            if len(df) % 100 == 0:
-                print(f"バー {len(df)}: エクイティ {self.equity}")
+bt = Backtest(data={'TEST': data}, cash=10000)
+bt.set_strategy(my_strategy)
+
+# 10ステップ進める
+bt.goto(10, strategy=my_strategy)
+
+# 状態を確認
+state = bt.get_state_snapshot()
+print(state)
 ```
 
 4. **エラーハンドリングを追加する**
 ```python
 try:
-    bt = Backtest({'TEST': data}, MyStrategy)
+    bt = Backtest(data={'TEST': data}, cash=10000)
+    bt.set_strategy(my_strategy)
     results = bt.run()
 except Exception as e:
     print(f"エラー: {e}")
-    print(f"エラータイプ: {type(e)}")
+    print(f"エラータイプ: {type(e).__name__}")
     import traceback
     traceback.print_exc()
 ```

@@ -41,18 +41,17 @@ def my_strategy(bt):
         bt.buy(tag="entry")
 
 # 一括実行
-results = bt.run_with_strategy(my_strategy)
+bt.set_strategy(my_strategy)
+results = bt.run()
 print(results)
 ```
 
 ## 主な機能
 
-- **リプレイ型シミュレーター**: `step()` で1バーずつ進めながらチャート確認
+- **リプレイ型シミュレーター**: `step()` で1バーずつ進めながら状態確認
 - **シンプルな戦略実装**: 関数ベースで `buy()` / `sell()` を呼ぶだけ
 - **統計の自動計算**: 代表的なパフォーマンス指標を同梱
 - **リスク管理**: `sl` と `tp` に標準対応
-- **可視化**: `chart()` で Lightweight Charts ローソク足チャート生成
-- **インジケーター表示**: `chart()` でSMAなどのテクニカル指標をオーバーレイ
 - **marimo連携**: スライダーで時間を操作しながらリアルタイム可視化
 
 ```mermaid
@@ -79,9 +78,9 @@ flowchart TD
 | `goto(step, strategy)` | 指定位置まで進める |
 | `buy(code, size, tag, ...)` | 買い注文 |
 | `sell(code, size, tag, ...)` | 売り注文 |
-| `chart(code, indicators, ...)` | チャート生成（インジケーター対応） |
 | `finalize()` | 統計計算 |
-| `run_with_strategy(func)` | 一括実行 |
+| `set_strategy(func)` | 戦略関数を設定 |
+| `run()` | バックテストを最後まで実行 |
 | `get_state_snapshot()` | 現在状態を辞書で取得 |
 | `add_trade_callback(func)` | 取引イベントコールバック登録 |
 

@@ -1,5 +1,9 @@
-from .db_stocks_daily import db_stocks_daily
-from trading_data.lib.util import _Timestamp
+from .lib.jquants import jquants
+from .lib.e_api import e_api
+from .lib.kabusap import kabusap
+from .lib.stooq import stooq_daily_quotes
+from BackcastPro.api.db_stocks_daily import db_stocks_daily
+from .lib.util import _Timestamp
 
 import pandas as pd
 import threading
@@ -17,6 +21,47 @@ class stocks_price:
 
     def __init__(self):
         self.db = db_stocks_daily()
+
+    def _save_to_cache_async(self, code: str, df: pd.DataFrame) -> None:
+        """DataFrameをcacheフォルダに非同期で保存"""
+        threading.Thread(
+            target=self.db.save_stock_prices, args=(code, df), daemon=True
+        ).start()
+
+    def _fetch_from_cache(
+        self, code: str, from_: datetime, to: datetime
+    ) -> pd.DataFrame | None:
+        """1) cacheフォルダから株価データを取得"""
+        return self.db.load_stock_prices_from_cache(code, from_, to)
+
+    def _fetch_from_tachibana(
+        self, code: str, from_: datetime, to: datetime
+    ) -> pd.DataFrame | None:
+        """2) 立花証券 e-支店から株価データを取得"""
+        if not hasattr(self, "e_shiten"):
+            self.e_shiten = e_api()
+        if not self.e_shiten.isEnable:
+            return None
+        df = self.e_shiten.get_daily_quotes(code=code, from_=from_, to=to)
+        return df
+
+    def _fetch_from_jquants(
+        self, code: str, from_: datetime, to: datetime
+    ) -> pd.DataFrame | None:
+        """3) J-Quantsから株価データを取得"""
+        if not hasattr(self, "jq"):
+            self.jq = jquants()
+        if not self.jq.isEnable:
+            return None
+        df = self.jq.get_daily_quotes(code=code, from_=from_, to=to)
+        return df
+
+    def _fetch_from_stooq(
+        self, code: str, from_: datetime, to: datetime
+    ) -> pd.DataFrame | None:
+        """4) stooqから株価データを取得"""
+        df = stooq_daily_quotes(code=code, from_=from_, to=to)
+        return df
 
     def get_japanese_stock_price_data(
         self, code="", from_: datetime = None, to: datetime = None
@@ -36,8 +81,26 @@ class stocks_price:
         self.db.ensure_db_ready(code)
 
         # 1) cacheフォルダから取得
-        df = self.db.load_stock_prices_from_cache(code, from_, to)
+        df = self._fetch_from_cache(code, norm_from, norm_to)
         if df is not None and not df.empty:
+            return df
+
+        # 2) 立花証券 e-支店から取得
+        df = self._fetch_from_tachibana(code, norm_from, norm_to)
+        if df is not None and not df.empty:
+            self._save_to_cache_async(code, df)
+            return df
+
+        # 3) J-Quantsから取得
+        df = self._fetch_from_jquants(code, norm_from, norm_to)
+        if df is not None and not df.empty:
+            self._save_to_cache_async(code, df)
+            return df
+
+        # 4) stooqから取得
+        df = self._fetch_from_stooq(code, norm_from, norm_to)
+        if df is not None and not df.empty:
+            self._save_to_cache_async(code, df)
             return df
 
         raise ValueError(f"日本株式銘柄の取得に失敗しました: {code}")

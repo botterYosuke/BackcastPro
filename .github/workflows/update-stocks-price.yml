@@ -1,0 +1,54 @@
+name: Update Stocks Price
+
+on:
+  schedule:
+    # 0:00 JST = 15:00 UTC (Japan is UTC+9)
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-stocks-price:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Verify imports
+        run: |
+          uv run python -c "from trading_data.stocks_price import stocks_price; print('trading_data OK')"
+          uv run python -c "from BackcastPro.api.ftp_client import FTPClient; print('FTPClient OK')"
+
+      - name: Run update stocks price script
+        env:
+          JQUANTS_API_KEY: ${{ secrets.JQUANTS_API_KEY }}
+          eAPI_URL: ${{ secrets.EAPI_URL }}
+          eAPI_USER_ID: ${{ secrets.EAPI_USER_ID }}
+          eAPI_PASSWORD: ${{ secrets.EAPI_PASSWORD }}
+          BACKCASTPRO_FTP_HOST: ${{ secrets.BACKCASTPRO_FTP_HOST }}
+          BACKCASTPRO_FTP_USER: ${{ secrets.BACKCASTPRO_FTP_USER }}
+          BACKCASTPRO_FTP_PASSWORD: ${{ secrets.BACKCASTPRO_FTP_PASSWORD }}
+          BACKCASTPRO_CACHE_DIR: ${{ github.workspace }}/cache
+        run: |
+          mkdir -p cache/stocks_daily cache/logs
+          uv run python tasks/update_stocks_price.py
+
+      - name: Upload logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-stocks-price-logs
+          path: cache/logs/
+          retention-days: 30

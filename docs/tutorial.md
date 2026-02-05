@@ -31,7 +31,7 @@ sequenceDiagram
     participant B as Backtest
     participant S as Strategy Function
     participant R as Results
-    U->>D: DataReader('7203.JP', 'stooq')
+    U->>D: yf.download('7203.T', period='1y')
     D-->>U: OHLCV DataFrame
     U->>B: Backtest(data={code: df})
     loop 各タイムスタンプ
@@ -81,7 +81,8 @@ def buy_and_hold(bt):
 bt = Backtest(data={code: df}, cash=10000, commission=0.001)
 
 # 一括実行
-results = bt.run_with_strategy(buy_and_hold)
+bt.set_strategy(buy_and_hold)
+results = bt.run()
 print(results)
 ```
 
@@ -121,7 +122,8 @@ custom_data = pd.DataFrame({
 
 # バックテストで使用
 bt = Backtest(data={'CUSTOM': custom_data}, cash=10000)
-results = bt.run_with_strategy(buy_and_hold)
+bt.set_strategy(buy_and_hold)
+results = bt.run()
 ```
 
 ### 複数銘柄の同時バックテスト
@@ -147,7 +149,8 @@ def multi_stock_strategy(bt):
         if pos == 0:
             bt.buy(code=code, tag="buy")
 
-results = bt.run_with_strategy(multi_stock_strategy)
+bt.set_strategy(multi_stock_strategy)
+results = bt.run()
 ```
 
 ## バックテストの実行
@@ -161,7 +164,8 @@ bt = Backtest(
     commission=0.001,
     finalize_trades=True,
 )
-results = bt.run_with_strategy(my_strategy)
+bt.set_strategy(my_strategy)
+results = bt.run()
 ```
 
 ### 方法2: ステップ実行
@@ -204,9 +208,10 @@ for _ in range(10):
 # 100バー目まで進める（戦略を適用しながら）
 bt.goto(100, strategy=my_strategy)
 
-# チャートを確認
-chart = bt.chart()
-chart.show()
+# 状態を確認
+print(f"時間: {bt.current_time}")
+print(f"資産: {bt.equity:,.0f}")
+print(f"ポジション: {bt.position}")
 ```
 
 ### reset() で最初からやり直し
@@ -302,28 +307,25 @@ slider = mo.ui.slider(
 # スライダー位置まで進める
 bt.goto(slider.value, strategy=my_strategy)
 
-# チャート描画（tag 表示付き）
-chart = bt.chart(height=500, show_tags=True)
-
 # 情報パネル
+state = bt.get_state_snapshot()
 info = mo.md(f"""
-### 📊 状況
+### 状況
 | 項目 | 値 |
 |------|-----|
-| 日時 | {bt.current_time} |
-| 進捗 | {bt.progress * 100:.1f}% |
-| 資産 | ${bt.equity:,.2f} |
-| ポジション | {bt.position} 株 |
+| 日時 | {state['current_time']} |
+| 進捗 | {state['progress'] * 100:.1f}% |
+| 資産 | ¥{state['equity']:,.0f} |
+| 現金 | ¥{state['cash']:,.0f} |
+| 決済済取引 | {state['closed_trades']} 件 |
 """)
 
-mo.vstack([slider, chart, info])
+mo.vstack([slider, info])
 ```
 
-## インジケーターの表示
+## インジケーターの活用
 
-チャートにSMAなどのテクニカルインジケーターを重ねて表示できます。
-
-### 基本的な使い方
+データにインジケーター列を追加し、戦略内で参照できます。
 
 ```python
 # データにインジケーターを追加
@@ -332,34 +334,22 @@ df['SMA_50'] = df['Close'].rolling(50).mean()
 
 bt = Backtest(data={code: df}, cash=10000)
 
-# インジケーター付きチャート
-chart = bt.chart(indicators=['SMA_20', 'SMA_50'])
-```
+# 戦略内でインジケーターを参照
+def sma_cross_strategy(bt):
+    for code, df in bt.data.items():
+        if len(df) < 50:
+            continue
 
-### カスタムスタイル
+        sma20 = df['SMA_20'].iloc[-1]
+        sma50 = df['SMA_50'].iloc[-1]
 
-色や線の太さをカスタマイズできます。
+        if bt.position_of(code) == 0 and sma20 > sma50:
+            bt.buy(code=code, tag="golden_cross")
+        elif bt.position_of(code) > 0 and sma20 < sma50:
+            bt.sell(code=code, tag="dead_cross")
 
-```python
-chart = bt.chart(
-    indicators=['SMA_20', 'SMA_50'],
-    indicator_options={
-        'SMA_20': {'color': '#2196F3', 'lineWidth': 2, 'title': '20日移動平均'},
-        'SMA_50': {'color': '#FFC107', 'lineWidth': 3, 'title': '50日移動平均'}
-    }
-)
-```
-
-### marimoでのリプレイモード
-
-```python
-import marimo as mo
-
-slider = mo.ui.slider(start=1, stop=len(bt.index), value=50, label="時間")
-bt.goto(slider.value, strategy=my_strategy)
-chart = bt.chart(indicators=['SMA_20', 'SMA_50'])
-
-mo.vstack([slider, chart])
+bt.set_strategy(sma_cross_strategy)
+results = bt.run()
 ```
 
 ## 次のステップ
@@ -460,6 +450,5 @@ A: 反対ポジションがある場合は全クローズ、ない場合は全�
 ## まとめ
 
 - **データ準備** → **Backtest初期化** → **戦略関数定義** → **実行** → **分析** の順に進めます
-- `run_with_strategy()` で一括実行、または `step()` でステップ実行
-- `chart()` で売買マーカー付きチャートを生成
-- marimo連携でインタラクティブな可視化が可能
+- `set_strategy()` + `run()` で一括実行、または `step()` でステップ実行
+- marimo連携でインタラクティブなリプレイシミュレーションが可能

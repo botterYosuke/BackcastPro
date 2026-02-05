@@ -19,7 +19,6 @@ cd BackcastPro
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e .
-python -m pip install -r requirements.txt
 ```
 
 ## 使用方法
@@ -55,7 +54,8 @@ print(results)
 
 ```python
 bt = Backtest(data={"AAPL": df}, cash=100000)
-results = bt.run_with_strategy(my_strategy)
+bt.set_strategy(my_strategy)
+results = bt.run()
 ```
 
 ### marimo連携（リプレイ型シミュレーター）
@@ -65,9 +65,11 @@ import marimo as mo
 
 slider = mo.ui.slider(start=1, stop=len(bt.index), value=1, label="時間")
 bt.goto(slider.value, strategy=my_strategy)
-chart = bt.chart()  # plotlyローソク足 + 売買マーカー
 
-mo.vstack([slider, chart])
+state = bt.get_state_snapshot()
+info = mo.md(f"資産: ¥{state['equity']:,.0f} / 進捗: {state['progress'] * 100:.1f}%")
+
+mo.vstack([slider, info])
 ```
 
 ## ドキュメント
