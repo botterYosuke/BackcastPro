@@ -43,7 +43,7 @@ jobs:
           BACKCASTPRO_CACHE_DIR: ${{ github.workspace }}/cache
         run: |
           mkdir -p cache/stocks_daily cache/logs
-          uv run python tasks/update_stocks_price.py
+          uv run python tasks/update_stocks_price.py --workers 1
 
       - name: Upload logs as artifact
         if: always()
