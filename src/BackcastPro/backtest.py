@@ -15,33 +15,6 @@ from ._broker import _Broker
 from ._stats import compute_stats
 
 
-class _ChartState:
-    """チャート状態管理（chart.py の ChartStateManager と互換）"""
-
-    def __init__(self, color_theme: str = "dark"):
-        self.widgets: dict = {}
-        self.last_index: dict[str, int] = {}
-        self.indicators: dict[str, tuple] = {}
-        # 色テーマのバリデーション
-        valid_themes = ("dark", "light")
-        if color_theme not in valid_themes:
-            import warnings
-            warnings.warn(
-                f"Unknown color_theme '{color_theme}'. Using 'dark' as default. "
-                f"Valid themes: {valid_themes}",
-                stacklevel=3
-            )
-            color_theme = "dark"
-        self.color_theme: str = color_theme
-
-    def reset(self, clear_cache: bool = False) -> None:
-        """チャート状態をリセット"""
-        self.last_index = {}
-        if clear_cache:
-            self.widgets = {}
-            self.indicators = {}
-
-
 class Backtest:
     """
     特定のデータに対してバックテストを実行します。
@@ -106,7 +79,6 @@ class Backtest:
                 trade_on_close=False,
                 exclusive_orders=False,
                 finalize_trades=False,
-                color_theme: str = "dark",
                 ):
 
         if not isinstance(spread, Number):
@@ -140,9 +112,6 @@ class Backtest:
 
         # パフォーマンス最適化: 各銘柄の index position マッピング
         self._index_positions: dict[str, dict] = {}
-
-        # チャート状態管理（chart.py と互換）
-        self._chart_state = _ChartState(color_theme)
 
         # 戦略関数
         self._strategy: Optional[Callable[['Backtest'], None]] = None
