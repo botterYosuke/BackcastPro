@@ -12,17 +12,19 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+_FTP_AVAILABLE = hasattr(ftplib, 'FTP_TLS')
 
-class _NatFriendlyFTP_TLS(ftplib.FTP_TLS):
-    """NAT越しでもPASVが動くFTP_TLS。
+if _FTP_AVAILABLE:
+    class _NatFriendlyFTP_TLS(ftplib.FTP_TLS):
+        """NAT越しでもPASVが動くFTP_TLS。
 
-    サーバーがPASVレスポンスで内部IPを返す場合、
-    制御接続のホストに差し替える。
-    """
+        サーバーがPASVレスポンスで内部IPを返す場合、
+        制御接続のホストに差し替える。
+        """
 
-    def makepasv(self):
-        _host, port = super().makepasv()
-        return self.host, port
+        def makepasv(self):
+            _host, port = super().makepasv()
+            return self.host, port
 
 
 @dataclass
@@ -69,6 +71,8 @@ class FTPClient:
         Returns:
             成功時True、失敗時False
         """
+        if not _FTP_AVAILABLE:
+            return False
         try:
             with _NatFriendlyFTP_TLS() as ftp:
                 ftp.connect(self.config.host, self.config.port)
@@ -117,6 +121,8 @@ class FTPClient:
         Returns:
             成功時True、失敗時False
         """
+        if not _FTP_AVAILABLE:
+            return False
         try:
             with _NatFriendlyFTP_TLS() as ftp:
                 ftp.connect(self.config.host, self.config.port, timeout=60)
@@ -182,6 +188,8 @@ class FTPClient:
         Returns:
             {'success': [...], 'failed': [...]}
         """
+        if not _FTP_AVAILABLE:
+            return {'success': [], 'failed': [(lp, "FTP not available") for lp, _ in files]}
         results: dict[str, list] = {'success': [], 'failed': []}
 
         try:
