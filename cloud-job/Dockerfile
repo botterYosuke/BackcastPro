@@ -10,4 +10,4 @@ COPY src/BackcastPro/ /app/src/BackcastPro/
 COPY src/trading_data/ /app/src/trading_data/
 COPY cloud-job/update_stocks_price.py /app/update_stocks_price.py
 
-CMD ["python", "/app/update_stocks_price.py"]
+ENTRYPOINT ["python", "/app/update_stocks_price.py"]

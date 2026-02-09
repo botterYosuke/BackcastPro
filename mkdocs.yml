@@ -16,6 +16,8 @@ nav:
       - 開発者ガイド: developer-guide.md
       - 約定ロジック分析: execution-logic-report.md
       - PyPIデプロイ: how-to-deploy-to-PyPI.md
+      - Cloud Run データ更新: cloud-run-updater.md
+      - 設計判断記録: design-decisions.md
   - プライバシーポリシー: privacy.md
 
 theme:
