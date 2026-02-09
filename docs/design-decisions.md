@@ -6,6 +6,7 @@
 
 1. [FTP廃止とGoogle Driveへの完全移行](#ftp廃止とgoogle-driveへの完全移行)
 2. [株価データ更新のCloud Run Job化](#株価データ更新のcloud-run-job化)
+3. [DockerfileのENTRYPOINT化](#dockerfileのentrypoint化)
 
 ---
 
@@ -64,5 +65,41 @@ BackcastProのデータ取得は、当初以下の3段フォールバック構�
     *   サーバー管理不要で安定した定期実行が可能。
     *   Job 側の実装が非常に軽量（`requests` ライブラリのみで完結）。
     *   Cloud Run Proxy にロジックを集約できたため、認証や権限管理が一元化された。
+
+---
+
+## DockerfileのENTRYPOINT化
+
+**Date:** 2026-02-09
+**Status:** Implemented
+
+### Context
+
+Cloud Run Job `update-stocks-price` が `--args` 付きで実行すると、exit code 1 で即座に失敗する問題が発生。アプリケーションログ（stdout/stderr）が一切出力されず、システムログには「Application exec likely failed」とだけ記録されていた。
+
+原因は Docker の `CMD` と `ENTRYPOINT` の仕様の違い：
+
+*   `CMD ["python", "script.py"]` の場合、Cloud Run Job の `args` フィールド（Kubernetes の `args`）は CMD を**完全に置換**する。つまり `--args="--codes,7203"` を渡すと、コンテナは `--codes` を実行ファイルとして実行しようとする。
+*   `ENTRYPOINT ["python", "script.py"]` の場合、`args` は ENTRYPOINT の後ろに**引数として追加**される。
+
+### Decision
+
+`cloud-job/Dockerfile` の最終行を `CMD` から `ENTRYPOINT` に変更。
+
+```dockerfile
+# 変更前
+CMD ["python", "/app/update_stocks_price.py"]
+
+# 変更後
+ENTRYPOINT ["python", "/app/update_stocks_price.py"]
+```
+
+### Consequences
+
+*   **メリット**:
+    *   `--args` が正しく Python スクリプトの引数として渡されるようになった。
+    *   dry-run (`--args="--codes,7203,--days,3,--dry-run"`) が正常に動作することを確認済み。
+*   **注意点**:
+    *   `ENTRYPOINT` を使う場合、`docker run` でコマンドを上書きするには `--entrypoint` フラグが必要になる（デバッグ時に `bash` でコンテナに入る場合など）。
 
 ---
