@@ -91,7 +91,7 @@ BackcastPro/
 │           ├── db_stocks_daily.py
 │           ├── db_stocks_board.py
 │           ├── db_stocks_info.py
-│           └── gdrive_client.py # Cloud Run API経由のダウンローダー
+│           └── cloud_run_client.py # Cloud Run API経由のダウンローダー
 ├── cloud-run/                    # Cloud Runデプロイ用コード
 │   ├── main.py                  # APIサーバー実装
 │   └── Dockerfile               # コンテナ定義
@@ -280,7 +280,7 @@ tests/
 ├── test_db_stocks_daily.py           # 日足DBのテスト
 ├── test_db_stocks_info.py            # 銘柄情報DBのテスト
 ├── test_e_api.py                     # 立花証券e支店APIのテスト
-├── test_gdrive_client.py             # Google Driveクライアントのテスト
+├── test_cloud_run_client.py           # Cloud Run APIクライアントのテスト
 ├── test_j-quants.py                  # J-Quants APIのテスト
 ├── test_kabusap.py                   # kabuステーションAPIのテスト
 ├── test_order.py                     # 注文クラスのテスト

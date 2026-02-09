@@ -283,7 +283,7 @@ def upload_to_cloud(modified_codes: list[str], dry_run: bool = False) -> dict:
     Returns:
         {'success': [...], 'failed': [...]}
     """
-    from BackcastPro.api.gdrive_client import GDriveClient
+    from BackcastPro.api.cloud_run_client import CloudRunClient
 
     results = {'success': [], 'failed': []}
 
@@ -296,7 +296,7 @@ def upload_to_cloud(modified_codes: list[str], dry_run: bool = False) -> dict:
         logger.info("アップロード対象ファイルなし")
         return results
 
-    client = GDriveClient()
+    client = CloudRunClient()
     if not client.config.is_configured():
         logger.error("BACKCASTPRO_GDRIVE_API_URL not configured")
         for code in modified_codes:

@@ -388,7 +388,7 @@ class TestUploadToCloud:
         assert result == {'success': [], 'failed': []}
 
     @patch('update_stocks_price.os.path.exists', return_value=True)
-    @patch('BackcastPro.api.gdrive_client.GDriveClient')
+    @patch('BackcastPro.api.cloud_run_client.CloudRunClient')
     def test_upload_success(self, mock_client_cls, mock_exists):
         client = mock_client_cls.return_value
         client.config.is_configured.return_value = True
@@ -399,7 +399,7 @@ class TestUploadToCloud:
         assert result['failed'] == []
 
     @patch('update_stocks_price.os.path.exists', return_value=True)
-    @patch('BackcastPro.api.gdrive_client.GDriveClient')
+    @patch('BackcastPro.api.cloud_run_client.CloudRunClient')
     def test_upload_failure(self, mock_client_cls, mock_exists):
         client = mock_client_cls.return_value
         client.config.is_configured.return_value = True
@@ -410,7 +410,7 @@ class TestUploadToCloud:
         assert ('7203', 'Upload failed') in result['failed']
 
     @patch('update_stocks_price.os.path.exists', return_value=True)
-    @patch('BackcastPro.api.gdrive_client.GDriveClient')
+    @patch('BackcastPro.api.cloud_run_client.CloudRunClient')
     def test_upload_exception(self, mock_client_cls, mock_exists):
         client = mock_client_cls.return_value
         client.config.is_configured.return_value = True
@@ -420,7 +420,7 @@ class TestUploadToCloud:
         assert ('7203', 'network error') in result['failed']
 
     @patch('update_stocks_price.os.path.exists', return_value=False)
-    @patch('BackcastPro.api.gdrive_client.GDriveClient')
+    @patch('BackcastPro.api.cloud_run_client.CloudRunClient')
     def test_file_not_found(self, mock_client_cls, mock_exists):
         client = mock_client_cls.return_value
         client.config.is_configured.return_value = True
@@ -428,7 +428,7 @@ class TestUploadToCloud:
         result = upload_to_cloud(['7203'])
         assert ('7203', 'File not found') in result['failed']
 
-    @patch('BackcastPro.api.gdrive_client.GDriveClient')
+    @patch('BackcastPro.api.cloud_run_client.CloudRunClient')
     def test_api_not_configured(self, mock_client_cls):
         client = mock_client_cls.return_value
         client.config.is_configured.return_value = False

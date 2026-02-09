@@ -213,11 +213,11 @@ class db_stocks_info(db_manager):
             db.close()
 
     def _download_from_cloud(self, local_path: str) -> bool:
-        """Google DriveからDuckDBファイルをダウンロード"""
-        from .gdrive_client import GDriveClient
-        gdrive = GDriveClient()
-        if gdrive.config.is_configured():
-            if gdrive.download_listed_info(local_path):
+        """Cloud RunからDuckDBファイルをダウンロード"""
+        from .cloud_run_client import CloudRunClient
+        client = CloudRunClient()
+        if client.config.is_configured():
+            if client.download_listed_info(local_path):
                 return True
-            logger.debug("Google Driveからダウンロード失敗: listed_info.duckdb")
+            logger.debug("Cloud Runからダウンロード失敗: listed_info.duckdb")
         return False

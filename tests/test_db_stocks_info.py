@@ -32,7 +32,7 @@ class TestDbStocksInfo(unittest.TestCase):
 
     def test_download_from_cloud_success(self):
         """Test successful download from Google Drive"""
-        with patch('BackcastPro.api.gdrive_client.GDriveClient') as mock_gdrive_cls:
+        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_gdrive_cls:
             mock_client = MagicMock()
             mock_gdrive_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
@@ -48,7 +48,7 @@ class TestDbStocksInfo(unittest.TestCase):
 
     def test_download_from_cloud_failure(self):
         """Test failure during Google Drive download"""
-        with patch('BackcastPro.api.gdrive_client.GDriveClient') as mock_gdrive_cls:
+        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_gdrive_cls:
             mock_client = MagicMock()
             mock_gdrive_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
@@ -62,7 +62,7 @@ class TestDbStocksInfo(unittest.TestCase):
 
     def test_download_from_cloud_not_configured(self):
         """Test behavior when Google Drive is not configured"""
-        with patch('BackcastPro.api.gdrive_client.GDriveClient') as mock_gdrive_cls:
+        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_gdrive_cls:
             mock_client = MagicMock()
             mock_gdrive_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = False

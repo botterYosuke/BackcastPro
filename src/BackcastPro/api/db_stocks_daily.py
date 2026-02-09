@@ -460,11 +460,11 @@ class db_stocks_daily(db_manager):
             db.close()
 
     def _download_from_cloud(self, code: str, local_path: str) -> bool:
-        """Google DriveからDuckDBファイルをダウンロード"""
-        from .gdrive_client import GDriveClient
-        gdrive = GDriveClient()
-        if gdrive.config.is_configured():
-            if gdrive.download_stocks_daily(code, local_path):
+        """Cloud RunからDuckDBファイルをダウンロード"""
+        from .cloud_run_client import CloudRunClient
+        client = CloudRunClient()
+        if client.config.is_configured():
+            if client.download_stocks_daily(code, local_path):
                 return True
-            logger.debug(f"Google Driveからダウンロード失敗: stocks_daily/{code}.duckdb")
+            logger.debug(f"Cloud Runからダウンロード失敗: stocks_daily/{code}.duckdb")
         return False

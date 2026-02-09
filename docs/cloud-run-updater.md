@@ -11,7 +11,7 @@ BackcastProは、夜間にCloud Run Jobを使用して株価データを自動�
    - J-Quants APIなどから最新の株価データを取得します。
    - 取得したデータをDuckDBファイルとして生成・更新します。
 3. **Cloud Run Proxy** 経由で **Google Drive** にアップロードします。
-   - Jobは `GDriveClient` を使用し、Cloud Run Proxyのエンドポイントに対して `POST` リクエストを送信します。
+   - Jobは `CloudRunClient` を使用し、Cloud Run Proxyのエンドポイントに対して `POST` リクエストを送信します。
    - Proxyは受け取ったデータをGoogle Driveの所定のフォルダ（`jp/stocks_daily` など）に保存します。
 
 ```mermaid
@@ -159,7 +159,7 @@ gcloud.cmd logging read 'resource.type="cloud_run_job" AND resource.labels.job_n
 
 ### データ確認
 
-更新されたデータは、ローカル環境で `GDriveClient` を通じてダウンロードするか、Google Driveを直接確認することで検証できます。
+更新されたデータは、ローカル環境で `CloudRunClient` を通じてダウンロードするか、Google Driveを直接確認することで検証できます。
 
 ## Windows (MSYS/Git Bash) 環境での注意事項
 

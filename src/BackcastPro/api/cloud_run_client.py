@@ -1,5 +1,5 @@
 """
-Google Driveクライアント（Cloud Run API経由）
+Cloud Run APIクライアント
 
 Cloud Run上のプロキシAPIを通じて、
 Google Drive共有フォルダからDuckDBファイルをダウンロード/アップロードするモジュール。
@@ -14,12 +14,12 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class GDriveConfig:
-    """Google Drive API接続設定"""
+class CloudRunConfig:
+    """Cloud Run API接続設定"""
     api_base_url: str
 
     @classmethod
-    def from_environment(cls) -> "GDriveConfig":
+    def from_environment(cls) -> "CloudRunConfig":
         """環境変数から設定を読み込み"""
         return cls(
             api_base_url=os.environ.get("BACKCASTPRO_GDRIVE_API_URL", ""),
@@ -30,11 +30,11 @@ class GDriveConfig:
         return bool(self.api_base_url)
 
 
-class GDriveClient:
-    """BackcastPro用Google Driveクライアント（Cloud Run API経由）"""
+class CloudRunClient:
+    """BackcastPro用Cloud Run APIクライアント"""
 
-    def __init__(self, config: Optional[GDriveConfig] = None):
-        self.config = config or GDriveConfig.from_environment()
+    def __init__(self, config: Optional[CloudRunConfig] = None):
+        self.config = config or CloudRunConfig.from_environment()
 
     def download_file(self, remote_path: str, local_path: str) -> bool:
         """
@@ -50,7 +50,7 @@ class GDriveClient:
         url = f"{self.config.api_base_url.rstrip('/')}/jp/{remote_path}"
 
         try:
-            logger.info(f"Google Driveダウンロード開始: {remote_path} -> {local_path}")
+            logger.info(f"ダウンロード開始: {remote_path} -> {local_path}")
 
             resp = requests.get(url, stream=True, timeout=(10, 300))
 
@@ -65,11 +65,11 @@ class GDriveClient:
                     if chunk:
                         f.write(chunk)
 
-            logger.info(f"Google Driveダウンロード完了: {local_path}")
+            logger.info(f"ダウンロード完了: {local_path}")
             return True
 
         except Exception as e:
-            logger.warning(f"Google Driveダウンロード失敗: {e}")
+            logger.warning(f"ダウンロード失敗: {e}")
             if os.path.exists(local_path):
                 try:
                     os.remove(local_path)
