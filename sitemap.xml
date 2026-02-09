@@ -2,34 +2,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://botteryosuke.github.io/BackcastPro/</loc>
-         <lastmod>2026-02-07</lastmod>
+         <lastmod>2026-02-09</lastmod>
     </url>
     <url>
          <loc>https://botteryosuke.github.io/BackcastPro/developer-guide/</loc>
-         <lastmod>2026-02-07</lastmod>
+         <lastmod>2026-02-09</lastmod>
     </url>
     <url>
          <loc>https://botteryosuke.github.io/BackcastPro/execution-logic-report/</loc>
-         <lastmod>2026-02-07</lastmod>
+         <lastmod>2026-02-09</lastmod>
     </url>
     <url>
          <loc>https://botteryosuke.github.io/BackcastPro/how-to-deploy-to-PyPI/</loc>
-         <lastmod>2026-02-07</lastmod>
+         <lastmod>2026-02-09</lastmod>
     </url>
     <url>
          <loc>https://botteryosuke.github.io/BackcastPro/privacy/</loc>
-         <lastmod>2026-02-07</lastmod>
+         <lastmod>2026-02-09</lastmod>
     </url>
     <url>
          <loc>https://botteryosuke.github.io/BackcastPro/troubleshooting/</loc>
-         <lastmod>2026-02-07</lastmod>
+         <lastmod>2026-02-09</lastmod>
     </url>
     <url>
          <loc>https://botteryosuke.github.io/BackcastPro/tutorial/</loc>
-         <lastmod>2026-02-07</lastmod>
+         <lastmod>2026-02-09</lastmod>
+    </url>
+    <url>
+         <loc>https://botteryosuke.github.io/BackcastPro/plans/cloud_run_gdrive_proxy/</loc>
+         <lastmod>2026-02-09</lastmod>
     </url>
     <url>
          <loc>https://botteryosuke.github.io/BackcastPro/plans/encapsulated-dazzling-alpaca/</loc>
-         <lastmod>2026-02-07</lastmod>
+         <lastmod>2026-02-09</lastmod>
+    </url>
+    <url>
+         <loc>https://botteryosuke.github.io/BackcastPro/plans/migration_ftp_to_gdrive/</loc>
+         <lastmod>2026-02-09</lastmod>
     </url>
 </urlset>
