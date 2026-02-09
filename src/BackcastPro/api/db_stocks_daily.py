@@ -460,9 +460,17 @@ class db_stocks_daily(db_manager):
             db.close()
 
     def _download_from_ftp(self, code: str, local_path: str) -> bool:
-        """FTPサーバーからDuckDBファイルをダウンロード"""
-        from .ftp_client import FTPClient
+        """クラウドストレージからDuckDBファイルをダウンロード（Google Drive優先、FTPフォールバック）"""
+        # 1. Google Drive (Cloud Run API) を試行
+        from .gdrive_client import GDriveClient
+        gdrive = GDriveClient()
+        if gdrive.config.is_configured():
+            if gdrive.download_stocks_daily(code, local_path):
+                return True
+            logger.debug(f"Google Driveからダウンロード失敗: stocks_daily/{code}.duckdb")
 
+        # 2. FTPフォールバック
+        from .ftp_client import FTPClient
         client = FTPClient()
         if not client.config.is_configured():
             logger.debug("FTP credentials not configured")
