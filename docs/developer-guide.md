@@ -42,7 +42,7 @@ python -m pip install -e .
 
 4. **開発用依存関係をインストール**
 ```powershell
-python -m pip install pytest pytest-cov black flake8 mypy
+python -m pip install pytest pytest-cov flask google-api-python-client google-auth
 ```
 
 ### VS Code設定
@@ -273,18 +273,29 @@ def calculate_rsi(data: pd.DataFrame, period: int = 14) -> pd.Series:
 ```
 tests/
 ├── test_backtest_api.py              # バックテストAPIのテスト
-├── test_backtest_chart_auto_update.py # チャート自動更新のテスト
 ├── test_backtest_set_data.py         # データ設定のテスト
 ├── test_backtest_step_loop.py        # ステップ実行のテスト
+├── test_cloud_run_main.py            # Cloud Run APIのテスト
 ├── test_db_stocks_board.py           # 板情報DBのテスト
 ├── test_db_stocks_daily.py           # 日足DBのテスト
 ├── test_db_stocks_info.py            # 銘柄情報DBのテスト
-├── test_e_api.py                     # 外部APIのテスト
-├── test_indicators.py                # インジケーターのテスト
-├── test_j-quants.py                  # J-Quantsのテスト
-├── test_stooq.py                     # Stooqのテスト
+├── test_e_api.py                     # 立花証券e支店APIのテスト
+├── test_gdrive_client.py             # Google Driveクライアントのテスト
+├── test_j-quants.py                  # J-Quants APIのテスト
+├── test_kabusap.py                   # kabuステーションAPIのテスト
+├── test_order.py                     # 注文クラスのテスト
+├── test_position.py                  # ポジションクラスのテスト
 ├── test_relative_size_option_c.py    # 相対サイズオプションのテスト
-└── marimo_test_indicators.py         # marimoインジケーターテスト
+├── test_stats.py                     # 統計計算のテスト
+├── test_stocks_board_wrapper.py      # 板情報ラッパーのテスト
+├── test_stocks_info_wrapper.py       # 銘柄情報ラッパーのテスト
+├── test_stocks_price_wrapper.py      # 株価情報ラッパーのテスト
+├── test_stooq.py                     # Stooqデータ取得のテスト
+├── test_trade.py                     # トレードクラスのテスト
+├── test_update_stocks_price.py       # データ更新ジョブのテスト
+├── test_util.py                      # ユーティリティのテスト
+├── import_equities_trades.py         # 株式取引データインポートスクリプト
+└── import_minute_bars.py             # 分足データインポートスクリプト
 ```
 
 ### テストの実行
