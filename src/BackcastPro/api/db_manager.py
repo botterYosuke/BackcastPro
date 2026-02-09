@@ -286,6 +286,12 @@ class db_manager:
             
             logger.info(f"バッチ挿入完了: {total_rows}件")
 
+    def _normalize_code(self, code: str = None) -> str | None:
+        """銘柄コードを正規化（5桁の末尾0を除去して4桁にする）"""
+        if code and len(code) > 4:
+            return code[:-1]
+        return code
+
     def _get_db_path(self, code: str = None) -> str:
         """DBファイルパスを取得"""
         if self._db_subdir and code:
@@ -316,11 +322,7 @@ class db_manager:
         if not self.isEnable:
             return
 
-        # コードの正規化（サフィックス除去）
-        normalized_code = code
-        if code and len(code) > 4:
-            normalized_code = code[:-1]
-
+        normalized_code = self._normalize_code(code)
         db_path = self._get_db_path(normalized_code)
 
         if not os.path.exists(db_path):
@@ -333,20 +335,8 @@ class db_manager:
     @contextmanager
     def get_db(self, code: str = None):
         """DuckDBデータベース接続を取得"""
-        db_path = self._get_db_path(code)
-        if not os.path.exists(db_path):
-            if code and len(code) > 4:
-                code_retry = code[:-1]
-                with self.get_db(code_retry) as db:
-                    yield db
-                return
-
-            os.makedirs(os.path.dirname(db_path), exist_ok=True)
-            if self._download_from_cloud(db_path, code):
-                logger.info(f"DuckDBファイルをクラウドからダウンロードしました: {db_path}")
-            else:
-                logger.info(f"DuckDBファイルを作成しました: {db_path}")
-
+        self.ensure_db_ready(code)
+        db_path = self._get_db_path(self._normalize_code(code))
         db = duckdb.connect(db_path)
         try:
             yield db

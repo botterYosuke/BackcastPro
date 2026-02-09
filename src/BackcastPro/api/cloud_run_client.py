@@ -2,7 +2,7 @@
 Cloud Run APIクライアント
 
 Cloud Run上のプロキシAPIを通じて、
-Google Drive共有フォルダからDuckDBファイルをダウンロード/アップロードするモジュール。
+NAS (FTPS) からDuckDBファイルをダウンロード/アップロードするモジュール。
 """
 import os
 import logging

@@ -9,6 +9,7 @@
 3. [DockerfileのENTRYPOINT化](#dockerfileのentrypoint化)
 4. [Google Drive廃止と自宅NAS（FTPS）への移行](#google-drive廃止と自宅nasftpsへの移行)
 5. [Cloud Run Proxyアップロード廃止とDockerボリュームマウントへの移行](#cloud-run-proxyアップロード廃止とdockerボリュームマウントへの移行)
+6. [Cloud Run Job廃止とSynology NAS Docker + DockerHubへの移行](#cloud-run-job廃止とsynology-nas-docker--dockerhubへの移行)
 
 ---
 
@@ -46,7 +47,7 @@ BackcastProのデータ取得は、当初以下の3段フォールバック構�
 ## 株価データ更新のCloud Run Job化
 
 **Date:** 2026-02-09
-**Status:** ~~Implemented~~ Superseded（アップロード経路は[Cloud Run Proxyアップロード廃止とDockerボリュームマウントへの移行](#cloud-run-proxyアップロード廃止とdockerボリュームマウントへの移行)により変更。Cloud Run Job自体は引き続き使用）
+**Status:** ~~Implemented~~ Superseded（アップロード経路は[Cloud Run Proxyアップロード廃止とDockerボリュームマウントへの移行](#cloud-run-proxyアップロード廃止とdockerボリュームマウントへの移行)により変更。実行環境は[Cloud Run Job廃止とSynology NAS Docker + DockerHubへの移行](#cloud-run-job廃止とsynology-nas-docker--dockerhubへの移行)により変更）
 
 ### Context
 
@@ -162,5 +163,34 @@ ENTRYPOINT ["python", "/app/update_stocks_price.py"]
     *   ローカルDocker環境でのテストが容易に（`docker run -v` のみで動作確認可能）。
 *   **注意点**:
     *   Cloud Run Job で使用する場合は、ボリュームマウント（GCS FUSE等）の設定が別途必要。
+
+---
+
+## Cloud Run Job廃止とSynology NAS Docker + DockerHubへの移行
+
+**Date:** 2026-02-10
+**Status:** Implemented
+
+### Context
+
+`update_stocks_price.py` は Google Cloud Run Job で定期実行していたが、自宅に Synology NAS（DS218）が稼働しており、Docker 実行環境が利用可能。Cloud Run Job の課題（GCS FUSE マウント設定の複雑さ、Google Cloud のコスト）を解消するため、NAS の Docker で直接実行する構成に移行する。
+
+### Decision
+
+*   **実行環境の変更**: Google Cloud Run Job → Synology NAS の Docker。NAS のタスクスケジューラで定期実行。
+*   **イメージ配布の変更**: Google Artifact Registry → DockerHub (`backcast/cloud-job`)。
+*   **CI/CDの変更**: `cloudbuild-job.yaml`（Cloud Build）→ `.github/workflows/publish-dockerhub.yml`（GitHub Actions）。`main` ブランチへの push で自動ビルド・push。
+*   **ボリュームマウント**: NAS のローカルディレクトリを `-v /volume1/docker/backcast/data:/data` でマウントし、DuckDB ファイルを永続化。
+
+### Consequences
+
+*   **メリット**:
+    *   Google Cloud の運用コスト削減（Cloud Run Job、Cloud Scheduler、Artifact Registry）。
+    *   GCS FUSE マウント設定が不要になり、構成がシンプルに。
+    *   NAS のローカルディスクに直接書き込むため、データアクセスが高速。
+    *   GitHub Actions + DockerHub というオープンな CI/CD パイプラインに統一。
+*   **デメリット**:
+    *   NAS の稼働率・ネットワーク環境に依存。
+    *   DockerHub の pull rate limit（無料プラン: 100 pulls/6h）に注意が必要。
 
 ---

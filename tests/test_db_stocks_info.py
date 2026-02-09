@@ -31,10 +31,10 @@ class TestDbStocksInfo(unittest.TestCase):
             del os.environ['BACKCASTPRO_CACHE_DIR']
 
     def test_download_from_cloud_success(self):
-        """Test successful download from Google Drive"""
-        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_gdrive_cls:
+        """Test successful download from Cloud Run"""
+        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_client_cls:
             mock_client = MagicMock()
-            mock_gdrive_cls.return_value = mock_client
+            mock_client_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
             mock_client.download_file.return_value = True
 
@@ -47,10 +47,10 @@ class TestDbStocksInfo(unittest.TestCase):
             mock_client.download_file.assert_called_once_with("listed_info.duckdb", test_path)
 
     def test_download_from_cloud_failure(self):
-        """Test failure during Google Drive download"""
-        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_gdrive_cls:
+        """Test failure during Cloud Run download"""
+        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_client_cls:
             mock_client = MagicMock()
-            mock_gdrive_cls.return_value = mock_client
+            mock_client_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
             mock_client.download_file.return_value = False
 
@@ -61,10 +61,10 @@ class TestDbStocksInfo(unittest.TestCase):
             self.assertFalse(result, "Download should return False on failure")
 
     def test_download_from_cloud_not_configured(self):
-        """Test behavior when Google Drive is not configured"""
-        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_gdrive_cls:
+        """Test behavior when Cloud Run is not configured"""
+        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_client_cls:
             mock_client = MagicMock()
-            mock_gdrive_cls.return_value = mock_client
+            mock_client_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = False
 
             test_path = os.path.join(self.test_cache_dir, "test_notconfigured.duckdb")

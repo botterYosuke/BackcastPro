@@ -60,28 +60,27 @@ def setup_logging() -> logging.Logger:
     ))
     root_logger.addHandler(console_handler)
 
-    # Cloud Run ではファイルハンドラ不要（stdout → Cloud Logging）
-    if not os.environ.get('CLOUD_RUN_JOB'):
-        cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', '.')
-        log_dir = os.path.join(cache_dir, 'logs')
-        os.makedirs(log_dir, exist_ok=True)
+    # ファイルハンドラ（ログファイル出力）
+    cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', '.')
+    log_dir = os.path.join(cache_dir, 'logs')
+    os.makedirs(log_dir, exist_ok=True)
 
-        log_file = os.path.join(
-            log_dir,
-            f"update_stocks_price_{datetime.now().strftime('%Y%m%d')}.log"
-        )
+    log_file = os.path.join(
+        log_dir,
+        f"update_stocks_price_{datetime.now().strftime('%Y%m%d')}.log"
+    )
 
-        file_handler = RotatingFileHandler(
-            log_file,
-            maxBytes=10 * 1024 * 1024,  # 10MB
-            backupCount=30,
-            encoding='utf-8'
-        )
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        ))
-        root_logger.addHandler(file_handler)
+    file_handler = RotatingFileHandler(
+        log_file,
+        maxBytes=10 * 1024 * 1024,  # 10MB
+        backupCount=30,
+        encoding='utf-8'
+    )
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    ))
+    root_logger.addHandler(file_handler)
 
     return logging.getLogger(__name__)
 

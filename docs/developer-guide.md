@@ -68,7 +68,8 @@ python -m pip install pytest pytest-cov flask
 # DuckDBキャッシュディレクトリ
 BACKCASTPRO_CACHE_DIR=/path/to/your/duckdb/cache
 
-# Cloud Run Proxy のURL（ダウンロード用、オプション）
+# NAS FTPS Proxy のURL（DuckDBダウンロード用、オプション）
+# ※歴史的経緯で GDRIVE の名前が残っている（実際は NAS FTPS Proxy）
 BACKCASTPRO_GDRIVE_API_URL=https://your-cloud-run-url.a.run.app
 ```
 
@@ -94,9 +95,13 @@ BackcastPro/
 │           ├── db_stocks_daily.py
 │           ├── db_stocks_board.py
 │           ├── db_stocks_info.py
-│           └── cloud_run_client.py # Cloud Run API経由のダウンローダー
-├── cloud-run/                    # Cloud Runデプロイ用コード
-│   ├── main.py                  # APIサーバー実装
+│           └── cloud_run_client.py # NAS FTPS Proxy経由のダウンローダー
+├── cloud-job/                    # 株価データ更新ジョブ
+│   ├── update_stocks_price.py   # 更新スクリプト
+│   ├── Dockerfile               # コンテナ定義（DockerHub: backcast/cloud-job）
+│   └── requirements.txt         # 依存パッケージ
+├── cloud-run/                    # NAS FTPS Proxyサーバー
+│   ├── main.py                  # FTPS→HTTPプロキシ実装
 │   └── Dockerfile               # コンテナ定義
 ├── tests/                       # テストファイル
 ├── docs/                        # ドキュメント
@@ -131,8 +136,8 @@ BackcastPro/
 - 日本株価・板情報・銘柄情報の取得
 - **データ取得フロー**:
   1. ローカルキャッシュ（DuckDB）を確認
-  2. なければCloud Run API経由でダウンロード
-  3. **データ更新**: 夜間にCloud Run Jobが実行され、マウントボリューム上のDuckDBファイルを更新（詳細は[Cloud Run Jobによる株価データ更新](cloud-run-updater.md)を参照）
+  2. なければNAS FTPS Proxy経由でダウンロード
+  3. **データ更新**: 夜間にDockerコンテナが実行され、マウントボリューム上のDuckDBファイルを更新（詳細は[Docker Jobによる株価データ更新](cloud-run-updater.md)を参照）
 
 ### データフロー
 
@@ -529,7 +534,9 @@ GitHub Actionsを使用して以下を自動化：
 - **テスト実行** - PR作成時
 - **コード品質チェック** - リント、フォーマット
 - **ビルド** - リリース時
-- **PyPIアップロード** - タグ作成時
+- **PyPIアップロード** - `main` push時（`.github/workflows/publish-pypi.yml`）
+- **DockerHub push** - `main` push時（`.github/workflows/publish-dockerhub.yml` → `backcast/cloud-job`）
+- **ドキュメント** - `main` push時（`.github/workflows/docs.yml`）
 
 ## パフォーマンス最適化
 

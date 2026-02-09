@@ -36,9 +36,9 @@ class TestDbStocksDaily(unittest.TestCase):
             del os.environ['BACKCASTPRO_CACHE_DIR']
 
     def test_download_from_cloud_success(self):
-        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_gdrive_cls:
+        with patch('BackcastPro.api.cloud_run_client.CloudRunClient') as mock_client_cls:
             mock_client = MagicMock()
-            mock_gdrive_cls.return_value = mock_client
+            mock_client_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
             mock_client.download_file.return_value = True
 
