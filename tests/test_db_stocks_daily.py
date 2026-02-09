@@ -40,16 +40,16 @@ class TestDbStocksDaily(unittest.TestCase):
             mock_client = MagicMock()
             mock_gdrive_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
-            mock_client.download_stocks_daily.return_value = True
+            mock_client.download_file.return_value = True
 
             code = "9999"
             test_path = os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb")
             os.makedirs(os.path.dirname(test_path), exist_ok=True)
 
-            result = self.db_daily._download_from_cloud(code, test_path)
+            result = self.db_daily._download_from_cloud(test_path, code)
 
             self.assertTrue(result)
-            mock_client.download_stocks_daily.assert_called_once_with(code, test_path)
+            mock_client.download_file.assert_called_once_with(f"stocks_daily/{code}.duckdb", test_path)
 
     def test_metadata_operations(self):
         """Test _save_metadata and _get_metadata"""

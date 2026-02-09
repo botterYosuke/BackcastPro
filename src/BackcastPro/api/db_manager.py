@@ -4,6 +4,7 @@ import duckdb
 import logging
 import inspect
 import tempfile
+from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -14,6 +15,9 @@ class db_manager:
     データベース管理クラス
     キャッシュやデータの保存・読み込みを担当
     """
+
+    _db_subdir: str = None
+    _db_filename: str = None
 
     def __init__(self):
         # 1. 環境変数をチェック
@@ -281,3 +285,70 @@ class db_manager:
                 logger.debug(f"バッチ挿入進捗: {processed}/{total_rows} 件 ({processed/total_rows*100:.1f}%)")
             
             logger.info(f"バッチ挿入完了: {total_rows}件")
+
+    def _get_db_path(self, code: str = None) -> str:
+        """DBファイルパスを取得"""
+        if self._db_subdir and code:
+            return os.path.join(self.cache_dir, self._db_subdir, f"{code}.duckdb")
+        elif self._db_filename:
+            return os.path.join(self.cache_dir, self._db_filename)
+        else:
+            raise ValueError("DB path configuration is incomplete")
+
+    def _download_from_cloud(self, local_path: str, code: str = None) -> bool:
+        """Cloud RunからDuckDBファイルをダウンロード"""
+        from .cloud_run_client import CloudRunClient
+        client = CloudRunClient()
+        if client.config.is_configured():
+            if self._db_subdir and code:
+                remote_path = f"{self._db_subdir}/{code}.duckdb"
+            elif self._db_filename:
+                remote_path = self._db_filename
+            else:
+                return False
+            if client.download_file(remote_path, local_path):
+                return True
+            logger.debug(f"Cloud Runからダウンロード失敗: {remote_path}")
+        return False
+
+    def ensure_db_ready(self, code: str = None) -> None:
+        """DuckDBファイルの準備を行う（存在しなければクラウドからダウンロードを試行）"""
+        if not self.isEnable:
+            return
+
+        # コードの正規化（サフィックス除去）
+        normalized_code = code
+        if code and len(code) > 4:
+            normalized_code = code[:-1]
+
+        db_path = self._get_db_path(normalized_code)
+
+        if not os.path.exists(db_path):
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            if self._download_from_cloud(db_path, normalized_code):
+                logger.info(f"DuckDBファイルをクラウドからダウンロードしました: {db_path}")
+            else:
+                logger.debug(f"クラウドにDuckDBファイルが存在しません: {db_path}")
+
+    @contextmanager
+    def get_db(self, code: str = None):
+        """DuckDBデータベース接続を取得"""
+        db_path = self._get_db_path(code)
+        if not os.path.exists(db_path):
+            if code and len(code) > 4:
+                code_retry = code[:-1]
+                with self.get_db(code_retry) as db:
+                    yield db
+                return
+
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            if self._download_from_cloud(db_path, code):
+                logger.info(f"DuckDBファイルをクラウドからダウンロードしました: {db_path}")
+            else:
+                logger.info(f"DuckDBファイルを作成しました: {db_path}")
+
+        db = duckdb.connect(db_path)
+        try:
+            yield db
+        finally:
+            db.close()

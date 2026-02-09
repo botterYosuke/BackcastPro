@@ -9,18 +9,13 @@ BackcastProは、夜間にCloud Run Jobを使用して株価データを自動�
 1. **Cloud Scheduler** が毎晩定刻（例: 19:30 JST）に **Cloud Run Job** をトリガーします。
 2. **Cloud Run Job** (`update_stocks_price.py`) が実行されます。
    - J-Quants APIなどから最新の株価データを取得します。
-   - 取得したデータをDuckDBファイルとして生成・更新します。
-3. **Cloud Run Proxy** 経由で **Google Drive** にアップロードします。
-   - Jobは `CloudRunClient` を使用し、Cloud Run Proxyのエンドポイントに対して `POST` リクエストを送信します。
-   - Proxyは受け取ったデータをGoogle Driveの所定のフォルダ（`jp/stocks_daily` など）に保存します。
+   - 取得したデータをDuckDBファイルとしてマウントされたボリューム（`BACKCASTPRO_CACHE_DIR`）に直接保存します。
 
 ```mermaid
 graph LR
     A[Cloud Scheduler] -->|トリガー| B[Cloud Run Job]
     B -->|データ取得| C[J-Quants / Tachibana / Stooq]
-    B -->|DuckDB保存| D[/tmp/backcastpro_cache/]
-    B -->|HTTP POST| E[Cloud Run Proxy]
-    E -->|アップロード| F[Google Drive]
+    B -->|DuckDB保存| D[マウントボリューム /data]
 ```
 
 ## 構成要素
@@ -29,15 +24,9 @@ graph LR
 
 - **ソース**: `cloud-job/`
 - **イメージ**: `asia-northeast1-docker.pkg.dev/carbide-booth-486907-a3/cloud-run-source-deploy/update-stocks-price:latest`
-- **役割**: データのダウンロード、加工、アップロード
+- **役割**: データの取得、加工、DuckDBファイルへの保存
 - **認証**: Secret ManagerからAPIキーなどを取得
-
-### 2. Cloud Run Proxy (`backcastpro`)
-
-- **ソース**: `cloud-run/`
-- **URL**: `https://backcastpro-341714433786.asia-northeast1.run.app`
-- **役割**: Google Driveへのアクセス（ダウンロード/アップロード）の中継
-- **認証**: `UPLOAD_API_KEY` による簡易認証（Job → Proxy間）
+- **データ保存先**: 環境変数 `BACKCASTPRO_CACHE_DIR`（デフォルト: `/data`）で指定されたディレクトリ
 
 ## 本番環境情報
 
@@ -46,7 +35,6 @@ graph LR
 | GCP プロジェクト ID | `carbide-booth-486907-a3` |
 | プロジェクト番号 | `341714433786` |
 | リージョン | `asia-northeast1` |
-| Proxy URL | `https://backcastpro-341714433786.asia-northeast1.run.app` |
 | Artifact Registry | `asia-northeast1-docker.pkg.dev/carbide-booth-486907-a3/cloud-run-source-deploy/` |
 | サービスアカウント | `341714433786-compute@developer.gserviceaccount.com` |
 
@@ -58,8 +46,6 @@ graph LR
 | `eAPI_URL` | 立花証券 e-支店 APIエンドポイント |
 | `eAPI_USER_ID` | 立花証券 ユーザーID |
 | `eAPI_PASSWORD` | 立花証券 パスワード |
-| `UPLOAD_API_KEY` | Cloud Run Proxy への認証キー（ProxyとJobで共有） |
-| `GOOGLE_SERVICE_ACCOUNT_JSON` | Google Drive用サービスアカウント鍵（Proxyのみ） |
 
 ## デプロイ手順
 
@@ -94,8 +80,8 @@ MSYS_NO_PATHCONV=1 gcloud.cmd run jobs create update-stocks-price \
   --max-retries=1 \
   --memory=2Gi \
   --cpu=1 \
-  --set-secrets="JQUANTS_API_KEY=JQUANTS_API_KEY:latest,eAPI_URL=eAPI_URL:latest,eAPI_USER_ID=eAPI_USER_ID:latest,eAPI_PASSWORD=eAPI_PASSWORD:latest,UPLOAD_API_KEY=UPLOAD_API_KEY:latest" \
-  --set-env-vars="BACKCASTPRO_CACHE_DIR=/tmp/backcastpro_cache,BACKCASTPRO_GDRIVE_API_URL=https://backcastpro-341714433786.asia-northeast1.run.app"
+  --set-secrets="JQUANTS_API_KEY=JQUANTS_API_KEY:latest,eAPI_URL=eAPI_URL:latest,eAPI_USER_ID=eAPI_USER_ID:latest,eAPI_PASSWORD=eAPI_PASSWORD:latest" \
+  --set-env-vars="BACKCASTPRO_CACHE_DIR=/data"
 ```
 
 コード変更後の更新：
@@ -120,12 +106,24 @@ MSYS_NO_PATHCONV=1 gcloud.cmd scheduler jobs create http update-stocks-price-nig
 
 ## Job の実行・テスト
 
-### dry-run で動作確認
+### 特定銘柄で動作確認
 
 ```bash
 MSYS_NO_PATHCONV=1 gcloud.cmd run jobs execute update-stocks-price \
   --region=asia-northeast1 \
-  --args="--codes,7203,--days,3,--dry-run"
+  --args="--codes,7203,--days,3"
+```
+
+### ローカルDockerで動作確認
+
+```bash
+docker build -f cloud-job/Dockerfile -t update-stocks-price .
+docker run -v /path/to/duckdb:/data \
+  -e JQUANTS_API_KEY=xxx \
+  -e eAPI_URL=xxx \
+  -e eAPI_USER_ID=xxx \
+  -e eAPI_PASSWORD=xxx \
+  update-stocks-price --codes 7203 --days 3
 ```
 
 ### 実行状態の確認
@@ -159,7 +157,13 @@ gcloud.cmd logging read 'resource.type="cloud_run_job" AND resource.labels.job_n
 
 ### データ確認
 
-更新されたデータは、ローカル環境で `CloudRunClient` を通じてダウンロードするか、Google Driveを直接確認することで検証できます。
+更新されたデータは、マウントされたボリューム内のDuckDBファイルを直接確認することで検証できます。
+
+```bash
+# ボリューム内のDuckDBファイルを確認
+ls /path/to/duckdb/stocks_daily/
+# 例: 7203.duckdb, 8306.duckdb, ...
+```
 
 ## Windows (MSYS/Git Bash) 環境での注意事項
 
@@ -173,11 +177,11 @@ MSYS/Git Bash は `/` で始まる文字列を Windows パスに自動変換し�
 **すべての gcloud コマンドの先頭に `MSYS_NO_PATHCONV=1` を付けてください。**
 
 ```bash
-# NG: URLが壊れる
-gcloud.cmd run jobs update update-stocks-price --set-env-vars="BACKCASTPRO_GDRIVE_API_URL=https://example.run.app"
+# NG: パスが壊れる
+gcloud.cmd run jobs update update-stocks-price --set-env-vars="BACKCASTPRO_CACHE_DIR=/data"
 
 # OK: パス変換を無効化
-MSYS_NO_PATHCONV=1 gcloud.cmd run jobs update update-stocks-price --set-env-vars="BACKCASTPRO_GDRIVE_API_URL=https://example.run.app"
+MSYS_NO_PATHCONV=1 gcloud.cmd run jobs update update-stocks-price --set-env-vars="BACKCASTPRO_CACHE_DIR=/data"
 ```
 
 ### 2. gcloud logging はbashから動作しない
@@ -212,7 +216,7 @@ ENTRYPOINT ["python", "/app/update_stocks_price.py"]
 
 ### 環境変数が壊れている
 
-MSYS のパス自動変換により、URL が `https://...` → `https;\...` のように壊れることがあります。
+MSYS のパス自動変換により、パスが `/data` → `C:\...` のように壊れることがあります。
 
 `gcloud run jobs describe` で環境変数の値を確認し、壊れていた場合は `MSYS_NO_PATHCONV=1` を付けて `gcloud run jobs update` で修正してください。
 

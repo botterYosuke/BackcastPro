@@ -1,8 +1,7 @@
 """
-夜間株価取得・アップロードスクリプト
+夜間株価取得スクリプト
 
-複数のデータソースから株価を取得し、DuckDBにキャッシュ保存後、
-Cloud Run proxy経由でGoogle Driveにアップロードする。
+複数のデータソースから株価を取得し、DuckDBに保存する。
 
 取得優先度:
 1. Tachibana（立花証券 e-支店）を試行
@@ -12,7 +11,6 @@ Cloud Run proxy経由でGoogle Driveにアップロードする。
 使用方法:
     python update_stocks_price.py                    # 全銘柄処理
     python update_stocks_price.py --codes 7203,8306  # 特定銘柄のみ
-    python update_stocks_price.py --dry-run          # アップロードをスキップ
     python update_stocks_price.py --workers 8        # 並列ワーカー数を指定
 """
 import os
@@ -45,8 +43,6 @@ class UpdateSummary:
     total_stocks: int = 0
     success_count: int = 0
     failed_count: int = 0
-    uploaded: int = 0
-    upload_failed: int = 0
     errors: list[tuple[str, str]] = field(default_factory=list)
 
 
@@ -93,17 +89,12 @@ def setup_logging() -> logging.Logger:
 def parse_arguments() -> argparse.Namespace:
     """コマンドライン引数をパース"""
     parser = argparse.ArgumentParser(
-        description='夜間株価取得・アップロードスクリプト'
+        description='夜間株価取得スクリプト'
     )
     parser.add_argument(
         '--codes',
         type=str,
         help='処理対象の銘柄コード（カンマ区切り）例: 7203,8306'
-    )
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='アップロードをスキップ'
     )
     parser.add_argument(
         '--days',
@@ -272,60 +263,6 @@ def process_stock(
     return code, False, 0, None
 
 
-def upload_to_cloud(modified_codes: list[str], dry_run: bool = False) -> dict:
-    """
-    更新されたDuckDBファイルをCloud Run proxy経由でGoogle Driveにアップロード
-
-    Args:
-        modified_codes: 更新された銘柄コードのリスト
-        dry_run: Trueの場合、実際のアップロードをスキップ
-
-    Returns:
-        {'success': [...], 'failed': [...]}
-    """
-    from BackcastPro.api.cloud_run_client import CloudRunClient
-
-    results = {'success': [], 'failed': []}
-
-    if dry_run:
-        logger.info("dry-run モード: アップロードをスキップ")
-        results['success'] = modified_codes
-        return results
-
-    if not modified_codes:
-        logger.info("アップロード対象ファイルなし")
-        return results
-
-    client = CloudRunClient()
-    if not client.config.is_configured():
-        logger.error("BACKCASTPRO_GDRIVE_API_URL not configured")
-        for code in modified_codes:
-            results['failed'].append((code, "API URL not configured"))
-        return results
-
-    cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', '.')
-    local_dir = os.path.join(cache_dir, 'stocks_daily')
-
-    for code in modified_codes:
-        local_path = os.path.join(local_dir, f"{code}.duckdb")
-        if not os.path.exists(local_path):
-            logger.warning(f"ローカルファイルなし: {local_path}")
-            results['failed'].append((code, "File not found"))
-            continue
-        try:
-            if client.upload_stocks_daily(code, local_path):
-                results['success'].append(code)
-            else:
-                results['failed'].append((code, "Upload failed"))
-        except Exception as e:
-            logger.error(f"  アップロード失敗 {code}: {e}")
-            results['failed'].append((code, str(e)))
-
-    logger.info("アップロード処理完了")
-
-    return results
-
-
 def main():
     """メインエントリーポイント"""
     global logger
@@ -438,14 +375,7 @@ def main():
 
     producer.join()
 
-    # 4. アップロード
-    logger.info("-" * 50)
-    logger.info(f"アップロード開始: {len(modified_codes)} ファイル")
-    upload_results = upload_to_cloud(modified_codes, dry_run=args.dry_run)
-    summary.uploaded = len(upload_results['success'])
-    summary.upload_failed = len(upload_results['failed'])
-
-    # 5. サマリー出力
+    # 4. サマリー出力
     summary.end_time = datetime.now()
     duration = summary.end_time - summary.start_time
 
@@ -456,7 +386,6 @@ def main():
     logger.info(f"対象銘柄: {summary.total_stocks}")
     logger.info(f"成功: {summary.success_count}")
     logger.info(f"失敗: {summary.failed_count}")
-    logger.info(f"アップロード: 成功={summary.uploaded}, 失敗={summary.upload_failed}")
 
     if summary.errors:
         logger.info("-" * 50)

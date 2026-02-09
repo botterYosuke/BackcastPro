@@ -1,21 +1,17 @@
-"""Google Drive proxy for BackcastPro.
+"""FTPS proxy for BackcastPro.
 
-Streams .duckdb files from a shared Google Drive folder via HTTP (GET),
-and accepts file uploads via HTTP (POST).
+Streams .duckdb files from a home NAS via FTPS, exposed as HTTP (GET/POST).
 Deployed on Cloud Run.
 """
 
+import ftplib
 import io
-import json
 import logging
 import os
 import re
+import ssl
 
 from flask import Flask, Response, request as flask_request
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-from googleapiclient.http import MediaIoBaseDownload, MediaInMemoryUpload
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -27,86 +23,102 @@ ALLOWED_PATHS = re.compile(
 )
 
 
-class GoogleDriveProxy:
-    """Finds and streams files from a shared Google Drive folder."""
+class _NatFriendlyFTP_TLS(ftplib.FTP_TLS):
+    """FTP_TLS that works behind NAT.
 
-    def __init__(self, credentials, root_folder_id: str):
-        self.service = build("drive", "v3", credentials=credentials)
-        self.root_folder_id = root_folder_id
-        self._folder_cache: dict[str, str] = {}  # name -> folder_id
+    When the server returns a private IP in PASV response,
+    replace it with the control connection host.
+    """
 
-    def find_subfolder(self, name: str) -> str | None:
-        """Find a subfolder by name under the root folder (cached)."""
-        if name in self._folder_cache:
-            return self._folder_cache[name]
+    def makepasv(self):
+        _host, port = super().makepasv()
+        return self.host, port
 
-        query = (
-            f"'{self.root_folder_id}' in parents"
-            f" and name = '{name}'"
-            f" and mimeType = 'application/vnd.google-apps.folder'"
-            f" and trashed = false"
-        )
-        results = (
-            self.service.files()
-            .list(q=query, fields="files(id, name)", pageSize=1)
-            .execute()
-        )
-        files = results.get("files", [])
-        if not files:
-            return None
 
-        folder_id = files[0]["id"]
-        self._folder_cache[name] = folder_id
-        return folder_id
+class NASFtpsProxy:
+    """Connects to a home NAS via FTPS and handles file operations."""
 
-    def find_file(self, folder_id: str, filename: str) -> str | None:
-        """Find a file by name in a specific folder."""
-        query = (
-            f"'{folder_id}' in parents"
-            f" and name = '{filename}'"
-            f" and trashed = false"
-        )
-        results = (
-            self.service.files()
-            .list(q=query, fields="files(id, name)", pageSize=1)
-            .execute()
-        )
-        files = results.get("files", [])
-        if not files:
-            return None
-        return files[0]["id"]
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        username: str,
+        password: str,
+        base_path: str = "/",
+        connect_timeout: float = 30.0,
+    ):
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.base_path = base_path.rstrip("/")
+        self.connect_timeout = connect_timeout
 
-    def upload_file(self, folder_id: str, filename: str, data: bytes) -> str:
-        """Upload or update a file in a folder. Returns file ID."""
-        existing_id = self.find_file(folder_id, filename)
-        media = MediaInMemoryUpload(data, mimetype="application/octet-stream")
+    def _connect(self) -> _NatFriendlyFTP_TLS:
+        """Establish a new FTPS connection (per-request)."""
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
 
-        if existing_id:
-            result = self.service.files().update(
-                fileId=existing_id, media_body=media
-            ).execute()
-            return result["id"]
+        ftp = _NatFriendlyFTP_TLS(context=context)
+        ftp.connect(self.host, self.port, timeout=self.connect_timeout)
+        ftp.login(self.username, self.password)
+        ftp.prot_p()
+        ftp.set_pasv(True)
+        return ftp
 
-        result = self.service.files().create(
-            body={"name": filename, "parents": [folder_id]},
-            media_body=media, fields="id"
-        ).execute()
-        return result["id"]
+    def _resolve_path(self, file_path: str) -> str:
+        """Combine base_path with the relative file_path."""
+        return f"{self.base_path}/jp/{file_path}"
 
-    def stream_file(self, file_id: str) -> Response:
-        """Stream file content as a chunked HTTP response."""
-        request = self.service.files().get_media(fileId=file_id)
+    def _ensure_directory(self, ftp: _NatFriendlyFTP_TLS, dir_path: str) -> None:
+        """Create directory tree on NAS (mkdir -p equivalent)."""
+        parts = dir_path.strip("/").split("/")
+        current = ""
+        for part in parts:
+            current = f"{current}/{part}"
+            try:
+                ftp.mkd(current)
+            except ftplib.error_perm:
+                pass  # Directory already exists
+
+    def stream_file(self, file_path: str) -> Response:
+        """Stream file content as a chunked HTTP response via FTPS.
+
+        Raises ftplib.error_perm if file not found.
+        """
+        remote_path = self._resolve_path(file_path)
+
+        # Pre-check: verify file exists (raises error_perm if not found)
+        ftp_check = self._connect()
+        try:
+            ftp_check.voidcmd("TYPE I")
+            ftp_check.size(remote_path)
+        finally:
+            try:
+                ftp_check.quit()
+            except Exception:
+                pass
 
         def generate():
-            fh = io.BytesIO()
-            downloader = MediaIoBaseDownload(fh, request, chunksize=1024 * 1024)
-            done = False
-            while not done:
-                _, done = downloader.next_chunk()
-                fh.seek(0)
-                yield fh.read()
-                fh.seek(0)
-                fh.truncate()
+            ftp = self._connect()
+            try:
+                ftp.voidcmd("TYPE I")
+                conn = ftp.transfercmd(f"RETR {remote_path}")
+                try:
+                    while True:
+                        chunk = conn.recv(1024 * 1024)
+                        if not chunk:
+                            break
+                        yield chunk
+                finally:
+                    conn.close()
+                    ftp.voidresp()
+            finally:
+                try:
+                    ftp.quit()
+                except Exception:
+                    pass
 
         return Response(
             generate(),
@@ -114,47 +126,41 @@ class GoogleDriveProxy:
             headers={"Transfer-Encoding": "chunked"},
         )
 
+    def upload_file(self, file_path: str, data: bytes) -> dict:
+        """Upload/overwrite a file via FTPS."""
+        remote_path = self._resolve_path(file_path)
+        dir_path = remote_path.rsplit("/", 1)[0]
 
-def _build_credentials():
-    """Build Google credentials from environment."""
-    sa_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
-    scopes = ["https://www.googleapis.com/auth/drive"]
+        ftp = self._connect()
+        try:
+            self._ensure_directory(ftp, dir_path)
+            ftp.storbinary(f"STOR {remote_path}", io.BytesIO(data))
+            return {"path": remote_path, "size": len(data)}
+        finally:
+            try:
+                ftp.quit()
+            except Exception:
+                pass
 
-    if sa_json:
-        info = json.loads(sa_json)
-        return service_account.Credentials.from_service_account_info(
-            info, scopes=scopes
+
+def _get_proxy() -> NASFtpsProxy:
+    """Get or create the NASFtpsProxy singleton."""
+    if not hasattr(app, "_nas_proxy"):
+        app._nas_proxy = NASFtpsProxy(
+            host=os.environ.get("FTPS_HOST", "backcast.i234.me"),
+            port=int(os.environ.get("FTPS_PORT", "21")),
+            username=os.environ.get("FTPS_USERNAME", ""),
+            password=os.environ.get("FTPS_PASSWORD", ""),
+            base_path=os.environ.get("FTPS_BASE_PATH", "/StockData"),
+            connect_timeout=float(os.environ.get("FTPS_CONNECT_TIMEOUT", "30")),
         )
-
-    # Fallback: Cloud Run default service account
-    import google.auth
-
-    credentials, _ = google.auth.default(scopes=scopes)
-    return credentials
-
-
-def _get_proxy(subfolder: str = "") -> GoogleDriveProxy:
-    """Get or create the GoogleDriveProxy singleton.
-
-    Args:
-        subfolder: Root subfolder to resolve as the effective root.
-                   Pass None to use the root folder directly.
-    """
-    if not hasattr(app, "_drive_proxy"):
-        credentials = _build_credentials()
-        root_folder_id = os.environ.get(
-            "GOOGLE_DRIVE_ROOT_FOLDER_ID", "1LxXZ7dZv4oXlYyXH6OZtt_0yVbwtyiF4"
+        logger.info(
+            "NAS FTPS proxy configured: %s:%s base=%s",
+            app._nas_proxy.host,
+            app._nas_proxy.port,
+            app._nas_proxy.base_path,
         )
-        proxy = GoogleDriveProxy(credentials, root_folder_id)
-        if subfolder:
-            resolved = proxy.find_subfolder(subfolder)
-            if resolved:
-                proxy.root_folder_id = resolved
-                logger.info("Resolved '%s' subfolder: %s", subfolder, resolved)
-            else:
-                logger.warning("'%s' subfolder not found in root folder", subfolder)
-        app._drive_proxy = proxy
-    return app._drive_proxy
+    return app._nas_proxy
 
 
 @app.route("/")
@@ -164,41 +170,21 @@ def health():
 
 @app.route("/jp/<path:file_path>", methods=["GET"])
 def download_file(file_path: str):
-    # Validate path against whitelist
     if not ALLOWED_PATHS.match(file_path):
         return "Not Found", 404
 
-    proxy = _get_proxy("jp")
-
-    # Parse path: "stocks_daily/1234.duckdb" or "listed_info.duckdb"
-    parts = file_path.split("/")
-    if len(parts) == 2:
-        subfolder_name, filename = parts
-    elif len(parts) == 1:
-        subfolder_name, filename = None, parts[0]
-    else:
+    proxy = _get_proxy()
+    try:
+        logger.info("Streaming: %s", file_path)
+        return proxy.stream_file(file_path)
+    except ftplib.error_perm:
+        logger.warning("File not found on NAS: %s", file_path)
         return "Not Found", 404
-
-    if subfolder_name:
-        folder_id = proxy.find_subfolder(subfolder_name)
-        if not folder_id:
-            logger.warning("Subfolder not found: %s", subfolder_name)
-            return "Not Found", 404
-    else:
-        folder_id = proxy.root_folder_id
-
-    file_id = proxy.find_file(folder_id, filename)
-    if not file_id:
-        logger.warning("File not found: %s/%s", subfolder_name or "", filename)
-        return "Not Found", 404
-
-    logger.info("Streaming: %s (file_id=%s)", file_path, file_id)
-    return proxy.stream_file(file_id)
 
 
 @app.route("/jp/<path:file_path>", methods=["POST"])
 def upload_handler(file_path: str):
-    """Upload a file to Google Drive via the proxy."""
+    """Upload a file to NAS via the proxy."""
     expected_key = os.environ.get("UPLOAD_API_KEY")
     if not expected_key or flask_request.headers.get("X-API-Key") != expected_key:
         return "Unauthorized", 401
@@ -206,34 +192,18 @@ def upload_handler(file_path: str):
     if not ALLOWED_PATHS.match(file_path):
         return "Not Found", 404
 
-    proxy = _get_proxy("jp")
-    parts = file_path.split("/")
-    if len(parts) != 2:
-        return "Bad Request", 400
-
-    subfolder_name, filename = parts
-    folder_id = proxy.find_subfolder(subfolder_name)
-    if not folder_id:
-        logger.warning("Subfolder not found: %s", subfolder_name)
-        return "Subfolder not found", 404
-
+    proxy = _get_proxy()
     data = flask_request.get_data()
-    file_id = proxy.upload_file(folder_id, filename, data)
-    logger.info("Uploaded: %s (file_id=%s, size=%d)", file_path, file_id, len(data))
-    return {"file_id": file_id}, 200
-
-
-@app.errorhandler(HttpError)
-def handle_google_error(e):
-    if e.resp.status == 404:
-        return "File not found", 404
-    logger.error("Google Drive API error: %s", e)
-    return "Google Drive API error", 503
+    result = proxy.upload_file(file_path, data)
+    logger.info("Uploaded: %s (size=%d)", file_path, len(data))
+    return result, 200
 
 
 @app.errorhandler(Exception)
 def handle_error(e):
     logger.error("Unexpected error: %s", e, exc_info=True)
+    if isinstance(e, (ftplib.error_perm, ftplib.error_temp)):
+        return "NAS error", 503
     return "Internal error", 500
 
 

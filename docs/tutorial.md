@@ -107,7 +107,7 @@ data = yf.download('7203.T', start=start_date, end=end_date)
 ```
 
 > [!NOTE]
-> BackcastProは、ローカルキャッシュにデータが存在しない場合、自動的にGoogle Driveからデータをダウンロードします。
+> BackcastProは、ローカルキャッシュにデータが存在しない場合、自動的にCloud Run API経由でNASからデータをダウンロードします。
 > これにより、手動でのデータ準備なしにバックテストを開始できる場合があります。
 
 ### カスタムデータの使用

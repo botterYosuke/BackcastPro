@@ -5,12 +5,12 @@ import os
 from typing import List, Tuple, Optional, Dict
 from datetime import datetime
 import logging
-from contextlib import contextmanager
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 class db_stocks_info(db_manager):
+
+    _db_filename = "listed_info.duckdb"
 
     def __init__(self):
         super().__init__()
@@ -171,53 +171,3 @@ class db_stocks_info(db_manager):
             return pd.DataFrame()
 
 
-    def ensure_db_ready(self) -> None:
-        """
-        DuckDBファイルの準備を行う（存在しなければクラウドからダウンロードを試行）
-        """
-        if not self.isEnable:
-            return
-
-        db_path = os.path.join(self.cache_dir, "listed_info.duckdb")
-
-        if not os.path.exists(db_path):
-            os.makedirs(os.path.dirname(db_path), exist_ok=True)
-            # クラウドからダウンロードを試行
-            if self._download_from_cloud(db_path):
-                logger.info(f"DuckDBファイルをクラウドからダウンロードしました: {db_path}")
-            else:
-                logger.debug(f"クラウドにDuckDBファイルが存在しません: listed_info.duckdb")
-
-
-    @contextmanager
-    def get_db(self):
-        """
-        DuckDBデータベース接続を取得（コンテキストマネージャー対応）
-
-        Yields:
-            duckdb.DuckDBPyConnection: DuckDB接続オブジェクト
-        """
-        db_path = os.path.join(self.cache_dir, "listed_info.duckdb")
-        if not os.path.exists(db_path):
-            os.makedirs(os.path.dirname(db_path), exist_ok=True)
-            # クラウドからダウンロードを試行
-            if self._download_from_cloud(db_path):
-                logger.info(f"DuckDBファイルをクラウドからダウンロードしました: {db_path}")
-            else:
-                logger.info(f"DuckDBファイルを作成しました: {db_path}")
-
-        db = duckdb.connect(db_path)
-        try:
-            yield db
-        finally:
-            db.close()
-
-    def _download_from_cloud(self, local_path: str) -> bool:
-        """Cloud RunからDuckDBファイルをダウンロード"""
-        from .cloud_run_client import CloudRunClient
-        client = CloudRunClient()
-        if client.config.is_configured():
-            if client.download_listed_info(local_path):
-                return True
-            logger.debug("Cloud Runからダウンロード失敗: listed_info.duckdb")
-        return False

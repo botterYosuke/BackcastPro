@@ -5,12 +5,12 @@ import os
 from typing import List, Tuple, Optional, Dict
 from datetime import datetime
 import logging
-from contextlib import contextmanager
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 class db_stocks_daily(db_manager):
+
+    _db_subdir = "stocks_daily"
 
     def __init__(self):
         super().__init__()
@@ -400,71 +400,3 @@ class db_stocks_daily(db_manager):
             return pd.DataFrame()
 
 
-    def ensure_db_ready(self, code: str) -> None:
-        """
-        DuckDBファイルの準備を行う（存在しなければクラウドからダウンロードを試行）
-
-        Args:
-            code (str): 銘柄コード
-        """
-        if not self.isEnable:
-            return
-
-        # コードの正規化（サフィックス除去）
-        normalized_code = code
-        if len(code) > 4:
-            normalized_code = code[:-1]
-
-        db_path = os.path.join(self.cache_dir, "stocks_daily", f"{normalized_code}.duckdb")
-
-        if not os.path.exists(db_path):
-            os.makedirs(os.path.dirname(db_path), exist_ok=True)
-            # クラウドからダウンロードを試行
-            if self._download_from_cloud(normalized_code, db_path):
-                logger.info(f"DuckDBファイルをクラウドからダウンロードしました: {db_path}")
-            else:
-                logger.debug(f"クラウドにDuckDBファイルが存在しません: {normalized_code}")
-
-
-    @contextmanager
-    def get_db(self, code: str):
-        """
-        DuckDBデータベース接続を取得
-        
-        Args:
-            code (str): 銘柄コード
-        
-        Yields:
-            duckdb.DuckDBPyConnection: DuckDB接続オブジェクト
-        """
-        db_path = os.path.join(self.cache_dir, "stocks_daily", f"{code}.duckdb")
-        if not os.path.exists(db_path):
-            if len(code) > 4:
-                code_retry = code[:-1]
-                # 再帰呼び出しの結果を返す（ジェネレータなので yield from）
-                yield from self.get_db(code_retry)
-                return
-
-            os.makedirs(os.path.dirname(db_path), exist_ok=True)
-            
-            # クラウドからダウンロードを試行
-            if self._download_from_cloud(code, db_path):
-                logger.info(f"DuckDBファイルをクラウドからダウンロードしました: {db_path}")
-            else:
-                logger.info(f"DuckDBファイルを作成しました: {db_path}")
-
-        db = duckdb.connect(db_path)
-        try:
-            yield db
-        finally:
-            db.close()
-
-    def _download_from_cloud(self, code: str, local_path: str) -> bool:
-        """Cloud RunからDuckDBファイルをダウンロード"""
-        from .cloud_run_client import CloudRunClient
-        client = CloudRunClient()
-        if client.config.is_configured():
-            if client.download_stocks_daily(code, local_path):
-                return True
-            logger.debug(f"Cloud Runからダウンロード失敗: stocks_daily/{code}.duckdb")
-        return False

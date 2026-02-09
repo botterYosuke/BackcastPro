@@ -42,7 +42,7 @@ python -m pip install -e .
 
 4. **開発用依存関係をインストール**
 ```powershell
-python -m pip install pytest pytest-cov flask google-api-python-client google-auth
+python -m pip install pytest pytest-cov flask
 ```
 
 ### VS Code設定
@@ -65,7 +65,10 @@ python -m pip install pytest pytest-cov flask google-api-python-client google-au
 `.env`ファイルをプロジェクトルートに作成し、以下の環境変数を設定してください（必要に応じて）：
 
 ```bash
-# Google Drive API (Cloud Run) のURL
+# DuckDBキャッシュディレクトリ
+BACKCASTPRO_CACHE_DIR=/path/to/your/duckdb/cache
+
+# Cloud Run Proxy のURL（ダウンロード用、オプション）
 BACKCASTPRO_GDRIVE_API_URL=https://your-cloud-run-url.a.run.app
 ```
 
@@ -128,8 +131,8 @@ BackcastPro/
 - 日本株価・板情報・銘柄情報の取得
 - **データ取得フロー**:
   1. ローカルキャッシュ（DuckDB）を確認
-  2. なければCloud Run API経由でGoogle Driveからダウンロード
-  3. **データ更新**: 夜間にCloud Run Jobが実行され、Google Drive上のデータを更新（詳細は[Cloud Run Jobによる株価データ更新](cloud-run-updater.md)を参照）
+  2. なければCloud Run API経由でダウンロード
+  3. **データ更新**: 夜間にCloud Run Jobが実行され、マウントボリューム上のDuckDBファイルを更新（詳細は[Cloud Run Jobによる株価データ更新](cloud-run-updater.md)を参照）
 
 ### データフロー
 

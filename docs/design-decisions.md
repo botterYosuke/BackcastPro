@@ -7,13 +7,15 @@
 1. [FTP廃止とGoogle Driveへの完全移行](#ftp廃止とgoogle-driveへの完全移行)
 2. [株価データ更新のCloud Run Job化](#株価データ更新のcloud-run-job化)
 3. [DockerfileのENTRYPOINT化](#dockerfileのentrypoint化)
+4. [Google Drive廃止と自宅NAS（FTPS）への移行](#google-drive廃止と自宅nasftpsへの移行)
+5. [Cloud Run Proxyアップロード廃止とDockerボリュームマウントへの移行](#cloud-run-proxyアップロード廃止とdockerボリュームマウントへの移行)
 
 ---
 
 ## FTP廃止とGoogle Driveへの完全移行
 
-**Date:** 2026-02-09  
-**Status:** Implemented
+**Date:** 2026-02-09
+**Status:** ~~Implemented~~ Superseded（[Google Drive廃止と自宅NAS（FTPS）への移行](#google-drive廃止と自宅nasftpsへの移行)により置換）
 
 ### Context
 
@@ -43,8 +45,8 @@ BackcastProのデータ取得は、当初以下の3段フォールバック構�
 
 ## 株価データ更新のCloud Run Job化
 
-**Date:** 2026-02-09  
-**Status:** Implemented
+**Date:** 2026-02-09
+**Status:** ~~Implemented~~ Superseded（アップロード経路は[Cloud Run Proxyアップロード廃止とDockerボリュームマウントへの移行](#cloud-run-proxyアップロード廃止とdockerボリュームマウントへの移行)により変更。Cloud Run Job自体は引き続き使用）
 
 ### Context
 
@@ -98,8 +100,67 @@ ENTRYPOINT ["python", "/app/update_stocks_price.py"]
 
 *   **メリット**:
     *   `--args` が正しく Python スクリプトの引数として渡されるようになった。
-    *   dry-run (`--args="--codes,7203,--days,3,--dry-run"`) が正常に動作することを確認済み。
+    *   `--args="--codes,7203,--days,3"` が正常に動作することを確認済み。
 *   **注意点**:
     *   `ENTRYPOINT` を使う場合、`docker run` でコマンドを上書きするには `--entrypoint` フラグが必要になる（デバッグ時に `bash` でコンテナに入る場合など）。
+
+---
+
+## Google Drive廃止と自宅NAS（FTPS）への移行
+
+**Date:** 2026-02-10
+**Status:** Implemented
+
+### Context
+
+[FTP廃止とGoogle Driveへの完全移行](#ftp廃止とgoogle-driveへの完全移行)で Google Drive に一本化したが、Google Drive API の制約（レート制限、API呼び出しの複雑さ、サービスアカウント管理）が運用上の課題となった。自宅に NAS（Synology DS218）が稼働しており、FTPS サーバーが利用可能であったため、ストレージを NAS に移行することを決定。
+
+### Decision
+
+*   **Cloud Run Proxy のバックエンドを Google Drive API → FTPS に変更**: `cloud-run/main.py` の `GoogleDriveProxy` クラスを `NASFtpsProxy` クラスに置換。
+*   **プロトコル選定: FTPS（rsync ではなく）**: Cloud Run のリクエスト-レスポンスモデルとの親和性から FTPS を採用。rsync はバッチ同期向きで、オンデマンドの個別ファイル配信には不向き。
+*   **HTTP API インターフェースは維持**: `GET /jp/<path:file_path>` と `POST /jp/<path:file_path>` はそのまま。クライアント側（`CloudRunClient`, `update_stocks_price.py`）の変更は不要。
+*   **NAT 越え対応**: `_NatFriendlyFTP_TLS` クラスで PASV レスポンスのホストを制御接続のホストに差し替え。
+*   **リクエストごとの接続確立**: Cloud Run コンテナはフリーズ/リサイクルされるため、接続プールは使わず毎リクエストで FTPS 接続を確立・切断。
+*   **Google 依存ライブラリの完全削除**: `google-api-python-client`, `google-auth` を `requirements.txt` から削除。`ftplib`/`ssl` は Python 標準ライブラリのため追加依存なし。
+
+### Consequences
+
+*   **メリット**:
+    *   Google Drive API のレート制限・複雑さから解放。
+    *   Docker イメージサイズの削減（Google API Client の依存を除去）。
+    *   ストレージ容量が NAS のディスク容量に依存し、Google Drive の容量制限なし。
+    *   コードの大幅な簡素化（フォルダID検索が不要、パスベースの直接アクセス）。
+*   **デメリット**:
+    *   自宅ネットワーク・NAS の稼働率に依存（Google Drive の 99.9%+ SLA と比較）。
+    *   NAS のインターネット公開が必要（FTPS ポートフォワーディング、DDNS）。
+
+---
+
+## Cloud Run Proxyアップロード廃止とDockerボリュームマウントへの移行
+
+**Date:** 2026-02-10
+**Status:** Implemented
+
+### Context
+
+`update_stocks_price.py`（Cloud Run Job）は、株価データをDuckDBに保存した後、`CloudRunClient` を使って Cloud Run Proxy 経由で NAS にアップロードしていた。しかし、Cloud Run Proxy を中継するアップロードは複雑さの原因であり、Dockerボリュームマウントで直接DuckDBファイルに書き込む方がシンプルで信頼性が高い。
+
+### Decision
+
+*   **`upload_to_cloud()` 関数の削除**: Cloud Run Proxy へのアップロード処理を完全に削除。
+*   **`--dry-run` 引数の削除**: アップロードをスキップする目的のフラグだったため、不要に。
+*   **Dockerボリュームマウント方式に変更**: `Dockerfile` に `ENV BACKCASTPRO_CACHE_DIR=/data` を追加。コンテナ実行時に `-v /host/path:/data` でマウントすることで、DuckDBファイルをホスト側に永続化。
+*   **`UpdateSummary` の簡素化**: `uploaded` / `upload_failed` フィールドを削除。
+
+### Consequences
+
+*   **メリット**:
+    *   Cloud Run Proxy への依存がなくなり、Job が自己完結型になった。
+    *   `UPLOAD_API_KEY` と `BACKCASTPRO_GDRIVE_API_URL` が Job の環境変数から不要に。
+    *   コードの大幅な簡素化（`upload_to_cloud` 関数52行 + 関連コード削除）。
+    *   ローカルDocker環境でのテストが容易に（`docker run -v` のみで動作確認可能）。
+*   **注意点**:
+    *   Cloud Run Job で使用する場合は、ボリュームマウント（GCS FUSE等）の設定が別途必要。
 
 ---

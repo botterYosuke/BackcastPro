@@ -36,7 +36,7 @@ class TestDbStocksInfo(unittest.TestCase):
             mock_client = MagicMock()
             mock_gdrive_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
-            mock_client.download_listed_info.return_value = True
+            mock_client.download_file.return_value = True
 
             test_path = os.path.join(self.test_cache_dir, "test_downloaded.duckdb")
             os.makedirs(os.path.dirname(test_path), exist_ok=True)
@@ -44,7 +44,7 @@ class TestDbStocksInfo(unittest.TestCase):
             result = self.db_info._download_from_cloud(test_path)
 
             self.assertTrue(result, "Download should return True on success")
-            mock_client.download_listed_info.assert_called_once_with(test_path)
+            mock_client.download_file.assert_called_once_with("listed_info.duckdb", test_path)
 
     def test_download_from_cloud_failure(self):
         """Test failure during Google Drive download"""
@@ -52,7 +52,7 @@ class TestDbStocksInfo(unittest.TestCase):
             mock_client = MagicMock()
             mock_gdrive_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
-            mock_client.download_listed_info.return_value = False
+            mock_client.download_file.return_value = False
 
             test_path = os.path.join(self.test_cache_dir, "test_fail.duckdb")
 

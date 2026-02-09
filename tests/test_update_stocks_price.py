@@ -21,7 +21,6 @@ from update_stocks_price import (
     merge_with_jquants_priority,
     _fetch_with_retry,
     process_stock,
-    upload_to_cloud,
     UpdateSummary,
 )
 
@@ -54,7 +53,6 @@ class TestParseArguments:
         with patch('sys.argv', ['update_stocks_price.py']):
             args = parse_arguments()
         assert args.codes is None
-        assert args.dry_run is False
         assert args.days == 7
         assert args.workers == 4
 
@@ -62,11 +60,6 @@ class TestParseArguments:
         with patch('sys.argv', ['prog', '--codes', '7203,8306']):
             args = parse_arguments()
         assert args.codes == '7203,8306'
-
-    def test_dry_run_flag(self):
-        with patch('sys.argv', ['prog', '--dry-run']):
-            args = parse_arguments()
-        assert args.dry_run is True
 
     def test_days_custom(self):
         with patch('sys.argv', ['prog', '--days', '30']):
@@ -79,10 +72,9 @@ class TestParseArguments:
         assert args.workers == 8
 
     def test_all_arguments(self):
-        with patch('sys.argv', ['prog', '--codes', '1234', '--dry-run', '--days', '14', '--workers', '2']):
+        with patch('sys.argv', ['prog', '--codes', '1234', '--days', '14', '--workers', '2']):
             args = parse_arguments()
         assert args.codes == '1234'
-        assert args.dry_run is True
         assert args.days == 14
         assert args.workers == 2
 
@@ -372,87 +364,19 @@ class TestProcessStock:
 
 
 # ===========================================================================
-# TestUploadToCloud
-# ===========================================================================
-
-class TestUploadToCloud:
-    """Cloud アップロード"""
-
-    def test_dry_run_skips_upload(self):
-        result = upload_to_cloud(['7203', '8306'], dry_run=True)
-        assert result['success'] == ['7203', '8306']
-        assert result['failed'] == []
-
-    def test_empty_codes(self):
-        result = upload_to_cloud([], dry_run=False)
-        assert result == {'success': [], 'failed': []}
-
-    @patch('update_stocks_price.os.path.exists', return_value=True)
-    @patch('BackcastPro.api.cloud_run_client.CloudRunClient')
-    def test_upload_success(self, mock_client_cls, mock_exists):
-        client = mock_client_cls.return_value
-        client.config.is_configured.return_value = True
-        client.upload_stocks_daily.return_value = True
-
-        result = upload_to_cloud(['7203'])
-        assert result['success'] == ['7203']
-        assert result['failed'] == []
-
-    @patch('update_stocks_price.os.path.exists', return_value=True)
-    @patch('BackcastPro.api.cloud_run_client.CloudRunClient')
-    def test_upload_failure(self, mock_client_cls, mock_exists):
-        client = mock_client_cls.return_value
-        client.config.is_configured.return_value = True
-        client.upload_stocks_daily.return_value = False
-
-        result = upload_to_cloud(['7203'])
-        assert result['success'] == []
-        assert ('7203', 'Upload failed') in result['failed']
-
-    @patch('update_stocks_price.os.path.exists', return_value=True)
-    @patch('BackcastPro.api.cloud_run_client.CloudRunClient')
-    def test_upload_exception(self, mock_client_cls, mock_exists):
-        client = mock_client_cls.return_value
-        client.config.is_configured.return_value = True
-        client.upload_stocks_daily.side_effect = Exception("network error")
-
-        result = upload_to_cloud(['7203'])
-        assert ('7203', 'network error') in result['failed']
-
-    @patch('update_stocks_price.os.path.exists', return_value=False)
-    @patch('BackcastPro.api.cloud_run_client.CloudRunClient')
-    def test_file_not_found(self, mock_client_cls, mock_exists):
-        client = mock_client_cls.return_value
-        client.config.is_configured.return_value = True
-
-        result = upload_to_cloud(['7203'])
-        assert ('7203', 'File not found') in result['failed']
-
-    @patch('BackcastPro.api.cloud_run_client.CloudRunClient')
-    def test_api_not_configured(self, mock_client_cls):
-        client = mock_client_cls.return_value
-        client.config.is_configured.return_value = False
-
-        result = upload_to_cloud(['7203', '8306'])
-        assert len(result['failed']) == 2
-        assert all(reason == 'API URL not configured' for _, reason in result['failed'])
-
-
-# ===========================================================================
 # TestMain
 # ===========================================================================
 
 class TestMain:
     """main() 統合テスト"""
 
-    @patch('update_stocks_price.upload_to_cloud', return_value={'success': ['7203'], 'failed': []})
     @patch('update_stocks_price.process_stock')
     @patch('update_stocks_price.stocks_price')
     @patch('update_stocks_price.jquants_cls')
     @patch('update_stocks_price.e_api')
     @patch('update_stocks_price.setup_logging')
     def test_main_with_codes(self, mock_log, mock_eapi, mock_jq, mock_sp_cls,
-                             mock_process, mock_upload):
+                             mock_process):
         mock_log.return_value = logging.getLogger('test')
         sp = MagicMock()
         mock_sp_cls.return_value = sp
@@ -474,14 +398,13 @@ class TestMain:
             result = usp.main()
         assert result == 1
 
-    @patch('update_stocks_price.upload_to_cloud', return_value={'success': [], 'failed': [('7203', 'err')]})
     @patch('update_stocks_price.process_stock', return_value=('7203', False, 0, None))
     @patch('update_stocks_price.stocks_price')
     @patch('update_stocks_price.jquants_cls')
     @patch('update_stocks_price.e_api')
     @patch('update_stocks_price.setup_logging')
     def test_main_failures_returns_1(self, mock_log, mock_eapi, mock_jq,
-                                     mock_sp_cls, mock_process, mock_upload):
+                                     mock_sp_cls, mock_process):
         mock_log.return_value = logging.getLogger('test')
         sp = MagicMock()
         mock_sp_cls.return_value = sp
@@ -504,8 +427,6 @@ class TestUpdateSummary:
         assert s.total_stocks == 0
         assert s.success_count == 0
         assert s.failed_count == 0
-        assert s.uploaded == 0
-        assert s.upload_failed == 0
         assert s.errors == []
         assert isinstance(s.start_time, datetime)
 

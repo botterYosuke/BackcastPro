@@ -147,13 +147,14 @@ custom_data = pd.DataFrame({
 }, index=pd.date_range('2023-01-01', periods=3))
 ```
 
-### 問題: Google Driveからのデータダウンロード失敗
+### 問題: Cloud Run API経由のデータダウンロード失敗
 
-**原因:** Cloud Run APIのURLが設定されていない、または停止している。
+**原因:** Cloud Run APIのURLが設定されていない、Proxyが停止している、またはNASに接続できない。
 
 **解決方法:**
 1. `.env` ファイルで `BACKCASTPRO_GDRIVE_API_URL` が正しく設定されているか確認してください。
-2. APIが起動しているかブラウザでアクセスして確認してください（`https://.../health`）。
+2. APIが起動しているかブラウザでアクセスして確認してください（`https://.../`で`OK`が返ること）。
+3. NASが稼働中でFTPSサーバーが有効か確認してください。
 
 ### 問題: データが空または取得できない
 
