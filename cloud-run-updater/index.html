@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cloud-run-job" class="md-skip">
+        <a href="#docker-job" class="md-skip">
           コンテンツにスキップ
         </a>
       
@@ -711,10 +711,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-cloud-run-job-update-stocks-price" class="md-nav__link">
+  <a href="#docker-backcastcloud-job" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Cloud Run Job (update-stocks-price)
+        Docker イメージ (backcast/cloud-job)
       
     </span>
   </a>
@@ -722,38 +722,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-cloud-run-proxy-backcastpro" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Cloud Run Proxy (backcastpro)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        本番環境情報
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="本番環境情報">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#secret-manager" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Secret Manager に登録済みのシークレット
+        必要な環境変数・シークレット
       
     </span>
   </a>
@@ -766,44 +738,22 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker イメージの取得
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker イメージの取得">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        デプロイ手順
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="デプロイ手順">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        前提条件
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cloud-run-job-2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cloud Run Job のデプロイ（2ステップ方式）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cloud-scheduler" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cloud Scheduler の設定
+        ローカルでビルドする場合
       
     </span>
   </a>
@@ -816,33 +766,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#job" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Job の実行・テスト
+        実行方法
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Job の実行・テスト">
+    <nav class="md-nav" aria-label="実行方法">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#dry-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dry-run で動作確認
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実行状態の確認
+        特定銘柄で動作確認
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全銘柄を更新
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI引数
       
     </span>
   </a>
@@ -855,7 +816,57 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        定期実行の設定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="定期実行の設定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#synology-nas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Synology NAS（タスクスケジューラ）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cronlinuxmac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cron（Linux/Mac）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        タスクスケジューラ（Windows）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
         運用・監視
@@ -867,7 +878,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         ログ確認
@@ -878,7 +889,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         データ確認
@@ -894,57 +905,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#windows-msysgit-bash" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Windows (MSYS/Git Bash) 環境での注意事項
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Windows (MSYS/Git Bash) 環境での注意事項">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. パス自動変換の無効化
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-gcloud-logging-bash" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. gcloud logging はbashから動作しない
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-gcloudcmd" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. gcloud.cmd を使う
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         トラブルシューティング
@@ -956,32 +917,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#job-exit-code-1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Job が exit code 1 で即座に失敗する
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        環境変数が壊れている
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#import" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ビルドは成功するが import エラーで失敗する
+        コンテナがimportエラーで失敗する
       
     </span>
   </a>
@@ -1114,10 +1053,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-cloud-run-job-update-stocks-price" class="md-nav__link">
+  <a href="#docker-backcastcloud-job" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Cloud Run Job (update-stocks-price)
+        Docker イメージ (backcast/cloud-job)
       
     </span>
   </a>
@@ -1125,38 +1064,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-cloud-run-proxy-backcastpro" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Cloud Run Proxy (backcastpro)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        本番環境情報
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="本番環境情報">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#secret-manager" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Secret Manager に登録済みのシークレット
+        必要な環境変数・シークレット
       
     </span>
   </a>
@@ -1169,44 +1080,22 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker イメージの取得
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker イメージの取得">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        デプロイ手順
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="デプロイ手順">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        前提条件
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cloud-run-job-2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cloud Run Job のデプロイ（2ステップ方式）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cloud-scheduler" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Cloud Scheduler の設定
+        ローカルでビルドする場合
       
     </span>
   </a>
@@ -1219,33 +1108,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#job" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Job の実行・テスト
+        実行方法
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Job の実行・テスト">
+    <nav class="md-nav" aria-label="実行方法">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#dry-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        dry-run で動作確認
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        実行状態の確認
+        特定銘柄で動作確認
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全銘柄を更新
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI引数
       
     </span>
   </a>
@@ -1258,7 +1158,57 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        定期実行の設定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="定期実行の設定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#synology-nas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Synology NAS（タスクスケジューラ）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cronlinuxmac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cron（Linux/Mac）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        タスクスケジューラ（Windows）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
     <span class="md-ellipsis">
       
         運用・監視
@@ -1270,7 +1220,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
+  <a href="#_10" class="md-nav__link">
     <span class="md-ellipsis">
       
         ログ確認
@@ -1281,7 +1231,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
+  <a href="#_11" class="md-nav__link">
     <span class="md-ellipsis">
       
         データ確認
@@ -1297,57 +1247,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#windows-msysgit-bash" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Windows (MSYS/Git Bash) 環境での注意事項
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Windows (MSYS/Git Bash) 環境での注意事項">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. パス自動変換の無効化
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-gcloud-logging-bash" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. gcloud logging はbashから動作しない
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-gcloudcmd" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. gcloud.cmd を使う
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
+  <a href="#_12" class="md-nav__link">
     <span class="md-ellipsis">
       
         トラブルシューティング
@@ -1359,32 +1259,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#job-exit-code-1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Job が exit code 1 で即座に失敗する
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        環境変数が壊れている
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#import" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ビルドは成功するが import エラーで失敗する
+        コンテナがimportエラーで失敗する
       
     </span>
   </a>
@@ -1416,80 +1294,39 @@
   
 
 
-<h1 id="cloud-run-job">Cloud Run Jobによる株価データ更新<a class="headerlink" href="#cloud-run-job" title="Permanent link">&para;</a></h1>
-<p>BackcastProは、夜間にCloud Run Jobを使用して株価データを自動更新する仕組みを備えています。</p>
+<h1 id="docker-job">Docker Jobによる株価データ更新<a class="headerlink" href="#docker-job" title="Permanent link">&para;</a></h1>
+<p>BackcastProは、夜間にDockerコンテナを使用して株価データを自動更新する仕組みを備えています。
+DockerイメージはGitHub Actionsで自動的にDockerHubへpushされ、Synology NASのDockerで定期実行します。</p>
 <h2 id="_1">アーキテクチャ<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>データの更新プロセスは以下の通りです：</p>
 <ol>
-<li><strong>Cloud Scheduler</strong> が毎晩定刻（例: 19:30 JST）に <strong>Cloud Run Job</strong> をトリガーします。</li>
-<li><strong>Cloud Run Job</strong> (<code>update_stocks_price.py</code>) が実行されます。</li>
+<li>GitHub Actionsが <code>main</code> ブランチへの push 時に Docker イメージを <strong>DockerHub</strong> (<code>backcast/cloud-job</code>) へ push します。</li>
+<li>Synology NAS のタスクスケジューラが毎晩定刻に <strong>Dockerコンテナ</strong> をトリガーします。</li>
+<li>コンテナ (<code>update_stocks_price.py</code>) が実行されます。</li>
 <li>J-Quants APIなどから最新の株価データを取得します。</li>
-<li>取得したデータをDuckDBファイルとして生成・更新します。</li>
-<li><strong>Cloud Run Proxy</strong> 経由で <strong>Google Drive</strong> にアップロードします。</li>
-<li>Jobは <code>GDriveClient</code> を使用し、Cloud Run Proxyのエンドポイントに対して <code>POST</code> リクエストを送信します。</li>
-<li>Proxyは受け取ったデータをGoogle Driveの所定のフォルダ（<code>jp/stocks_daily</code> など）に保存します。</li>
+<li>取得したデータをDuckDBファイルとしてマウントされたボリューム（<code>STOCKDATA_CACHE_DIR</code>）に直接保存します。</li>
 </ol>
 <pre class="mermaid"><code>graph LR
-    A[Cloud Scheduler] --&gt;|トリガー| B[Cloud Run Job]
+    G[GitHub Actions] --&gt;|push| H[DockerHub backcast/cloud-job]
+    A[NAS タスクスケジューラ] --&gt;|docker run| B[Docker コンテナ]
+    H -.-&gt;|docker pull| B
     B --&gt;|データ取得| C[J-Quants / Tachibana / Stooq]
-    B --&gt;|DuckDB保存| D[/tmp/backcastpro_cache/]
-    B --&gt;|HTTP POST| E[Cloud Run Proxy]
-    E --&gt;|アップロード| F[Google Drive]</code></pre>
+    B --&gt;|DuckDB保存| D[マウントボリューム /data]</code></pre>
 <h2 id="_2">構成要素<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<h3 id="1-cloud-run-job-update-stocks-price">1. Cloud Run Job (<code>update-stocks-price</code>)<a class="headerlink" href="#1-cloud-run-job-update-stocks-price" title="Permanent link">&para;</a></h3>
+<h3 id="docker-backcastcloud-job">Docker イメージ (<code>backcast/cloud-job</code>)<a class="headerlink" href="#docker-backcastcloud-job" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>DockerHub</strong>: <code>backcast/cloud-job</code></li>
 <li><strong>ソース</strong>: <code>cloud-job/</code></li>
-<li><strong>イメージ</strong>: <code>asia-northeast1-docker.pkg.dev/carbide-booth-486907-a3/cloud-run-source-deploy/update-stocks-price:latest</code></li>
-<li><strong>役割</strong>: データのダウンロード、加工、アップロード</li>
-<li><strong>認証</strong>: Secret ManagerからAPIキーなどを取得</li>
+<li><strong>Dockerfile</strong>: <code>cloud-job/Dockerfile</code></li>
+<li><strong>GitHub Action</strong>: <code>.github/workflows/publish-dockerhub.yml</code></li>
+<li><strong>役割</strong>: データの取得、加工、DuckDBファイルへの保存</li>
+<li><strong>データ保存先</strong>: 環境変数 <code>STOCKDATA_CACHE_DIR</code>（デフォルト: <code>/data</code>）で指定されたディレクトリ</li>
 </ul>
-<h3 id="2-cloud-run-proxy-backcastpro">2. Cloud Run Proxy (<code>backcastpro</code>)<a class="headerlink" href="#2-cloud-run-proxy-backcastpro" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>ソース</strong>: <code>cloud-run/</code></li>
-<li><strong>URL</strong>: <code>https://backcastpro-341714433786.asia-northeast1.run.app</code></li>
-<li><strong>役割</strong>: Google Driveへのアクセス（ダウンロード/アップロード）の中継</li>
-<li><strong>認証</strong>: <code>UPLOAD_API_KEY</code> による簡易認証（Job → Proxy間）</li>
-</ul>
-<h2 id="_3">本番環境情報<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_3">必要な環境変数・シークレット<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>項目</th>
-<th>値</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>GCP プロジェクト ID</td>
-<td><code>carbide-booth-486907-a3</code></td>
-</tr>
-<tr>
-<td>プロジェクト番号</td>
-<td><code>341714433786</code></td>
-</tr>
-<tr>
-<td>リージョン</td>
-<td><code>asia-northeast1</code></td>
-</tr>
-<tr>
-<td>Proxy URL</td>
-<td><code>https://backcastpro-341714433786.asia-northeast1.run.app</code></td>
-</tr>
-<tr>
-<td>Artifact Registry</td>
-<td><code>asia-northeast1-docker.pkg.dev/carbide-booth-486907-a3/cloud-run-source-deploy/</code></td>
-</tr>
-<tr>
-<td>サービスアカウント</td>
-<td><code>341714433786-compute@developer.gserviceaccount.com</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="secret-manager">Secret Manager に登録済みのシークレット<a class="headerlink" href="#secret-manager" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>シークレット名</th>
+<th>環境変数</th>
 <th>用途</th>
 </tr>
 </thead>
@@ -1510,122 +1347,91 @@
 <td><code>eAPI_PASSWORD</code></td>
 <td>立花証券 パスワード</td>
 </tr>
+</tbody>
+</table>
+<h2 id="docker">Docker イメージの取得<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h2>
+<p>DockerHub から最新イメージを pull します：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>backcast/cloud-job:latest
+</span></code></pre></div>
+<h3 id="_4">ローカルでビルドする場合<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>cloud-job/Dockerfile<span class="w"> </span>-t<span class="w"> </span>backcast/cloud-job<span class="w"> </span>.
+</span></code></pre></div>
+<h2 id="_5">実行方法<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="_6">特定銘柄で動作確認<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-v<span class="w"> </span>/path/to/duckdb:/data<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">JQUANTS_API_KEY</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_URL</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_USER_ID</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_PASSWORD</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span>backcast/cloud-job<span class="w"> </span>--codes<span class="w"> </span><span class="m">7203</span><span class="w"> </span>--days<span class="w"> </span><span class="m">3</span>
+</span></code></pre></div>
+<h3 id="_7">全銘柄を更新<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-v<span class="w"> </span>/path/to/duckdb:/data<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">JQUANTS_API_KEY</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_URL</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_USER_ID</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_PASSWORD</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>backcast/cloud-job<span class="w"> </span>--days<span class="w"> </span><span class="m">7</span>
+</span></code></pre></div>
+<h3 id="cli">CLI引数<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
 <tr>
-<td><code>UPLOAD_API_KEY</code></td>
-<td>Cloud Run Proxy への認証キー（ProxyとJobで共有）</td>
+<th>引数</th>
+<th>デフォルト</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--codes</code></td>
+<td>なし（全銘柄）</td>
+<td>処理対象の銘柄コード（カンマ区切り）</td>
 </tr>
 <tr>
-<td><code>GOOGLE_SERVICE_ACCOUNT_JSON</code></td>
-<td>Google Drive用サービスアカウント鍵（Proxyのみ）</td>
+<td><code>--days</code></td>
+<td>7</td>
+<td>取得する過去日数</td>
+</tr>
+<tr>
+<td><code>--workers</code></td>
+<td>4</td>
+<td>並列ワーカー数</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_4">デプロイ手順<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<h3 id="_5">前提条件<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Google Cloud SDK (<code>gcloud</code>) がインストール・設定されていること</li>
-<li>上記のSecretがSecret Managerに登録されていること</li>
-<li>サービスアカウントに <code>secretAccessor</code> ロールが付与されていること</li>
-</ul>
-<h3 id="cloud-run-job-2">Cloud Run Job のデプロイ（2ステップ方式）<a class="headerlink" href="#cloud-run-job-2" title="Permanent link">&para;</a></h3>
-<div class="admonition warning">
-<p class="admonition-title">注意</p>
-<p><code>gcloud run jobs deploy --dockerfile</code> フラグは**非対応**です。Cloud Build でイメージをビルドしてから Job を更新する 2 ステップ方式を使います。</p>
-</div>
-<p><strong>ステップ 1: Docker イメージのビルド＆プッシュ</strong></p>
-<p>プロジェクトルートの <code>cloudbuild-job.yaml</code> を使用します：</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">MSYS_NO_PATHCONV</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>gcloud.cmd<span class="w"> </span>builds<span class="w"> </span>submit<span class="w"> </span>--config<span class="o">=</span>cloudbuild-job.yaml<span class="w"> </span>.
+<h2 id="_8">定期実行の設定<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="synology-nas">Synology NAS（タスクスケジューラ）<a class="headerlink" href="#synology-nas" title="Permanent link">&para;</a></h3>
+<p>Synology DSM の <strong>コントロールパネル &gt; タスクスケジューラ</strong> で以下のスクリプトを登録してください：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>backcast/cloud-job:latest
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>/volume1/docker/backcast/data:/data<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">JQUANTS_API_KEY</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_URL</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_USER_ID</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_PASSWORD</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span>backcast/cloud-job<span class="w"> </span>--days<span class="w"> </span><span class="m">7</span>
 </span></code></pre></div>
-<p><strong>ステップ 2: Job の作成または更新</strong></p>
-<p>初回作成：</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nv">MSYS_NO_PATHCONV</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>gcloud.cmd<span class="w"> </span>run<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>create<span class="w"> </span>update-stocks-price<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--region<span class="o">=</span>asia-northeast1<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--image<span class="o">=</span>asia-northeast1-docker.pkg.dev/carbide-booth-486907-a3/cloud-run-source-deploy/update-stocks-price:latest<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--task-timeout<span class="o">=</span><span class="m">3600</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span>--max-retries<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span>--memory<span class="o">=</span>2Gi<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span>--cpu<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span>--set-secrets<span class="o">=</span><span class="s2">&quot;JQUANTS_API_KEY=JQUANTS_API_KEY:latest,eAPI_URL=eAPI_URL:latest,eAPI_USER_ID=eAPI_USER_ID:latest,eAPI_PASSWORD=eAPI_PASSWORD:latest,UPLOAD_API_KEY=UPLOAD_API_KEY:latest&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span>--set-env-vars<span class="o">=</span><span class="s2">&quot;BACKCASTPRO_CACHE_DIR=/tmp/backcastpro_cache,BACKCASTPRO_GDRIVE_API_URL=https://backcastpro-341714433786.asia-northeast1.run.app&quot;</span>
+<h3 id="cronlinuxmac">cron（Linux/Mac）<a class="headerlink" href="#cronlinuxmac" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 毎日 19:30 に実行</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="m">30</span><span class="w"> </span><span class="m">19</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span><span class="m">1</span>-5<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>/path/to/duckdb:/data<span class="w"> </span>-e<span class="w"> </span><span class="nv">JQUANTS_API_KEY</span><span class="o">=</span>xxx<span class="w"> </span>-e<span class="w"> </span><span class="nv">eAPI_URL</span><span class="o">=</span>xxx<span class="w"> </span>-e<span class="w"> </span><span class="nv">eAPI_USER_ID</span><span class="o">=</span>xxx<span class="w"> </span>-e<span class="w"> </span><span class="nv">eAPI_PASSWORD</span><span class="o">=</span>xxx<span class="w"> </span>backcast/cloud-job<span class="w"> </span>--days<span class="w"> </span><span class="m">7</span>
 </span></code></pre></div>
-<p>コード変更後の更新：</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">MSYS_NO_PATHCONV</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>gcloud.cmd<span class="w"> </span>run<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>update<span class="w"> </span>update-stocks-price<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>--region<span class="o">=</span>asia-northeast1<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>--image<span class="o">=</span>asia-northeast1-docker.pkg.dev/carbide-booth-486907-a3/cloud-run-source-deploy/update-stocks-price:latest
+<h3 id="windows">タスクスケジューラ（Windows）<a class="headerlink" href="#windows" title="Permanent link">&para;</a></h3>
+<p>PowerShellスクリプトを作成し、タスクスケジューラに登録してください。</p>
+<h2 id="_9">運用・監視<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h3 id="_10">ログ確認<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>ログはコンソール（stdout）とファイルの両方に出力されます。</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># マウントボリューム内のログファイルを確認</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>ls<span class="w"> </span>/path/to/duckdb/logs/
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># 例: update_stocks_price_20260210.log</span>
 </span></code></pre></div>
-<h3 id="cloud-scheduler">Cloud Scheduler の設定<a class="headerlink" href="#cloud-scheduler" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nv">MSYS_NO_PATHCONV</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>gcloud.cmd<span class="w"> </span>scheduler<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>create<span class="w"> </span>http<span class="w"> </span>update-stocks-price-nightly<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>--location<span class="o">=</span>asia-northeast1<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>--schedule<span class="o">=</span><span class="s2">&quot;30 19 * * 1-5&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span>--time-zone<span class="o">=</span><span class="s2">&quot;Asia/Tokyo&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>--uri<span class="o">=</span><span class="s2">&quot;https://asia-northeast1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/carbide-booth-486907-a3/jobs/update-stocks-price:run&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>--http-method<span class="o">=</span>POST<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span>--oauth-service-account-email<span class="o">=</span><span class="m">341714433786</span>-compute@developer.gserviceaccount.com
+<h3 id="_11">データ確認<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>更新されたデータは、マウントされたボリューム内のDuckDBファイルを直接確認することで検証できます。</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># ボリューム内のDuckDBファイルを確認</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>ls<span class="w"> </span>/path/to/duckdb/stocks_daily/
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># 例: 7203.duckdb, 8306.duckdb, ...</span>
 </span></code></pre></div>
-<h2 id="job">Job の実行・テスト<a class="headerlink" href="#job" title="Permanent link">&para;</a></h2>
-<h3 id="dry-run">dry-run で動作確認<a class="headerlink" href="#dry-run" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nv">MSYS_NO_PATHCONV</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>gcloud.cmd<span class="w"> </span>run<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>execute<span class="w"> </span>update-stocks-price<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span>--region<span class="o">=</span>asia-northeast1<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>--args<span class="o">=</span><span class="s2">&quot;--codes,7203,--days,3,--dry-run&quot;</span>
-</span></code></pre></div>
-<h3 id="_6">実行状態の確認<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 最新の実行を確認</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">MSYS_NO_PATHCONV</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>gcloud.cmd<span class="w"> </span>run<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>executions<span class="w"> </span>list<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>--job<span class="o">=</span>update-stocks-price<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span>--region<span class="o">=</span>asia-northeast1
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># 特定の実行の詳細</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="nv">MSYS_NO_PATHCONV</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>gcloud.cmd<span class="w"> </span>run<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>executions<span class="w"> </span>describe<span class="w"> </span>&lt;EXECUTION_NAME&gt;<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span>--region<span class="o">=</span>asia-northeast1
-</span></code></pre></div>
-<h2 id="_7">運用・監視<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
-<h3 id="_8">ログ確認<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
-<p>GCP Console から確認するのが最も簡単です：</p>
-<ol>
-<li><a href="https://console.cloud.google.com/run/jobs?project=carbide-booth-486907-a3">Cloud Run Jobs</a> を開く</li>
-<li><code>update-stocks-price</code> をクリック</li>
-<li>該当の実行を選択してログを確認</li>
-</ol>
-<p>コマンドラインで確認する場合は **PowerShell を使用**してください（理由は後述）：</p>
-<div class="language-powershell highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">gcloud</span><span class="p">.</span><span class="n">cmd</span> <span class="n">logging</span> <span class="n">read</span> <span class="s1">&#39;resource.type=&quot;cloud_run_job&quot; AND resource.labels.job_name=&quot;update-stocks-price&quot;&#39;</span> <span class="p">-</span><span class="n">-limit</span><span class="p">=</span><span class="n">50</span> <span class="p">-</span><span class="n">-format</span><span class="p">=</span><span class="s2">&quot;table(timestamp,textPayload)&quot;</span> <span class="p">-</span><span class="n">-order</span><span class="p">=</span><span class="n">desc</span> <span class="p">-</span><span class="n">-project</span><span class="p">=</span><span class="n">carbide-booth</span><span class="p">-</span><span class="n">486907-a3</span>
-</span></code></pre></div>
-<h3 id="_9">データ確認<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
-<p>更新されたデータは、ローカル環境で <code>GDriveClient</code> を通じてダウンロードするか、Google Driveを直接確認することで検証できます。</p>
-<h2 id="windows-msysgit-bash">Windows (MSYS/Git Bash) 環境での注意事項<a class="headerlink" href="#windows-msysgit-bash" title="Permanent link">&para;</a></h2>
-<div class="admonition danger">
-<p class="admonition-title">重要</p>
-<p>Windows の bash (MSYS/Git Bash) は特有の問題があります。以下の注意点を必ず守ってください。</p>
-</div>
-<h3 id="1">1. パス自動変換の無効化<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
-<p>MSYS/Git Bash は <code>/</code> で始まる文字列を Windows パスに自動変換します。これにより URL やシークレット参照が壊れます。</p>
-<p><strong>すべての gcloud コマンドの先頭に <code>MSYS_NO_PATHCONV=1</code> を付けてください。</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># NG: URLが壊れる</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>gcloud.cmd<span class="w"> </span>run<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>update<span class="w"> </span>update-stocks-price<span class="w"> </span>--set-env-vars<span class="o">=</span><span class="s2">&quot;BACKCASTPRO_GDRIVE_API_URL=https://example.run.app&quot;</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># OK: パス変換を無効化</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="nv">MSYS_NO_PATHCONV</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>gcloud.cmd<span class="w"> </span>run<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>update<span class="w"> </span>update-stocks-price<span class="w"> </span>--set-env-vars<span class="o">=</span><span class="s2">&quot;BACKCASTPRO_GDRIVE_API_URL=https://example.run.app&quot;</span>
-</span></code></pre></div>
-<h3 id="2-gcloud-logging-bash">2. gcloud logging はbashから動作しない<a class="headerlink" href="#2-gcloud-logging-bash" title="Permanent link">&para;</a></h3>
-<p><code>gcloud.cmd logging read</code> は、Cloud SDK のインストールパスにスペース（<code>C:\Users\...\AppData\Local\Google\Cloud SDK\...</code>）が含まれるため、bash から実行するとエラーになります。</p>
-<p><strong>ログ確認は PowerShell を使うか、GCP Console で行ってください。</strong></p>
-<h3 id="3-gcloudcmd">3. gcloud.cmd を使う<a class="headerlink" href="#3-gcloudcmd" title="Permanent link">&para;</a></h3>
-<p>Windows では <code>gcloud</code> ではなく <code>gcloud.cmd</code> を使用してください。</p>
-<h2 id="_10">トラブルシューティング<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
-<h3 id="job-exit-code-1">Job が exit code 1 で即座に失敗する<a class="headerlink" href="#job-exit-code-1" title="Permanent link">&para;</a></h3>
-<p><strong>症状</strong>: Job 実行後、数秒以内に exit code 1 で失敗し、アプリケーションログ（stdout/stderr）が一切出力されない。</p>
-<p><strong>原因</strong>: Dockerfile で <code>CMD</code> を使っている場合、Cloud Run Job の <code>--args</code> がコマンド全体を**置換**してしまい、引数（例: <code>--codes</code>）を実行ファイルとして実行しようとする。</p>
-<p><strong>解決策</strong>: Dockerfile の <code>CMD</code> を <code>ENTRYPOINT</code> に変更する。</p>
-<div class="language-dockerfile highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c"># NG: --args がコマンド全体を置換する</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;python&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;/app/update_stocks_price.py&quot;</span><span class="p">]</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c"># OK: --args が引数として追加される</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;python&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;/app/update_stocks_price.py&quot;</span><span class="p">]</span>
-</span></code></pre></div>
-<p>詳細は <a href="../design-decisions/#dockerfileのentrypoint化">設計判断記録 - DockerfileのENTRYPOINT化</a> を参照。</p>
-<h3 id="_11">環境変数が壊れている<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
-<p>MSYS のパス自動変換により、URL が <code>https://...</code> → <code>https;\...</code> のように壊れることがあります。</p>
-<p><code>gcloud run jobs describe</code> で環境変数の値を確認し、壊れていた場合は <code>MSYS_NO_PATHCONV=1</code> を付けて <code>gcloud run jobs update</code> で修正してください。</p>
-<h3 id="import">ビルドは成功するが import エラーで失敗する<a class="headerlink" href="#import" title="Permanent link">&para;</a></h3>
+<h2 id="_12">トラブルシューティング<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<h3 id="import">コンテナがimportエラーで失敗する<a class="headerlink" href="#import" title="Permanent link">&para;</a></h3>
 <p>Dockerfile の <code>PYTHONPATH</code> が <code>/app/src</code> に設定されているか確認してください。<code>trading_data</code> と <code>BackcastPro</code> パッケージは <code>/app/src/</code> 配下にコピーされるため、この設定がないと <code>ModuleNotFoundError</code> になります。</p>
 
 
