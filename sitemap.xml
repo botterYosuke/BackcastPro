@@ -5,6 +5,14 @@
          <lastmod>2026-02-09</lastmod>
     </url>
     <url>
+         <loc>https://botteryosuke.github.io/BackcastPro/cloud-run-updater/</loc>
+         <lastmod>2026-02-09</lastmod>
+    </url>
+    <url>
+         <loc>https://botteryosuke.github.io/BackcastPro/design-decisions/</loc>
+         <lastmod>2026-02-09</lastmod>
+    </url>
+    <url>
          <loc>https://botteryosuke.github.io/BackcastPro/developer-guide/</loc>
          <lastmod>2026-02-09</lastmod>
     </url>
@@ -26,18 +34,6 @@
     </url>
     <url>
          <loc>https://botteryosuke.github.io/BackcastPro/tutorial/</loc>
-         <lastmod>2026-02-09</lastmod>
-    </url>
-    <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/plans/cloud_run_gdrive_proxy/</loc>
-         <lastmod>2026-02-09</lastmod>
-    </url>
-    <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/plans/encapsulated-dazzling-alpaca/</loc>
-         <lastmod>2026-02-09</lastmod>
-    </url>
-    <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/plans/migration_ftp_to_gdrive/</loc>
          <lastmod>2026-02-09</lastmod>
     </url>
 </urlset>

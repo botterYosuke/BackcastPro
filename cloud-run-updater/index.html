@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://botteryosuke.github.io/BackcastPro/plans/migration_ftp_to_gdrive/">
+        <link rel="canonical" href="https://botteryosuke.github.io/BackcastPro/cloud-run-updater/">
       
       
       
@@ -18,19 +18,19 @@
         
       
       
-      <link rel="icon" href="../../img/logo.drawio.svg">
+      <link rel="icon" href="../img/logo.drawio.svg">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
-        <title>FTPダウンロードをGoogle Drive (Cloud Run API経由) に変更 - BackcastPro</title>
+        <title>Cloud Run Jobによる株価データ更新 - BackcastPro</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -49,7 +49,7 @@
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ftpgoogle-drive-cloud-run-api" class="md-skip">
+        <a href="#cloud-run-job" class="md-skip">
           コンテンツにスキップ
         </a>
       
@@ -88,9 +88,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="ヘッダー">
-    <a href="../.." title="BackcastPro" class="md-header__button md-logo" aria-label="BackcastPro" data-md-component="logo">
+    <a href=".." title="BackcastPro" class="md-header__button md-logo" aria-label="BackcastPro" data-md-component="logo">
       
-  <img src="../../img/logo.drawio.svg" alt="logo">
+  <img src="../img/logo.drawio.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -107,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              FTPダウンロードをGoogle Drive (Cloud Run API経由) に変更
+              Cloud Run Jobによる株価データ更新
             
           </span>
         </div>
@@ -220,7 +220,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -241,7 +241,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../tutorial/" class="md-tabs__link">
+        <a href="../tutorial/" class="md-tabs__link">
           
   
   
@@ -261,7 +261,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../developer-guide/" class="md-tabs__link">
+        <a href="../developer-guide/" class="md-tabs__link">
           
   
   
@@ -279,7 +279,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../privacy/" class="md-tabs__link">
+      <a href="../privacy/" class="md-tabs__link">
         
   
   
@@ -314,9 +314,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="ナビゲーション" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="BackcastPro" class="md-nav__button md-logo" aria-label="BackcastPro" data-md-component="logo">
+    <a href=".." title="BackcastPro" class="md-nav__button md-logo" aria-label="BackcastPro" data-md-component="logo">
       
-  <img src="../../img/logo.drawio.svg" alt="logo">
+  <img src="../img/logo.drawio.svg" alt="logo">
 
     </a>
     BackcastPro
@@ -343,7 +343,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -420,7 +420,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../tutorial/" class="md-nav__link">
+      <a href="../tutorial/" class="md-nav__link">
         
   
   
@@ -448,7 +448,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting/" class="md-nav__link">
+      <a href="../troubleshooting/" class="md-nav__link">
         
   
   
@@ -533,7 +533,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../developer-guide/" class="md-nav__link">
+      <a href="../developer-guide/" class="md-nav__link">
         
   
   
@@ -561,7 +561,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../execution-logic-report/" class="md-nav__link">
+      <a href="../execution-logic-report/" class="md-nav__link">
         
   
   
@@ -589,7 +589,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how-to-deploy-to-PyPI/" class="md-nav__link">
+      <a href="../how-to-deploy-to-PyPI/" class="md-nav__link">
         
   
   
@@ -624,7 +624,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../privacy/" class="md-nav__link">
+      <a href="../privacy/" class="md-nav__link">
         
   
   
@@ -671,10 +671,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#context" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Context
+        アーキテクチャ
       
     </span>
   </a>
@@ -682,22 +682,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        変更ファイル一覧
+        構成要素
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="変更ファイル一覧">
+    <nav class="md-nav" aria-label="構成要素">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-srcbackcastproapigdrive_clientpy" class="md-nav__link">
+  <a href="#1-cloud-run-job-update_stocks_price" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. 新規作成: src/BackcastPro/api/gdrive_client.py
+        1. Cloud Run Job (update_stocks_price)
       
     </span>
   </a>
@@ -705,54 +705,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-srcbackcastproapidb_stocks_dailypy-l462-470" class="md-nav__link">
+  <a href="#2-cloud-run-proxy-backcastpro-proxy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. 変更: src/BackcastPro/api/db_stocks_daily.py (L462-470)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-srcbackcastproapidb_stocks_boardpy-l427-435" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. 変更: src/BackcastPro/api/db_stocks_board.py (L427-435)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-srcbackcastproapidb_stocks_infopy-l215-223" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. 変更: src/BackcastPro/api/db_stocks_info.py (L215-223)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-env" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. 変更: .env
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6-teststest_gdrive_clientpy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. 新規作成: tests/test_gdrive_client.py
+        2. Cloud Run Proxy (backcastpro-proxy)
       
     </span>
   </a>
@@ -765,32 +721,60 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#ftp" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FTPコードについて
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        依存関係
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        検証方法
+        デプロイ手順
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="デプロイ手順">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        前提条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-cloud-run-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Cloud Run Job のデプロイ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-cloud-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Cloud Scheduler の設定
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        運用・監視
       
     </span>
   </a>
@@ -817,99 +801,67 @@
   
 
 
-<h1 id="ftpgoogle-drive-cloud-run-api">FTPダウンロードをGoogle Drive (Cloud Run API経由) に変更<a class="headerlink" href="#ftpgoogle-drive-cloud-run-api" title="Permanent link">&para;</a></h1>
-<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
-<p>BackcastProは .duckdb ファイルのダウンロードにFTPを使用している。
-これをGoogle Drive共有フォルダからのダウンロードに切り替える。
-Google Cloud Run上にダウンロードプロキシAPIを構築予定（別途実装）で、
-BackcastPro側はそのAPIにHTTP GETリクエストを送るだけのシンプルな設計にする。</p>
-<p>Cloud Run APIのエンドポイント例:
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>GET {API_BASE_URL}/download/stocks_daily/1234.duckdb → ファイル本体をストリーム返却
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>GET {API_BASE_URL}/download/stocks_board/1234.duckdb → ファイル本体をストリーム返却
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>GET {API_BASE_URL}/download/listed_info.duckdb       → ファイル本体をストリーム返却
-</span></code></pre></div></p>
-<h2 id="_1">変更ファイル一覧<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<h3 id="1-srcbackcastproapigdrive_clientpy">1. 新規作成: <code>src/BackcastPro/api/gdrive_client.py</code><a class="headerlink" href="#1-srcbackcastproapigdrive_clientpy" title="Permanent link">&para;</a></h3>
-<p>Google Driveダウンロードクライアント（Cloud Run API経由）</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@dataclass</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">GDriveConfig</span><span class="p">:</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">api_base_url</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># Cloud Run APIのベースURL</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="nd">@classmethod</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">from_environment</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GDriveConfig&quot;</span><span class="p">:</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="c1"># 環境変数 BACKCASTPRO_GDRIVE_API_URL から読み込み</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_configured</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api_base_url</span><span class="p">)</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="k">class</span><span class="w"> </span><span class="nc">GDriveClient</span><span class="p">:</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">download_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">remote_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">local_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Cloud Run APIからファイルをストリームダウンロード&quot;&quot;&quot;</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="c1"># GET {api_base_url}/download/{remote_path}</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>        <span class="c1"># requests.get(url, stream=True) でストリーミング書き込み</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>        <span class="c1"># 失敗時は部分ファイル削除（FTPClientと同じパターン）</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">download_stocks_daily</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">local_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;stocks_daily/</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">.duckdb&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">download_stocks_board</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">local_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;stocks_board/</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">.duckdb&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">download_listed_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span><span class="s2">&quot;listed_info.duckdb&quot;</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="2-srcbackcastproapidb_stocks_dailypy-l462-470">2. 変更: <code>src/BackcastPro/api/db_stocks_daily.py</code> (L462-470)<a class="headerlink" href="#2-srcbackcastproapidb_stocks_dailypy-l462-470" title="Permanent link">&para;</a></h3>
-<p><code>_download_from_ftp</code> メソッドを修正。Google Drive優先、FTPフォールバック。</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_download_from_ftp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">local_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="c1"># 1. Google Drive (Cloud Run API) を試行</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">.gdrive_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">GDriveClient</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">gdrive</span> <span class="o">=</span> <span class="n">GDriveClient</span><span class="p">()</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="k">if</span> <span class="n">gdrive</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">is_configured</span><span class="p">():</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="k">if</span> <span class="n">gdrive</span><span class="o">.</span><span class="n">download_stocks_daily</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">local_path</span><span class="p">):</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>            <span class="k">return</span> <span class="kc">True</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="c1"># 2. FTPフォールバック</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">.ftp_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">FTPClient</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">client</span> <span class="o">=</span> <span class="n">FTPClient</span><span class="p">()</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">client</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">is_configured</span><span class="p">():</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>        <span class="k">return</span> <span class="kc">False</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="k">return</span> <span class="n">client</span><span class="o">.</span><span class="n">download_stocks_daily</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">local_path</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="3-srcbackcastproapidb_stocks_boardpy-l427-435">3. 変更: <code>src/BackcastPro/api/db_stocks_board.py</code> (L427-435)<a class="headerlink" href="#3-srcbackcastproapidb_stocks_boardpy-l427-435" title="Permanent link">&para;</a></h3>
-<p>同じパターンで <code>_download_from_ftp</code> を修正。<code>download_stocks_board</code> を呼ぶ。</p>
-<h3 id="4-srcbackcastproapidb_stocks_infopy-l215-223">4. 変更: <code>src/BackcastPro/api/db_stocks_info.py</code> (L215-223)<a class="headerlink" href="#4-srcbackcastproapidb_stocks_infopy-l215-223" title="Permanent link">&para;</a></h3>
-<p>同じパターンで <code>_download_from_ftp</code> を修正。<code>download_listed_info</code> を呼ぶ。
-（codeパラメータなし）</p>
-<h3 id="5-env">5. 変更: <code>.env</code><a class="headerlink" href="#5-env" title="Permanent link">&para;</a></h3>
-<div class="language-ini highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># ============================================</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># Google Drive設定 (Cloud Run API経由)</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="c1"># ============================================</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="na">BACKCASTPRO_GDRIVE_API_URL</span><span class="o">=</span><span class="s">https://&lt;your-cloud-run-service&gt;.run.app</span>
-</span></code></pre></div>
-<h3 id="6-teststest_gdrive_clientpy">6. 新規作成: <code>tests/test_gdrive_client.py</code><a class="headerlink" href="#6-teststest_gdrive_clientpy" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>GDriveConfig</code> の環境変数読み込みテスト</li>
-<li><code>GDriveClient.download_file</code> の成功/失敗テスト（requestsをモック）</li>
-<li>各便利メソッドのパス生成テスト</li>
-<li>ダウンロード失敗時の部分ファイル削除テスト</li>
-</ul>
-<h2 id="ftp">FTPコードについて<a class="headerlink" href="#ftp" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>削除しない</strong> - アップロード機能がFTP依存のため残す</li>
-<li>Google Drive未設定時はFTPにフォールバック</li>
-<li>将来的にGoogle Driveが安定したらFTPを削除可能</li>
-</ul>
-<h2 id="_2">依存関係<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<ul>
-<li>新規依存なし（既存の <code>requests&gt;=2.25.0</code> のみ使用）</li>
-</ul>
-<h2 id="_3">検証方法<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h1 id="cloud-run-job">Cloud Run Jobによる株価データ更新<a class="headerlink" href="#cloud-run-job" title="Permanent link">&para;</a></h1>
+<p>BackcastProは、夜間にCloud Run Jobを使用して株価データを自動更新する仕組みを備えています。</p>
+<h2 id="_1">アーキテクチャ<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>データの更新プロセスは以下の通りです：</p>
 <ol>
-<li><code>tests/test_gdrive_client.py</code> のユニットテストを実行</li>
-<li>Cloud Run APIデプロイ後、<code>.env</code> にURLを設定して手動テスト</li>
-<li>ローカルの .duckdb ファイルを削除し、自動ダウンロードを確認</li>
+<li><strong>Cloud Scheduler</strong> が毎晩定刻（例: 19:30 JST）に <strong>Cloud Run Job</strong> をトリガーします。</li>
+<li><strong>Cloud Run Job</strong> (<code>update_stocks_price.py</code>) が実行されます。</li>
+<li>J-Quants APIなどから最新の株価データを取得します。</li>
+<li>取得したデータをDuckDBファイルとして生成・更新します。</li>
+<li><strong>Cloud Run Proxy</strong> 経由で <strong>Google Drive</strong> にアップロードします。</li>
+<li>Jobは <code>GDriveClient</code> を使用し、Cloud Run Proxyのエンドポイントに対して <code>POST</code> リクエストを送信します。</li>
+<li>Proxyは受け取ったデータをGoogle Driveの所定のフォルダ（<code>jp/stocks_daily</code> など）に保存します。</li>
 </ol>
+<h2 id="_2">構成要素<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="1-cloud-run-job-update_stocks_price">1. Cloud Run Job (<code>update_stocks_price</code>)<a class="headerlink" href="#1-cloud-run-job-update_stocks_price" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ソース</strong>: <code>cloud-job/</code></li>
+<li><strong>役割</strong>: データのダウンロード、加工、アップロード</li>
+<li><strong>認証</strong>: Secret ManagerからAPIキーなどを取得</li>
+</ul>
+<h3 id="2-cloud-run-proxy-backcastpro-proxy">2. Cloud Run Proxy (<code>backcastpro-proxy</code>)<a class="headerlink" href="#2-cloud-run-proxy-backcastpro-proxy" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ソース</strong>: <code>cloud-run/</code></li>
+<li><strong>役割</strong>: Google Driveへのアクセス（ダウンロード/アップロード）の中継</li>
+<li><strong>認証</strong>: <code>UPLOAD_API_KEY</code> による簡易認証（Job -&gt; Proxy間）</li>
+</ul>
+<h2 id="_3">デプロイ手順<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_4">前提条件<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>Google Cloud SDK (<code>gcloud</code>) がインストール・設定されていること。</p>
+<p>必要なSecretがSecret Managerに登録されていること：
+- <code>JQUANTS_API_KEY</code>
+- <code>eAPI_URL</code>
+- <code>eAPI_USER_ID</code>
+- <code>eAPI_PASSWORD</code>
+- <code>UPLOAD_API_KEY</code> (ProxyとJobで共有)</p>
+<h3 id="1-cloud-run-job">1. Cloud Run Job のデプロイ<a class="headerlink" href="#1-cloud-run-job" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>gcloud<span class="w"> </span>run<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>deploy<span class="w"> </span>update-stocks-price<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>--source<span class="w"> </span>.<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>--dockerfile<span class="o">=</span>cloud-job/Dockerfile<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>--region<span class="o">=</span>asia-northeast1<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span>--task-timeout<span class="o">=</span><span class="m">3600</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span>--max-retries<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span>--memory<span class="o">=</span>2Gi<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span>--cpu<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span>--set-secrets<span class="o">=</span><span class="s2">&quot;JQUANTS_API_KEY=JQUANTS_API_KEY:latest,eAPI_URL=eAPI_URL:latest,eAPI_USER_ID=eAPI_USER_ID:latest,eAPI_PASSWORD=eAPI_PASSWORD:latest&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span>--set-env-vars<span class="o">=</span><span class="s2">&quot;BACKCASTPRO_CACHE_DIR=/tmp/backcastpro_cache,BACKCASTPRO_GDRIVE_API_URL=https://YOUR-PROXY-URL.run.app,UPLOAD_API_KEY=YOUR_UPLOAD_KEY&quot;</span>
+</span></code></pre></div>
+<h3 id="2-cloud-scheduler">2. Cloud Scheduler の設定<a class="headerlink" href="#2-cloud-scheduler" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>gcloud<span class="w"> </span>scheduler<span class="w"> </span><span class="nb">jobs</span><span class="w"> </span>create<span class="w"> </span>http<span class="w"> </span>update-stocks-price-nightly<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--location<span class="o">=</span>asia-northeast1<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--schedule<span class="o">=</span><span class="s2">&quot;30 19 * * 1-5&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--time-zone<span class="o">=</span><span class="s2">&quot;Asia/Tokyo&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span>--uri<span class="o">=</span><span class="s2">&quot;https://asia-northeast1-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/YOUR-PROJECT/jobs/update-stocks-price:run&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span>--http-method<span class="o">=</span>POST<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span>--oauth-service-account-email<span class="o">=</span>YOUR-SERVICE-ACCOUNT-EMAIL
+</span></code></pre></div>
+<h2 id="_5">運用・監視<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>ログ確認</strong>: Cloud ConsoleのCloud Run Jobsセクションからログを確認できます。</li>
+<li><strong>データ確認</strong>: 更新されたデータは、ローカル環境で <code>GDriveClient</code> を通じてダウンロードするか、またはGoogle Driveを直接確認することで検証できます。</li>
+</ul>
 
 
 
@@ -1009,10 +961,10 @@ BackcastPro側はそのAPIにHTTP GETリクエストを送るだけのシンプ�
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.code.annotate", "navigation.instant", "navigation.tabs", "navigation.top", "navigation.footer", "search.highlight", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.code.annotate", "navigation.instant", "navigation.tabs", "navigation.top", "navigation.footer", "search.highlight", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
