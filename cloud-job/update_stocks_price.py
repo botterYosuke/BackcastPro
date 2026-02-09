@@ -13,6 +13,7 @@
     python update_stocks_price.py --codes 7203,8306  # 特定銘柄のみ
     python update_stocks_price.py --workers 8        # 並列ワーカー数を指定
 """
+
 import os
 import sys
 import logging
@@ -38,6 +39,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class UpdateSummary:
     """更新処理のサマリー"""
+
     start_time: datetime = field(default_factory=datetime.now)
     end_time: datetime | None = None
     total_stocks: int = 0
@@ -54,32 +56,32 @@ def setup_logging() -> logging.Logger:
     # コンソールハンドラ
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(logging.Formatter(
-        '%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%H:%M:%S'
-    ))
+    console_handler.setFormatter(
+        logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(message)s", datefmt="%H:%M:%S"
+        )
+    )
     root_logger.addHandler(console_handler)
 
     # ファイルハンドラ（ログファイル出力）
-    cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', '.')
-    log_dir = os.path.join(cache_dir, 'logs')
+    cache_dir = os.environ.get("STOCKDATA_CACHE_DIR", ".")
+    log_dir = os.path.join(cache_dir, "logs")
     os.makedirs(log_dir, exist_ok=True)
 
     log_file = os.path.join(
-        log_dir,
-        f"update_stocks_price_{datetime.now().strftime('%Y%m%d')}.log"
+        log_dir, f"update_stocks_price_{datetime.now().strftime('%Y%m%d')}.log"
     )
 
     file_handler = RotatingFileHandler(
         log_file,
         maxBytes=10 * 1024 * 1024,  # 10MB
         backupCount=30,
-        encoding='utf-8'
+        encoding="utf-8",
     )
     file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    ))
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    )
     root_logger.addHandler(file_handler)
 
     return logging.getLogger(__name__)
@@ -87,25 +89,15 @@ def setup_logging() -> logging.Logger:
 
 def parse_arguments() -> argparse.Namespace:
     """コマンドライン引数をパース"""
-    parser = argparse.ArgumentParser(
-        description='夜間株価取得スクリプト'
+    parser = argparse.ArgumentParser(description="夜間株価取得スクリプト")
+    parser.add_argument(
+        "--codes", type=str, help="処理対象の銘柄コード（カンマ区切り）例: 7203,8306"
     )
     parser.add_argument(
-        '--codes',
-        type=str,
-        help='処理対象の銘柄コード（カンマ区切り）例: 7203,8306'
+        "--days", type=int, default=7, help="取得する過去日数（デフォルト: 7）"
     )
     parser.add_argument(
-        '--days',
-        type=int,
-        default=7,
-        help='取得する過去日数（デフォルト: 7）'
-    )
-    parser.add_argument(
-        '--workers',
-        type=int,
-        default=4,
-        help='並列ワーカー数（デフォルト: 4）'
+        "--workers", type=int, default=4, help="並列ワーカー数（デフォルト: 4）"
     )
     return parser.parse_args()
 
@@ -121,10 +113,10 @@ def get_stock_codes_list() -> list[str]:
         return []
 
     # Code列から銘柄コードを取得
-    if 'Code' in df.columns:
-        codes = df['Code'].astype(str).tolist()
-    elif 'code' in df.columns:
-        codes = df['code'].astype(str).tolist()
+    if "Code" in df.columns:
+        codes = df["Code"].astype(str).tolist()
+    elif "code" in df.columns:
+        codes = df["code"].astype(str).tolist()
     else:
         logger.error("銘柄リストにCode列がありません")
         return []
@@ -133,7 +125,7 @@ def get_stock_codes_list() -> list[str]:
     normalized_codes = []
     for code in codes:
         code = code.strip()
-        if len(code) == 5 and code.endswith('0'):
+        if len(code) == 5 and code.endswith("0"):
             code = code[:4]
         normalized_codes.append(code)
 
@@ -150,8 +142,7 @@ def get_fetch_date_range(days: int = 7) -> tuple[datetime, datetime]:
 
 
 def merge_with_jquants_priority(
-    base_df: pd.DataFrame | None,
-    jquants_df: pd.DataFrame
+    base_df: pd.DataFrame | None, jquants_df: pd.DataFrame
 ) -> pd.DataFrame:
     """
     base_df と jquants_df をマージ。同一日付は J-Quants で上書き。
@@ -170,10 +161,10 @@ def merge_with_jquants_priority(
     base_copy = base_df.copy()
     jq_copy = jquants_df.copy()
 
-    if 'Date' in base_copy.columns:
-        base_copy = base_copy.set_index('Date')
-    if 'Date' in jq_copy.columns:
-        jq_copy = jq_copy.set_index('Date')
+    if "Date" in base_copy.columns:
+        base_copy = base_copy.set_index("Date")
+    if "Date" in jq_copy.columns:
+        jq_copy = jq_copy.set_index("Date")
 
     # base_df から jquants_df にない日付のみ抽出
     base_only = base_copy.loc[~base_copy.index.isin(jq_copy.index)]
@@ -199,10 +190,7 @@ def _fetch_with_retry(
             if attempt == max_attempts:
                 raise
             wait = min(1 * (2 ** (attempt - 1)), 10)
-            logger.debug(
-                f"  Retry {attempt}/{max_attempts} for {code}, "
-                f"wait {wait}s"
-            )
+            logger.debug(f"  Retry {attempt}/{max_attempts} for {code}, wait {wait}s")
             time.sleep(wait)
 
 
@@ -218,18 +206,14 @@ def process_stock(
     """
     sp = stocks_price()
     base_df = tachibana_df
-    source = 'tachibana' if (
-        base_df is not None and not base_df.empty
-    ) else None
+    source = "tachibana" if (base_df is not None and not base_df.empty) else None
 
     # Stooq fallback（Tachibana失敗時のみ）
     if base_df is None or base_df.empty:
         try:
-            base_df = _fetch_with_retry(
-                sp._fetch_from_stooq, code, from_date, to_date
-            )
+            base_df = _fetch_with_retry(sp._fetch_from_stooq, code, from_date, to_date)
             if base_df is not None and not base_df.empty:
-                source = 'stooq'
+                source = "stooq"
                 logger.debug(f"  Stooq {code}: {len(base_df)} records")
         except Exception as e:
             logger.debug(f"  Stooq {code} failed: {e}")
@@ -237,9 +221,7 @@ def process_stock(
     # J-Quants（常に取得）
     jquants_df = None
     try:
-        jquants_df = _fetch_with_retry(
-            sp._fetch_from_jquants, code, from_date, to_date
-        )
+        jquants_df = _fetch_with_retry(sp._fetch_from_jquants, code, from_date, to_date)
         if jquants_df is not None and not jquants_df.empty:
             logger.debug(f"  J-Quants {code}: {len(jquants_df)} records")
     except Exception as e:
@@ -248,9 +230,7 @@ def process_stock(
     # マージ（J-Quants優先）
     if jquants_df is not None and not jquants_df.empty:
         final_df = merge_with_jquants_priority(base_df, jquants_df)
-        final_source = (
-            'jquants' if source is None else f'{source}+jquants'
-        )
+        final_source = "jquants" if source is None else f"{source}+jquants"
     else:
         final_df = base_df
         final_source = source
@@ -277,7 +257,7 @@ def main():
 
     # 1. 銘柄リスト取得
     if args.codes:
-        codes = [c.strip() for c in args.codes.split(',')]
+        codes = [c.strip() for c in args.codes.split(",")]
         logger.info(f"指定銘柄: {codes}")
     else:
         codes = get_stock_codes_list()
@@ -290,7 +270,9 @@ def main():
 
     # 2. 日付範囲決定
     from_date, to_date = get_fetch_date_range(args.days)
-    logger.info(f"取得期間: {from_date.strftime('%Y-%m-%d')} 〜 {to_date.strftime('%Y-%m-%d')}")
+    logger.info(
+        f"取得期間: {from_date.strftime('%Y-%m-%d')} 〜 {to_date.strftime('%Y-%m-%d')}"
+    )
 
     # 3. パイプライン方式で株価取得
     #    Producer: Tachibana直列 → Queue → Consumer: Stooq/J-Quants/Save並列
@@ -308,9 +290,7 @@ def main():
             for i, code in enumerate(codes, 1):
                 tachi_df = None
                 try:
-                    tachi_df = sp._fetch_from_tachibana(
-                        code, from_date, to_date
-                    )
+                    tachi_df = sp._fetch_from_tachibana(code, from_date, to_date)
                     if tachi_df is not None and not tachi_df.empty:
                         logger.debug(
                             f"  [{i}/{len(codes)}] Tachibana {code}: "
@@ -322,9 +302,7 @@ def main():
         finally:
             tachibana_queue.put(None)  # 終了シグナル（必ず送信）
 
-    producer = threading.Thread(
-        target=tachibana_producer, daemon=True
-    )
+    producer = threading.Thread(target=tachibana_producer, daemon=True)
     producer.start()
 
     logger.info(f"パイプライン開始 (workers={args.workers})")
@@ -337,9 +315,7 @@ def main():
             if item is None:
                 break
             code, tachi_df = item
-            future = executor.submit(
-                process_stock, code, tachi_df, from_date, to_date
-            )
+            future = executor.submit(process_stock, code, tachi_df, from_date, to_date)
             futures[future] = code
 
         # 全Consumerの完了を待ち、結果を集計
@@ -353,8 +329,7 @@ def main():
                     modified_codes.append(code)
                     summary.success_count += 1
                     logger.debug(
-                        f"  {code} → 成功 "
-                        f"(source: {source}, records: {count})"
+                        f"  {code} → 成功 (source: {source}, records: {count})"
                     )
                 else:
                     summary.failed_count += 1

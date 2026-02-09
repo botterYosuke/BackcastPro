@@ -135,7 +135,7 @@ except:
 # 2. 環境変数を確認
 import os
 print("API URL:", os.getenv('BACKCASTPRO_API_URL'))
-print("NAS Proxy URL:", os.getenv('BACKCASTPRO_GDRIVE_API_URL'))
+print("NAS Proxy URL:", os.getenv('BACKCASTPRO_NAS_PROXY_URL'))
 
 # 3. 手動でデータを設定
 custom_data = pd.DataFrame({
@@ -152,7 +152,7 @@ custom_data = pd.DataFrame({
 **原因:** Cloud Run APIのURLが設定されていない、Proxyが停止している、またはNASに接続できない。
 
 **解決方法:**
-1. `.env` ファイルで `BACKCASTPRO_GDRIVE_API_URL`（NAS FTPS Proxy のURL、歴史的経緯で GDRIVE の名前が残っている）が正しく設定されているか確認してください。
+1. `.env` ファイルで `BACKCASTPRO_NAS_PROXY_URL`（NAS FTPS Proxy のURL）が正しく設定されているか確認してください。
 2. APIが起動しているかブラウザでアクセスして確認してください（`https://.../`で`OK`が返ること）。
 3. NASが稼働中でFTPSサーバーが有効か確認してください。
 

@@ -151,14 +151,14 @@ ENTRYPOINT ["python", "/app/update_stocks_price.py"]
 
 *   **`upload_to_cloud()` 関数の削除**: Cloud Run Proxy へのアップロード処理を完全に削除。
 *   **`--dry-run` 引数の削除**: アップロードをスキップする目的のフラグだったため、不要に。
-*   **Dockerボリュームマウント方式に変更**: `Dockerfile` に `ENV BACKCASTPRO_CACHE_DIR=/data` を追加。コンテナ実行時に `-v /host/path:/data` でマウントすることで、DuckDBファイルをホスト側に永続化。
+*   **Dockerボリュームマウント方式に変更**: `Dockerfile` に `ENV STOCKDATA_CACHE_DIR=/data` を追加。コンテナ実行時に `-v /host/path:/data` でマウントすることで、DuckDBファイルをホスト側に永続化。
 *   **`UpdateSummary` の簡素化**: `uploaded` / `upload_failed` フィールドを削除。
 
 ### Consequences
 
 *   **メリット**:
     *   Cloud Run Proxy への依存がなくなり、Job が自己完結型になった。
-    *   `UPLOAD_API_KEY` と `BACKCASTPRO_GDRIVE_API_URL` が Job の環境変数から不要に。
+    *   `UPLOAD_API_KEY` と `BACKCASTPRO_NAS_PROXY_URL` が Job の環境変数から不要に。
     *   コードの大幅な簡素化（`upload_to_cloud` 関数52行 + 関連コード削除）。
     *   ローカルDocker環境でのテストが容易に（`docker run -v` のみで動作確認可能）。
 *   **注意点**:

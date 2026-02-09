@@ -11,7 +11,7 @@ DockerイメージはGitHub Actionsで自動的にDockerHubへpushされ、Synol
 2. Synology NAS のタスクスケジューラが毎晩定刻に **Dockerコンテナ** をトリガーします。
 3. コンテナ (`update_stocks_price.py`) が実行されます。
    - J-Quants APIなどから最新の株価データを取得します。
-   - 取得したデータをDuckDBファイルとしてマウントされたボリューム（`BACKCASTPRO_CACHE_DIR`）に直接保存します。
+   - 取得したデータをDuckDBファイルとしてマウントされたボリューム（`STOCKDATA_CACHE_DIR`）に直接保存します。
 
 ```mermaid
 graph LR
@@ -31,7 +31,7 @@ graph LR
 - **Dockerfile**: `cloud-job/Dockerfile`
 - **GitHub Action**: `.github/workflows/publish-dockerhub.yml`
 - **役割**: データの取得、加工、DuckDBファイルへの保存
-- **データ保存先**: 環境変数 `BACKCASTPRO_CACHE_DIR`（デフォルト: `/data`）で指定されたディレクトリ
+- **データ保存先**: 環境変数 `STOCKDATA_CACHE_DIR`（デフォルト: `/data`）で指定されたディレクトリ
 
 ### 必要な環境変数・シークレット
 

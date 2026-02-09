@@ -7,7 +7,7 @@
 `cloud-job/update_stocks_price.py` は、株価データを DuckDB に保存した後、Cloud Run proxy 経由で Google Drive にアップロードしていた。
 Google Drive へのアップロードを廃止し、Docker でマウントしたフォルダ内の DuckDB ファイルに直接保存する方式に変更した。
 
-DuckDB への保存は元々 `db_stocks_daily.save_stock_prices()` が環境変数 `BACKCASTPRO_CACHE_DIR` を参照して動作しているため、アップロード関連コードの削除と Dockerfile のボリュームマウント対応のみで実現。
+DuckDB への保存は元々 `db_stocks_daily.save_stock_prices()` が環境変数 `STOCKDATA_CACHE_DIR` を参照して動作しているため、アップロード関連コードの削除と Dockerfile のボリュームマウント対応のみで実現。
 
 ## 変更後の動作
 
@@ -15,7 +15,7 @@ DuckDB への保存は元々 `db_stocks_daily.save_stock_prices()` が環境変�
 株価データソース (Tachibana / Stooq / J-Quants)
         ↓ 取得・マージ
     DuckDB に保存
-    (BACKCASTPRO_CACHE_DIR/stocks_daily/{code}.duckdb)
+    (STOCKDATA_CACHE_DIR/stocks_daily/{code}.duckdb)
 ```
 
 Docker 実行時に `-v` でホスト側ディレクトリをマウントすることで、DuckDB ファイルがホスト側に永続化される。
@@ -30,7 +30,7 @@ docker run -v /host/duckdb-dir:/data backcastpro-updater --codes 7203 --days 3
 | ファイル | 変更内容 |
 |---|---|
 | `cloud-job/update_stocks_price.py` | `upload_to_cloud()` 関数削除、`--dry-run` 引数削除、`UpdateSummary` のアップロード関連フィールド削除、docstring・サマリー出力の更新 |
-| `cloud-job/Dockerfile` | `ENV BACKCASTPRO_CACHE_DIR=/data` 追加（ボリュームマウントポイント） |
+| `cloud-job/Dockerfile` | `ENV STOCKDATA_CACHE_DIR=/data` 追加（ボリュームマウントポイント） |
 | `tests/test_update_stocks_price.py` | `TestUploadToCloud` クラス削除、`--dry-run` 関連テスト削除、`TestMain` のアップロードモック削除 |
 | `cloud-job/requirements.txt` | 変更なし（`requests` は Stooq/J-Quants/Tachibana の API 呼び出しで引き続き必要） |
 

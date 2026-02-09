@@ -8,7 +8,7 @@ from unittest.mock import patch, MagicMock
 import sys
 
 # テスト対象のモジュールをインポート
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from BackcastPro.api.db_stocks_board import db_stocks_board
 
 
@@ -24,7 +24,7 @@ def temp_cache_dir():
 @pytest.fixture
 def db_board(temp_cache_dir):
     """テスト用のdb_stocks_boardインスタンスを作成"""
-    with patch.dict(os.environ, {'BACKCASTPRO_CACHE_DIR': temp_cache_dir}):
+    with patch.dict(os.environ, {"STOCKDATA_CACHE_DIR": temp_cache_dir}):
         instance = db_stocks_board()
         instance.isEnable = True  # 強制的に有効化
         yield instance
@@ -33,13 +33,13 @@ def db_board(temp_cache_dir):
 @pytest.fixture
 def sample_board_data():
     """サンプルの板情報データを作成"""
-    timestamps = pd.date_range(start='2024-01-01 09:00:00', periods=10, freq='1min')
+    timestamps = pd.date_range(start="2024-01-01 09:00:00", periods=10, freq="1min")
     data = {
-        'Timestamp': timestamps,
-        'BidPrice1': [100.0 + i for i in range(10)],
-        'BidVolume1': [1000 + i * 10 for i in range(10)],
-        'AskPrice1': [101.0 + i for i in range(10)],
-        'AskVolume1': [900 + i * 10 for i in range(10)],
+        "Timestamp": timestamps,
+        "BidPrice1": [100.0 + i for i in range(10)],
+        "BidVolume1": [1000 + i * 10 for i in range(10)],
+        "AskPrice1": [101.0 + i for i in range(10)],
+        "AskVolume1": [900 + i * 10 for i in range(10)],
     }
     return pd.DataFrame(data)
 
@@ -47,14 +47,14 @@ def sample_board_data():
 @pytest.fixture
 def sample_board_data_from_api():
     """実際のAPIレスポンスと同じ構造のサンプル板情報データを作成（小文字のcodeカラムを含む）"""
-    timestamps = pd.date_range(start='2024-01-01 09:00:00', periods=10, freq='1min')
+    timestamps = pd.date_range(start="2024-01-01 09:00:00", periods=10, freq="1min")
     data = {
-        'Timestamp': timestamps,
-        'Price': [100.0 + i for i in range(10)],
-        'Qty': [1000 + i * 10 for i in range(10)],
-        'Type': ['Bid'] * 5 + ['Ask'] * 5,
-        'source': ['kabu-station'] * 10,
-        'code': ['1234'] * 10  # 小文字のcodeカラム（APIからのレスポンス形式）
+        "Timestamp": timestamps,
+        "Price": [100.0 + i for i in range(10)],
+        "Qty": [1000 + i * 10 for i in range(10)],
+        "Type": ["Bid"] * 5 + ["Ask"] * 5,
+        "source": ["kabu-station"] * 10,
+        "code": ["1234"] * 10,  # 小文字のcodeカラム（APIからのレスポンス形式）
     }
     return pd.DataFrame(data)
 
@@ -64,7 +64,7 @@ class TestDbStocksBoard:
 
     def test_init(self, temp_cache_dir):
         """初期化のテスト"""
-        with patch.dict(os.environ, {'BACKCASTPRO_CACHE_DIR': temp_cache_dir}):
+        with patch.dict(os.environ, {"STOCKDATA_CACHE_DIR": temp_cache_dir}):
             instance = db_stocks_board()
             assert instance.cache_dir == temp_cache_dir
             assert instance.isEnable is True
@@ -80,9 +80,9 @@ class TestDbStocksBoard:
         loaded_df = db_board.load_stock_board_from_cache(code)
 
         assert len(loaded_df) == len(sample_board_data)
-        assert 'Code' in loaded_df.columns
-        assert 'Timestamp' in loaded_df.columns
-        assert all(loaded_df['Code'] == code)
+        assert "Code" in loaded_df.columns
+        assert "Timestamp" in loaded_df.columns
+        assert all(loaded_df["Code"] == code)
 
     def test_save_stock_board_empty_dataframe(self, db_board):
         """空のDataFrameの保存テスト"""
@@ -100,8 +100,8 @@ class TestDbStocksBoard:
         """Timestampカラムがない場合のテスト"""
         code = "1234"
         data = {
-            'BidPrice1': [100.0, 101.0, 102.0],
-            'BidVolume1': [1000, 1100, 1200],
+            "BidPrice1": [100.0, 101.0, 102.0],
+            "BidVolume1": [1000, 1100, 1200],
         }
         df = pd.DataFrame(data)
 
@@ -110,26 +110,26 @@ class TestDbStocksBoard:
         db_board.save_stock_board(code, df)
 
         loaded_df = db_board.load_stock_board_from_cache(code)
-        assert 'Timestamp' in loaded_df.columns
+        assert "Timestamp" in loaded_df.columns
         # 同じTimestampのため、重複排除により1行だけが保存される
         assert len(loaded_df) >= 1
 
     def test_save_stock_board_with_timestamp_index(self, db_board):
         """Timestampがインデックスになっている場合のテスト"""
         code = "1234"
-        timestamps = pd.date_range(start='2024-01-01 09:00:00', periods=5, freq='1min')
+        timestamps = pd.date_range(start="2024-01-01 09:00:00", periods=5, freq="1min")
         data = {
-            'BidPrice1': [100.0 + i for i in range(5)],
-            'BidVolume1': [1000 + i * 10 for i in range(5)],
+            "BidPrice1": [100.0 + i for i in range(5)],
+            "BidVolume1": [1000 + i * 10 for i in range(5)],
         }
         df = pd.DataFrame(data, index=timestamps)
-        df.index.name = 'Timestamp'
+        df.index.name = "Timestamp"
 
         # インデックスからカラムに変換される
         db_board.save_stock_board(code, df)
 
         loaded_df = db_board.load_stock_board_from_cache(code)
-        assert 'Timestamp' in loaded_df.columns
+        assert "Timestamp" in loaded_df.columns
         # Timestampインデックスが正しくカラムに変換され、5行すべてが保存される
         assert len(loaded_df) == 5
 
@@ -159,13 +159,15 @@ class TestDbStocksBoard:
         count_1 = len(db_board.load_stock_board_from_cache(code))
 
         # 新しいタイムスタンプのデータを作成
-        new_timestamps = pd.date_range(start='2024-01-01 09:20:00', periods=5, freq='1min')
+        new_timestamps = pd.date_range(
+            start="2024-01-01 09:20:00", periods=5, freq="1min"
+        )
         new_data = {
-            'Timestamp': new_timestamps,
-            'BidPrice1': [110.0 + i for i in range(5)],
-            'BidVolume1': [1100 + i * 10 for i in range(5)],
-            'AskPrice1': [111.0 + i for i in range(5)],
-            'AskVolume1': [1000 + i * 10 for i in range(5)],
+            "Timestamp": new_timestamps,
+            "BidPrice1": [110.0 + i for i in range(5)],
+            "BidVolume1": [1100 + i * 10 for i in range(5)],
+            "AskPrice1": [111.0 + i for i in range(5)],
+            "AskVolume1": [1000 + i * 10 for i in range(5)],
         }
         new_df = pd.DataFrame(new_data)
 
@@ -194,9 +196,9 @@ class TestDbStocksBoard:
         assert len(loaded_df) < len(sample_board_data)
 
         # タイムスタンプが範囲内であることを確認
-        loaded_df['Timestamp'] = pd.to_datetime(loaded_df['Timestamp'])
-        assert all(loaded_df['Timestamp'] >= from_dt)
-        assert all(loaded_df['Timestamp'] <= to_dt)
+        loaded_df["Timestamp"] = pd.to_datetime(loaded_df["Timestamp"])
+        assert all(loaded_df["Timestamp"] >= from_dt)
+        assert all(loaded_df["Timestamp"] <= to_dt)
 
     def test_load_stock_board_nonexistent_code(self, db_board):
         """存在しない銘柄コードの読み込みテスト"""
@@ -218,10 +220,10 @@ class TestDbStocksBoard:
             metadata = db_board._get_metadata(db, code)
 
         assert metadata is not None
-        assert metadata['code'] == code
-        assert metadata['from_timestamp'] is not None
-        assert metadata['to_timestamp'] is not None
-        assert metadata['record_count'] == len(sample_board_data)
+        assert metadata["code"] == code
+        assert metadata["from_timestamp"] is not None
+        assert metadata["to_timestamp"] is not None
+        assert metadata["record_count"] == len(sample_board_data)
 
     def test_metadata_update_on_append(self, db_board, sample_board_data):
         """データ追加時のメタデータ更新テスト"""
@@ -234,13 +236,15 @@ class TestDbStocksBoard:
             metadata_1 = db_board._get_metadata(db, code)
 
         # 新しいデータを追加（より古い時刻）
-        old_timestamps = pd.date_range(start='2024-01-01 08:00:00', periods=5, freq='1min')
+        old_timestamps = pd.date_range(
+            start="2024-01-01 08:00:00", periods=5, freq="1min"
+        )
         old_data = {
-            'Timestamp': old_timestamps,
-            'BidPrice1': [90.0 + i for i in range(5)],
-            'BidVolume1': [900 + i * 10 for i in range(5)],
-            'AskPrice1': [91.0 + i for i in range(5)],
-            'AskVolume1': [800 + i * 10 for i in range(5)],
+            "Timestamp": old_timestamps,
+            "BidPrice1": [90.0 + i for i in range(5)],
+            "BidVolume1": [900 + i * 10 for i in range(5)],
+            "AskPrice1": [91.0 + i for i in range(5)],
+            "AskVolume1": [800 + i * 10 for i in range(5)],
         }
         old_df = pd.DataFrame(old_data)
 
@@ -250,8 +254,8 @@ class TestDbStocksBoard:
             metadata_2 = db_board._get_metadata(db, code)
 
         # from_timestampが更新されたことを確認
-        assert metadata_2['from_timestamp'] < metadata_1['from_timestamp']
-        assert metadata_2['record_count'] > metadata_1['record_count']
+        assert metadata_2["from_timestamp"] < metadata_1["from_timestamp"]
+        assert metadata_2["record_count"] > metadata_1["record_count"]
 
     def test_get_db_context_manager(self, db_board):
         """get_dbコンテキストマネージャーのテスト"""
@@ -285,9 +289,9 @@ class TestDbStocksBoard:
 
         # 無効なTimestampを含むデータ
         data = {
-            'Timestamp': ['2024-01-01 09:00:00', 'invalid', '2024-01-01 09:02:00'],
-            'BidPrice1': [100.0, 101.0, 102.0],
-            'BidVolume1': [1000, 1100, 1200],
+            "Timestamp": ["2024-01-01 09:00:00", "invalid", "2024-01-01 09:02:00"],
+            "BidPrice1": [100.0, 101.0, 102.0],
+            "BidVolume1": [1000, 1100, 1200],
         }
         df = pd.DataFrame(data)
 
@@ -300,14 +304,14 @@ class TestDbStocksBoard:
 
     def test_is_enable_false(self, temp_cache_dir):
         """isEnableがFalseの場合のテスト"""
-        with patch.dict(os.environ, {'BACKCASTPRO_CACHE_DIR': temp_cache_dir}):
+        with patch.dict(os.environ, {"STOCKDATA_CACHE_DIR": temp_cache_dir}):
             instance = db_stocks_board()
             instance.isEnable = False
 
             # isEnable=Falseの場合、保存も読み込みも何もしない
             data = {
-                'Timestamp': ['2024-01-01 09:00:00'],
-                'BidPrice1': [100.0],
+                "Timestamp": ["2024-01-01 09:00:00"],
+                "BidPrice1": [100.0],
             }
             df = pd.DataFrame(data)
 
@@ -352,7 +356,9 @@ class TestDbStocksBoard:
         from_str = "2024-01-01 09:03:00"
         to_str = "2024-01-01 09:06:00"
 
-        loaded_df = db_board.load_stock_board_from_cache(code, from_=from_str, to=to_str)
+        loaded_df = db_board.load_stock_board_from_cache(
+            code, from_=from_str, to=to_str
+        )
 
         # データが正しく読み込まれることを確認
         assert len(loaded_df) > 0
@@ -369,7 +375,9 @@ class TestDbStocksBoard:
         loaded_df = db_board.load_stock_board_from_cache(code)
         assert len(loaded_df) == len(sample_board_data)
 
-    def test_save_board_data_with_lowercase_code_column(self, db_board, sample_board_data_from_api):
+    def test_save_board_data_with_lowercase_code_column(
+        self, db_board, sample_board_data_from_api
+    ):
         """APIレスポンス形式（小文字codeカラム含む）の板情報保存テスト"""
         code = "1234"
 
@@ -381,24 +389,24 @@ class TestDbStocksBoard:
 
         assert len(loaded_df) == len(sample_board_data_from_api)
         # 小文字のcodeカラムが大文字のCodeカラムにリネームされていることを確認
-        assert 'Code' in loaded_df.columns
-        assert all(loaded_df['Code'] == code)
+        assert "Code" in loaded_df.columns
+        assert all(loaded_df["Code"] == code)
         # 小文字のcodeカラムは存在しないはず
-        assert 'code' not in loaded_df.columns
+        assert "code" not in loaded_df.columns
 
     def test_save_board_data_from_kabu_station_api(self, db_board):
         """kabuステーションAPI形式の板情報保存テスト"""
         code = "6363"
 
         # kabuステーションAPIのレスポンス形式を再現
-        timestamps = pd.date_range(start='2024-01-01 09:00:00', periods=5, freq='1min')
+        timestamps = pd.date_range(start="2024-01-01 09:00:00", periods=5, freq="1min")
         data = {
-            'Timestamp': timestamps,
-            'Price': [1500.0, 1501.0, 1499.0, 1502.0, 1498.0],
-            'Qty': [1000, 1100, 900, 1200, 800],
-            'Type': ['Bid', 'Ask', 'Bid', 'Ask', 'Bid'],
-            'source': ['kabu-station'] * 5,
-            'code': [code] * 5  # 小文字のcodeカラム
+            "Timestamp": timestamps,
+            "Price": [1500.0, 1501.0, 1499.0, 1502.0, 1498.0],
+            "Qty": [1000, 1100, 900, 1200, 800],
+            "Type": ["Bid", "Ask", "Bid", "Ask", "Bid"],
+            "source": ["kabu-station"] * 5,
+            "code": [code] * 5,  # 小文字のcodeカラム
         }
         df = pd.DataFrame(data)
 
@@ -409,24 +417,24 @@ class TestDbStocksBoard:
         loaded_df = db_board.load_stock_board_from_cache(code)
 
         assert len(loaded_df) == len(df)
-        assert 'Code' in loaded_df.columns
-        assert all(loaded_df['Code'] == code)
-        assert 'source' in loaded_df.columns
-        assert all(loaded_df['source'] == 'kabu-station')
+        assert "Code" in loaded_df.columns
+        assert all(loaded_df["Code"] == code)
+        assert "source" in loaded_df.columns
+        assert all(loaded_df["source"] == "kabu-station")
 
     def test_save_board_data_from_e_shiten_api(self, db_board):
         """立花証券e支店API形式の板情報保存テスト"""
         code = "8306"
 
         # 立花証券e支店APIのレスポンス形式を再現
-        timestamps = pd.date_range(start='2024-01-01 09:00:00', periods=5, freq='1min')
+        timestamps = pd.date_range(start="2024-01-01 09:00:00", periods=5, freq="1min")
         data = {
-            'Timestamp': timestamps,
-            'Price': [800.0, 801.0, 799.0, 802.0, 798.0],
-            'Qty': [2000, 2100, 1900, 2200, 1800],
-            'Type': ['Bid', 'Ask', 'Bid', 'Ask', 'Bid'],
-            'source': ['e-shiten'] * 5,
-            'code': [code] * 5  # 小文字のcodeカラム
+            "Timestamp": timestamps,
+            "Price": [800.0, 801.0, 799.0, 802.0, 798.0],
+            "Qty": [2000, 2100, 1900, 2200, 1800],
+            "Type": ["Bid", "Ask", "Bid", "Ask", "Bid"],
+            "source": ["e-shiten"] * 5,
+            "code": [code] * 5,  # 小文字のcodeカラム
         }
         df = pd.DataFrame(data)
 
@@ -437,23 +445,23 @@ class TestDbStocksBoard:
         loaded_df = db_board.load_stock_board_from_cache(code)
 
         assert len(loaded_df) == len(df)
-        assert 'Code' in loaded_df.columns
-        assert all(loaded_df['Code'] == code)
-        assert 'source' in loaded_df.columns
-        assert all(loaded_df['source'] == 'e-shiten')
+        assert "Code" in loaded_df.columns
+        assert all(loaded_df["Code"] == code)
+        assert "source" in loaded_df.columns
+        assert all(loaded_df["source"] == "e-shiten")
 
     def test_column_name_case_sensitivity(self, db_board):
         """カラム名の大文字小文字の重複問題のテスト（バグ再現テスト）"""
         code = "1234"
 
         # 小文字のcodeカラムを持つDataFrameを作成
-        timestamps = pd.date_range(start='2024-01-01 09:00:00', periods=3, freq='1min')
+        timestamps = pd.date_range(start="2024-01-01 09:00:00", periods=3, freq="1min")
         data = {
-            'Timestamp': timestamps,
-            'Price': [100.0, 101.0, 102.0],
-            'Qty': [1000, 1100, 1200],
-            'Type': ['Bid', 'Bid', 'Ask'],
-            'code': [code] * 3  # 小文字のcodeカラム
+            "Timestamp": timestamps,
+            "Price": [100.0, 101.0, 102.0],
+            "Qty": [1000, 1100, 1200],
+            "Type": ["Bid", "Bid", "Ask"],
+            "code": [code] * 3,  # 小文字のcodeカラム
         }
         df = pd.DataFrame(data)
 
@@ -465,8 +473,8 @@ class TestDbStocksBoard:
 
             # データが正常に保存・読み込みできることを確認
             assert len(loaded_df) == len(df)
-            assert 'Code' in loaded_df.columns
+            assert "Code" in loaded_df.columns
             # 小文字のcodeカラムは大文字のCodeにリネームされているはず
-            assert 'code' not in loaded_df.columns
+            assert "code" not in loaded_df.columns
         except Exception as e:
             pytest.fail(f"カラム名の大文字小文字問題が修正されていません: {e}")

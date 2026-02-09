@@ -1,17 +1,16 @@
 """FTPS proxy for BackcastPro.
 
-Streams .duckdb files from a home NAS via FTPS, exposed as HTTP (GET/POST).
+Streams .duckdb files from a home NAS via FTPS, exposed as HTTP GET.
 Deployed on Cloud Run.
 """
 
 import ftplib
-import io
 import logging
 import os
 import re
 import ssl
 
-from flask import Flask, Response, request as flask_request
+from flask import Flask, Response
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -71,17 +70,6 @@ class NASFtpsProxy:
         """Combine base_path with the relative file_path."""
         return f"{self.base_path}/jp/{file_path}"
 
-    def _ensure_directory(self, ftp: _NatFriendlyFTP_TLS, dir_path: str) -> None:
-        """Create directory tree on NAS (mkdir -p equivalent)."""
-        parts = dir_path.strip("/").split("/")
-        current = ""
-        for part in parts:
-            current = f"{current}/{part}"
-            try:
-                ftp.mkd(current)
-            except ftplib.error_perm:
-                pass  # Directory already exists
-
     def stream_file(self, file_path: str) -> Response:
         """Stream file content as a chunked HTTP response via FTPS.
 
@@ -126,23 +114,6 @@ class NASFtpsProxy:
             headers={"Transfer-Encoding": "chunked"},
         )
 
-    def upload_file(self, file_path: str, data: bytes) -> dict:
-        """Upload/overwrite a file via FTPS."""
-        remote_path = self._resolve_path(file_path)
-        dir_path = remote_path.rsplit("/", 1)[0]
-
-        ftp = self._connect()
-        try:
-            self._ensure_directory(ftp, dir_path)
-            ftp.storbinary(f"STOR {remote_path}", io.BytesIO(data))
-            return {"path": remote_path, "size": len(data)}
-        finally:
-            try:
-                ftp.quit()
-            except Exception:
-                pass
-
-
 def _get_proxy() -> NASFtpsProxy:
     """Get or create the NASFtpsProxy singleton."""
     if not hasattr(app, "_nas_proxy"):
@@ -180,23 +151,6 @@ def download_file(file_path: str):
     except ftplib.error_perm:
         logger.warning("File not found on NAS: %s", file_path)
         return "Not Found", 404
-
-
-@app.route("/jp/<path:file_path>", methods=["POST"])
-def upload_handler(file_path: str):
-    """Upload a file to NAS via the proxy."""
-    expected_key = os.environ.get("UPLOAD_API_KEY")
-    if not expected_key or flask_request.headers.get("X-API-Key") != expected_key:
-        return "Unauthorized", 401
-
-    if not ALLOWED_PATHS.match(file_path):
-        return "Not Found", 404
-
-    proxy = _get_proxy()
-    data = flask_request.get_data()
-    result = proxy.upload_file(file_path, data)
-    logger.info("Uploaded: %s (size=%d)", file_path, len(data))
-    return result, 200
 
 
 @app.errorhandler(Exception)

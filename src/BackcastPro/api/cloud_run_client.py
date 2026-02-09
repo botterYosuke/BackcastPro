@@ -1,8 +1,7 @@
 """
 Cloud Run APIクライアント
 
-Cloud Run上のプロキシAPIを通じて、
-NAS (FTPS) からDuckDBファイルをダウンロード/アップロードするモジュール。
+Cloud RunからDuckDBファイルをダウンロードするモジュール。
 """
 import os
 import logging
@@ -22,7 +21,7 @@ class CloudRunConfig:
     def from_environment(cls) -> "CloudRunConfig":
         """環境変数から設定を読み込み"""
         return cls(
-            api_base_url=os.environ.get("BACKCASTPRO_GDRIVE_API_URL", ""),
+            api_base_url=os.environ.get("BACKCASTPRO_NAS_PROXY_URL", ""),
         )
 
     def is_configured(self) -> bool:
@@ -76,39 +75,6 @@ class CloudRunClient:
                 except Exception:
                     pass
             return False
-
-    def upload_file(self, remote_path: str, local_path: str) -> bool:
-        """
-        Cloud Run API経由でファイルをアップロード
-
-        Args:
-            remote_path: 論理パス (例: "stocks_daily/1234.duckdb")
-            local_path: ローカルファイルパス
-
-        Returns:
-            成功時True、失敗時False
-        """
-        url = f"{self.config.api_base_url.rstrip('/')}/jp/{remote_path}"
-        api_key = os.environ.get("UPLOAD_API_KEY", "")
-
-        try:
-            logger.info(f"アップロード開始: {local_path} -> {remote_path}")
-            with open(local_path, 'rb') as f:
-                resp = requests.post(
-                    url, data=f,
-                    headers={"X-API-Key": api_key},
-                    timeout=(10, 300),
-                )
-            resp.raise_for_status()
-            logger.info(f"アップロード完了: {remote_path}")
-            return True
-        except Exception as e:
-            logger.warning(f"アップロード失敗: {e}")
-            return False
-
-    def upload_stocks_daily(self, code: str, local_path: str) -> bool:
-        """stocks_daily DuckDBファイルをアップロード"""
-        return self.upload_file(f"stocks_daily/{code}.duckdb", local_path)
 
     def download_stocks_daily(self, code: str, local_path: str) -> bool:
         """stocks_daily DuckDBファイルをダウンロード"""

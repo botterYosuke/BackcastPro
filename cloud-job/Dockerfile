@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=True
 ENV PYTHONPATH=/app/src
-ENV BACKCASTPRO_CACHE_DIR=/data
+ENV STOCKDATA_CACHE_DIR=/Volume1/StockData/jp
 WORKDIR /app
 
 COPY cloud-job/requirements.txt ./requirements.txt

@@ -66,11 +66,10 @@ python -m pip install pytest pytest-cov flask
 
 ```bash
 # DuckDBキャッシュディレクトリ
-BACKCASTPRO_CACHE_DIR=/path/to/your/duckdb/cache
+STOCKDATA_CACHE_DIR=/path/to/your/duckdb/cache
 
 # NAS FTPS Proxy のURL（DuckDBダウンロード用、オプション）
-# ※歴史的経緯で GDRIVE の名前が残っている（実際は NAS FTPS Proxy）
-BACKCASTPRO_GDRIVE_API_URL=https://your-cloud-run-url.a.run.app
+BACKCASTPRO_NAS_PROXY_URL=https://your-cloud-run-url.a.run.app
 ```
 
 ## プロジェクト構造

@@ -14,7 +14,7 @@ class TestCloudRunConfig(unittest.TestCase):
     def test_from_environment_with_values(self):
         """環境変数から設定を読み込む"""
         with patch.dict(os.environ, {
-            'BACKCASTPRO_GDRIVE_API_URL': 'https://my-api.run.app',
+            'BACKCASTPRO_NAS_PROXY_URL': 'https://my-api.run.app',
         }, clear=False):
             config = CloudRunConfig.from_environment()
             self.assertEqual(config.api_base_url, 'https://my-api.run.app')
@@ -23,7 +23,7 @@ class TestCloudRunConfig(unittest.TestCase):
     def test_from_environment_defaults(self):
         """環境変数がない場合のデフォルト値"""
         env_backup = {}
-        key = 'BACKCASTPRO_GDRIVE_API_URL'
+        key = 'BACKCASTPRO_NAS_PROXY_URL'
         if key in os.environ:
             env_backup[key] = os.environ.pop(key)
 
