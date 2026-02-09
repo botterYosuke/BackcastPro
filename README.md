@@ -74,7 +74,7 @@ mo.vstack([slider, info])
 
 ## ドキュメント
 
-- [ドキュメント一覧](https://github.com/botterYosuke/BackcastPro/blob/main/docs/index.md)
+- [ドキュメント一覧](https://botteryosuke.github.io/BackcastPro/)
 
 ## バグ報告 / サポート
 

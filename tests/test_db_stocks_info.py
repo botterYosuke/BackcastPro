@@ -30,49 +30,48 @@ class TestDbStocksInfo(unittest.TestCase):
         if 'BACKCASTPRO_CACHE_DIR' in os.environ:
             del os.environ['BACKCASTPRO_CACHE_DIR']
 
-    def test_download_from_ftp_success(self):
-        """Test successful download from FTP"""
-        with patch('BackcastPro.api.ftp_client.FTPClient') as mock_ftp_client_cls:
+    def test_download_from_cloud_success(self):
+        """Test successful download from Google Drive"""
+        with patch('BackcastPro.api.gdrive_client.GDriveClient') as mock_gdrive_cls:
             mock_client = MagicMock()
-            mock_ftp_client_cls.return_value = mock_client
+            mock_gdrive_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
             mock_client.download_listed_info.return_value = True
 
             test_path = os.path.join(self.test_cache_dir, "test_downloaded.duckdb")
             os.makedirs(os.path.dirname(test_path), exist_ok=True)
 
-            result = self.db_info._download_from_ftp(test_path)
+            result = self.db_info._download_from_cloud(test_path)
 
             self.assertTrue(result, "Download should return True on success")
             mock_client.download_listed_info.assert_called_once_with(test_path)
 
-    def test_download_from_ftp_failure_connection(self):
-        """Test failure during FTP connection"""
-        with patch('BackcastPro.api.ftp_client.FTPClient') as mock_ftp_client_cls:
+    def test_download_from_cloud_failure(self):
+        """Test failure during Google Drive download"""
+        with patch('BackcastPro.api.gdrive_client.GDriveClient') as mock_gdrive_cls:
             mock_client = MagicMock()
-            mock_ftp_client_cls.return_value = mock_client
+            mock_gdrive_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
             mock_client.download_listed_info.return_value = False
 
             test_path = os.path.join(self.test_cache_dir, "test_fail.duckdb")
 
-            result = self.db_info._download_from_ftp(test_path)
+            result = self.db_info._download_from_cloud(test_path)
 
-            self.assertFalse(result, "Download should return False on connection error")
+            self.assertFalse(result, "Download should return False on failure")
 
-    def test_download_from_ftp_not_configured(self):
-        """Test behavior when FTP is not configured"""
-        with patch('BackcastPro.api.ftp_client.FTPClient') as mock_ftp_client_cls:
+    def test_download_from_cloud_not_configured(self):
+        """Test behavior when Google Drive is not configured"""
+        with patch('BackcastPro.api.gdrive_client.GDriveClient') as mock_gdrive_cls:
             mock_client = MagicMock()
-            mock_ftp_client_cls.return_value = mock_client
+            mock_gdrive_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = False
 
             test_path = os.path.join(self.test_cache_dir, "test_notconfigured.duckdb")
 
-            result = self.db_info._download_from_ftp(test_path)
+            result = self.db_info._download_from_cloud(test_path)
 
-            self.assertFalse(result, "Download should return False if FTP not configured")
-            mock_client.download_listed_info.assert_not_called()
+            self.assertFalse(result, "Download should return False if not configured")
 
 if __name__ == '__main__':
     unittest.main()

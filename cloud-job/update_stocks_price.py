@@ -1,7 +1,8 @@
 """
-夜間株価取得・FTPアップロードスクリプト
+夜間株価取得・アップロードスクリプト
 
-複数のデータソースから株価を取得し、DuckDBにキャッシュ保存後、FTPサーバーにアップロードする。
+複数のデータソースから株価を取得し、DuckDBにキャッシュ保存後、
+Cloud Run proxy経由でGoogle Driveにアップロードする。
 
 取得優先度:
 1. Tachibana（立花証券 e-支店）を試行
@@ -11,7 +12,7 @@
 使用方法:
     python update_stocks_price.py                    # 全銘柄処理
     python update_stocks_price.py --codes 7203,8306  # 特定銘柄のみ
-    python update_stocks_price.py --dry-run          # FTPアップロードをスキップ
+    python update_stocks_price.py --dry-run          # アップロードをスキップ
     python update_stocks_price.py --workers 8        # 並列ワーカー数を指定
 """
 import os
@@ -44,22 +45,13 @@ class UpdateSummary:
     total_stocks: int = 0
     success_count: int = 0
     failed_count: int = 0
-    ftp_uploaded: int = 0
-    ftp_failed: int = 0
+    uploaded: int = 0
+    upload_failed: int = 0
     errors: list[tuple[str, str]] = field(default_factory=list)
 
 
 def setup_logging() -> logging.Logger:
     """ログ設定（コンソール＋ファイル）"""
-    cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', '.')
-    log_dir = os.path.join(cache_dir, 'logs')
-    os.makedirs(log_dir, exist_ok=True)
-
-    log_file = os.path.join(
-        log_dir,
-        f"update_stocks_price_{datetime.now().strftime('%Y%m%d')}.log"
-    )
-
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
 
@@ -70,21 +62,30 @@ def setup_logging() -> logging.Logger:
         '%(asctime)s - %(levelname)s - %(message)s',
         datefmt='%H:%M:%S'
     ))
-
-    # ファイルハンドラ（ローテーション）
-    file_handler = RotatingFileHandler(
-        log_file,
-        maxBytes=10 * 1024 * 1024,  # 10MB
-        backupCount=30,
-        encoding='utf-8'
-    )
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    ))
-
     root_logger.addHandler(console_handler)
-    root_logger.addHandler(file_handler)
+
+    # Cloud Run ではファイルハンドラ不要（stdout → Cloud Logging）
+    if not os.environ.get('CLOUD_RUN_JOB'):
+        cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', '.')
+        log_dir = os.path.join(cache_dir, 'logs')
+        os.makedirs(log_dir, exist_ok=True)
+
+        log_file = os.path.join(
+            log_dir,
+            f"update_stocks_price_{datetime.now().strftime('%Y%m%d')}.log"
+        )
+
+        file_handler = RotatingFileHandler(
+            log_file,
+            maxBytes=10 * 1024 * 1024,  # 10MB
+            backupCount=30,
+            encoding='utf-8'
+        )
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        ))
+        root_logger.addHandler(file_handler)
 
     return logging.getLogger(__name__)
 
@@ -92,7 +93,7 @@ def setup_logging() -> logging.Logger:
 def parse_arguments() -> argparse.Namespace:
     """コマンドライン引数をパース"""
     parser = argparse.ArgumentParser(
-        description='夜間株価取得・FTPアップロードスクリプト'
+        description='夜間株価取得・アップロードスクリプト'
     )
     parser.add_argument(
         '--codes',
@@ -102,7 +103,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         '--dry-run',
         action='store_true',
-        help='FTPアップロードをスキップ'
+        help='アップロードをスキップ'
     )
     parser.add_argument(
         '--days',
@@ -271,9 +272,9 @@ def process_stock(
     return code, False, 0, None
 
 
-def upload_to_ftp(modified_codes: list[str], dry_run: bool = False) -> dict:
+def upload_to_cloud(modified_codes: list[str], dry_run: bool = False) -> dict:
     """
-    更新されたDuckDBファイルをFTPサーバーにアップロード
+    更新されたDuckDBファイルをCloud Run proxy経由でGoogle Driveにアップロード
 
     Args:
         modified_codes: 更新された銘柄コードのリスト
@@ -282,12 +283,12 @@ def upload_to_ftp(modified_codes: list[str], dry_run: bool = False) -> dict:
     Returns:
         {'success': [...], 'failed': [...]}
     """
-    from BackcastPro.api.ftp_client import FTPClient
+    from BackcastPro.api.gdrive_client import GDriveClient
 
     results = {'success': [], 'failed': []}
 
     if dry_run:
-        logger.info("dry-run モード: FTPアップロードをスキップ")
+        logger.info("dry-run モード: アップロードをスキップ")
         results['success'] = modified_codes
         return results
 
@@ -295,51 +296,32 @@ def upload_to_ftp(modified_codes: list[str], dry_run: bool = False) -> dict:
         logger.info("アップロード対象ファイルなし")
         return results
 
-    client = FTPClient()
+    client = GDriveClient()
     if not client.config.is_configured():
-        logger.error("FTP credentials not configured")
+        logger.error("BACKCASTPRO_GDRIVE_API_URL not configured")
         for code in modified_codes:
-            results['failed'].append((code, "FTP not configured"))
+            results['failed'].append((code, "API URL not configured"))
         return results
 
     cache_dir = os.environ.get('BACKCASTPRO_CACHE_DIR', '.')
     local_dir = os.path.join(cache_dir, 'stocks_daily')
 
-    # upload_multiple() で単一FTPS接続でバッチアップロード
-    files = []
     for code in modified_codes:
         local_path = os.path.join(local_dir, f"{code}.duckdb")
         if not os.path.exists(local_path):
             logger.warning(f"ローカルファイルなし: {local_path}")
             results['failed'].append((code, "File not found"))
             continue
-        remote_path = f"{client.STOCKS_DAILY_DIR}/{code}.duckdb"
-        files.append((local_path, remote_path))
+        try:
+            if client.upload_stocks_daily(code, local_path):
+                results['success'].append(code)
+            else:
+                results['failed'].append((code, "Upload failed"))
+        except Exception as e:
+            logger.error(f"  アップロード失敗 {code}: {e}")
+            results['failed'].append((code, str(e)))
 
-    if not files:
-        logger.info("アップロード対象ファイルなし")
-        return results
-
-    logger.info(
-        f"FTPバッチアップロード開始: "
-        f"{client.config.host}:{client.config.port} "
-        f"({len(files)} ファイル)"
-    )
-    ftp_results = client.upload_multiple(files)
-
-    # upload_multiple の結果を code ベースに変換
-    for local_path in ftp_results.get('success', []):
-        filename = os.path.basename(local_path)
-        code = filename.replace('.duckdb', '')
-        results['success'].append(code)
-    for item in ftp_results.get('failed', []):
-        if isinstance(item, tuple):
-            local_path, reason = item
-            filename = os.path.basename(local_path)
-            code = filename.replace('.duckdb', '')
-            results['failed'].append((code, reason))
-
-    logger.info("FTPアップロード処理完了")
+    logger.info("アップロード処理完了")
 
     return results
 
@@ -456,12 +438,12 @@ def main():
 
     producer.join()
 
-    # 4. FTPアップロード
+    # 4. アップロード
     logger.info("-" * 50)
-    logger.info(f"FTPアップロード開始: {len(modified_codes)} ファイル")
-    ftp_results = upload_to_ftp(modified_codes, dry_run=args.dry_run)
-    summary.ftp_uploaded = len(ftp_results['success'])
-    summary.ftp_failed = len(ftp_results['failed'])
+    logger.info(f"アップロード開始: {len(modified_codes)} ファイル")
+    upload_results = upload_to_cloud(modified_codes, dry_run=args.dry_run)
+    summary.uploaded = len(upload_results['success'])
+    summary.upload_failed = len(upload_results['failed'])
 
     # 5. サマリー出力
     summary.end_time = datetime.now()
@@ -474,7 +456,7 @@ def main():
     logger.info(f"対象銘柄: {summary.total_stocks}")
     logger.info(f"成功: {summary.success_count}")
     logger.info(f"失敗: {summary.failed_count}")
-    logger.info(f"FTPアップロード: 成功={summary.ftp_uploaded}, 失敗={summary.ftp_failed}")
+    logger.info(f"アップロード: 成功={summary.uploaded}, 失敗={summary.upload_failed}")
 
     if summary.errors:
         logger.info("-" * 50)

@@ -135,6 +135,7 @@ except:
 # 2. 環境変数を確認
 import os
 print("API URL:", os.getenv('BACKCASTPRO_API_URL'))
+print("GDrive API URL:", os.getenv('BACKCASTPRO_GDRIVE_API_URL'))
 
 # 3. 手動でデータを設定
 custom_data = pd.DataFrame({
@@ -145,6 +146,14 @@ custom_data = pd.DataFrame({
     'Volume': [1000, 1100, 1200]
 }, index=pd.date_range('2023-01-01', periods=3))
 ```
+
+### 問題: Google Driveからのデータダウンロード失敗
+
+**原因:** Cloud Run APIのURLが設定されていない、または停止している。
+
+**解決方法:**
+1. `.env` ファイルで `BACKCASTPRO_GDRIVE_API_URL` が正しく設定されているか確認してください。
+2. APIが起動しているかブラウザでアクセスして確認してください（`https://.../health`）。
 
 ### 問題: データが空または取得できない
 

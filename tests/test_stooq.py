@@ -16,7 +16,7 @@ import numpy as np
 # Ensure src is in pythonpath
 sys.path.insert(0, os.path.abspath('src'))
 
-from BackcastPro.api.lib.stooq import (
+from trading_data.lib.stooq import (
     stooq_daily_quotes,
     _stooq_normalize_columns,
     _add_adjustment_prices,
@@ -42,7 +42,7 @@ class TestStooqDataRetrieval:
         df = pd.DataFrame(data, index=dates)
         return df
     
-    @patch('BackcastPro.api.lib.stooq.yf')
+    @patch('trading_data.lib.stooq.yf')
     def test_stooq_daily_quotes_success(self, mock_yf):
         """正常にデータが取得できる場合のテスト"""
         # モックデータを準備
@@ -58,8 +58,8 @@ class TestStooqDataRetrieval:
         assert 'Date' in result.columns or isinstance(result.index, pd.DatetimeIndex)
         mock_yf.download.assert_called_once()
     
-    @patch('BackcastPro.api.lib.stooq.yf')
-    @patch('BackcastPro.api.lib.stooq._get_yfinance_daily_quotes')
+    @patch('trading_data.lib.stooq.yf')
+    @patch('trading_data.lib.stooq._get_yfinance_daily_quotes')
     def test_stooq_daily_quotes_empty(self, mock_yfinance_api, mock_yf):
         """空のDataFrameが返される場合のテスト"""
         # 空のDataFrameを返すモック
@@ -72,7 +72,7 @@ class TestStooqDataRetrieval:
         # 検証（空のDataFrameが返される）
         assert result.empty
 
-    @patch('BackcastPro.api.lib.stooq.yf')
+    @patch('trading_data.lib.stooq.yf')
     def test_stooq_daily_quotes_error(self, mock_yf):
         """エラーが発生した場合のテスト"""
         # 例外を発生させるモック
@@ -252,7 +252,7 @@ class TestStooqNormalization:
 class TestYFinanceAPI:
     """Yahoo Finance API関連のテスト"""
     
-    @patch('BackcastPro.api.lib.stooq.requests.get')
+    @patch('trading_data.lib.stooq.requests.get')
     def test_get_yfinance_daily_quotes_success(self, mock_get):
         """Yahoo Finance APIからの正常なデータ取得のテスト"""
         # モックレスポンスを準備
@@ -290,7 +290,7 @@ class TestYFinanceAPI:
         assert 'Adj Close' in result.columns
         mock_get.assert_called_once()
     
-    @patch('BackcastPro.api.lib.stooq.requests.get')
+    @patch('trading_data.lib.stooq.requests.get')
     def test_get_yfinance_daily_quotes_error(self, mock_get):
         """Yahoo Finance APIエラー時のテスト"""
         # エラーレスポンスを準備
@@ -304,7 +304,7 @@ class TestYFinanceAPI:
         # 検証（エラー時は空のDataFrameが返される）
         assert result.empty
     
-    @patch('BackcastPro.api.lib.stooq.requests.get')
+    @patch('trading_data.lib.stooq.requests.get')
     def test_get_yfinance_daily_quotes_no_data(self, mock_get):
         """Yahoo Finance APIからデータが返されない場合のテスト"""
         # データがないレスポンスを準備
@@ -323,7 +323,7 @@ class TestYFinanceAPI:
         # 検証
         assert result.empty
     
-    @patch('BackcastPro.api.lib.stooq.requests.get')
+    @patch('trading_data.lib.stooq.requests.get')
     def test_get_yfinance_daily_quotes_timeout(self, mock_get):
         """Yahoo Finance APIタイムアウト時のテスト"""
         # タイムアウト例外を発生させる
@@ -336,7 +336,7 @@ class TestYFinanceAPI:
         # 検証（タイムアウト時は空のDataFrameが返される）
         assert result.empty
     
-    @patch('BackcastPro.api.lib.stooq.requests.get')
+    @patch('trading_data.lib.stooq.requests.get')
     def test_get_yfinance_daily_quotes_without_adjclose(self, mock_get):
         """Adj Closeがない場合のテスト"""
         # Adj Closeなしのモックレスポンス

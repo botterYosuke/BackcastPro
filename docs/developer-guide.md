@@ -60,6 +60,15 @@ python -m pip install pytest pytest-cov black flake8 mypy
 }
 ```
 
+### 環境変数の設定
+
+`.env`ファイルをプロジェクトルートに作成し、以下の環境変数を設定してください（必要に応じて）：
+
+```bash
+# Google Drive API (Cloud Run) のURL
+BACKCASTPRO_GDRIVE_API_URL=https://your-cloud-run-url.a.run.app
+```
+
 ## プロジェクト構造
 
 ```
@@ -82,7 +91,10 @@ BackcastPro/
 │           ├── db_stocks_daily.py
 │           ├── db_stocks_board.py
 │           ├── db_stocks_info.py
-│           └── ftp_client.py    # FTPクライアント
+│           └── gdrive_client.py # Cloud Run API経由のダウンローダー
+├── cloud-run/                    # Cloud Runデプロイ用コード
+│   ├── main.py                  # APIサーバー実装
+│   └── Dockerfile               # コンテナ定義
 ├── tests/                       # テストファイル
 ├── docs/                        # ドキュメント
 │   └── examples/                # サンプルコード
@@ -114,6 +126,10 @@ BackcastPro/
 - 外部APIからのデータ取得
 - DuckDBを使ったローカルキャッシュ
 - 日本株価・板情報・銘柄情報の取得
+- **データ取得フロー**:
+  1. ローカルキャッシュ（DuckDB）を確認
+  2. なければCloud Run API経由でGoogle Driveからダウンロード
+  3. **データ更新**: 夜間にCloud Run Jobが実行され、Google Drive上のデータを更新（詳細は[Cloud Run Jobによる株価データ更新](cloud-run-updater.md)を参照）
 
 ### データフロー
 
@@ -264,7 +280,6 @@ tests/
 ├── test_db_stocks_daily.py           # 日足DBのテスト
 ├── test_db_stocks_info.py            # 銘柄情報DBのテスト
 ├── test_e_api.py                     # 外部APIのテスト
-├── test_ftp_client.py                # FTPクライアントのテスト
 ├── test_indicators.py                # インジケーターのテスト
 ├── test_j-quants.py                  # J-Quantsのテスト
 ├── test_stooq.py                     # Stooqのテスト

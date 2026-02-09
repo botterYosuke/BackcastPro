@@ -1,6 +1,7 @@
-"""Google Drive download proxy for BackcastPro.
+"""Google Drive proxy for BackcastPro.
 
-Streams .duckdb files from a shared Google Drive folder via HTTP.
+Streams .duckdb files from a shared Google Drive folder via HTTP (GET),
+and accepts file uploads via HTTP (POST).
 Deployed on Cloud Run.
 """
 
@@ -10,11 +11,11 @@ import logging
 import os
 import re
 
-from flask import Flask, Response
+from flask import Flask, Response, request as flask_request
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import MediaIoBaseDownload, MediaInMemoryUpload
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -75,6 +76,23 @@ class GoogleDriveProxy:
             return None
         return files[0]["id"]
 
+    def upload_file(self, folder_id: str, filename: str, data: bytes) -> str:
+        """Upload or update a file in a folder. Returns file ID."""
+        existing_id = self.find_file(folder_id, filename)
+        media = MediaInMemoryUpload(data, mimetype="application/octet-stream")
+
+        if existing_id:
+            result = self.service.files().update(
+                fileId=existing_id, media_body=media
+            ).execute()
+            return result["id"]
+
+        result = self.service.files().create(
+            body={"name": filename, "parents": [folder_id]},
+            media_body=media, fields="id"
+        ).execute()
+        return result["id"]
+
     def stream_file(self, file_id: str) -> Response:
         """Stream file content as a chunked HTTP response."""
         request = self.service.files().get_media(fileId=file_id)
@@ -100,7 +118,7 @@ class GoogleDriveProxy:
 def _build_credentials():
     """Build Google credentials from environment."""
     sa_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
-    scopes = ["https://www.googleapis.com/auth/drive.readonly"]
+    scopes = ["https://www.googleapis.com/auth/drive"]
 
     if sa_json:
         info = json.loads(sa_json)
@@ -144,7 +162,7 @@ def health():
     return "OK", 200
 
 
-@app.route("/jp/<path:file_path>")
+@app.route("/jp/<path:file_path>", methods=["GET"])
 def download_file(file_path: str):
     # Validate path against whitelist
     if not ALLOWED_PATHS.match(file_path):
@@ -176,6 +194,33 @@ def download_file(file_path: str):
 
     logger.info("Streaming: %s (file_id=%s)", file_path, file_id)
     return proxy.stream_file(file_id)
+
+
+@app.route("/jp/<path:file_path>", methods=["POST"])
+def upload_handler(file_path: str):
+    """Upload a file to Google Drive via the proxy."""
+    expected_key = os.environ.get("UPLOAD_API_KEY")
+    if not expected_key or flask_request.headers.get("X-API-Key") != expected_key:
+        return "Unauthorized", 401
+
+    if not ALLOWED_PATHS.match(file_path):
+        return "Not Found", 404
+
+    proxy = _get_proxy("jp")
+    parts = file_path.split("/")
+    if len(parts) != 2:
+        return "Bad Request", 400
+
+    subfolder_name, filename = parts
+    folder_id = proxy.find_subfolder(subfolder_name)
+    if not folder_id:
+        logger.warning("Subfolder not found: %s", subfolder_name)
+        return "Subfolder not found", 404
+
+    data = flask_request.get_data()
+    file_id = proxy.upload_file(folder_id, filename, data)
+    logger.info("Uploaded: %s (file_id=%s, size=%d)", file_path, file_id, len(data))
+    return {"file_id": file_id}, 200
 
 
 @app.errorhandler(HttpError)

@@ -32,7 +32,7 @@ class stocks_price:
         if norm_from and norm_to and norm_from > norm_to:
             raise ValueError("開始日が終了日より後になっています")
 
-        # DBファイルの準備（存在しなければFTPからダウンロードを試行）
+        # DBファイルの準備（存在しなければクラウドからダウンロードを試行）
         self.db.ensure_db_ready(code)
 
         # 1) cacheフォルダから取得
