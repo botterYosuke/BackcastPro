@@ -115,14 +115,27 @@ def _build_credentials():
     return credentials
 
 
-def _get_proxy() -> GoogleDriveProxy:
-    """Get or create the GoogleDriveProxy singleton."""
+def _get_proxy(subfolder: str = "") -> GoogleDriveProxy:
+    """Get or create the GoogleDriveProxy singleton.
+
+    Args:
+        subfolder: Root subfolder to resolve as the effective root.
+                   Pass None to use the root folder directly.
+    """
     if not hasattr(app, "_drive_proxy"):
         credentials = _build_credentials()
         root_folder_id = os.environ.get(
             "GOOGLE_DRIVE_ROOT_FOLDER_ID", "1LxXZ7dZv4oXlYyXH6OZtt_0yVbwtyiF4"
         )
-        app._drive_proxy = GoogleDriveProxy(credentials, root_folder_id)
+        proxy = GoogleDriveProxy(credentials, root_folder_id)
+        if subfolder:
+            resolved = proxy.find_subfolder(subfolder)
+            if resolved:
+                proxy.root_folder_id = resolved
+                logger.info("Resolved '%s' subfolder: %s", subfolder, resolved)
+            else:
+                logger.warning("'%s' subfolder not found in root folder", subfolder)
+        app._drive_proxy = proxy
     return app._drive_proxy
 
 
@@ -137,7 +150,7 @@ def download_file(file_path: str):
     if not ALLOWED_PATHS.match(file_path):
         return "Not Found", 404
 
-    proxy = _get_proxy()
+    proxy = _get_proxy("jp")
 
     # Parse path: "stocks_daily/1234.duckdb" or "listed_info.duckdb"
     parts = file_path.split("/")
