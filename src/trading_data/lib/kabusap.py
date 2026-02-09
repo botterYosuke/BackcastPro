@@ -35,7 +35,7 @@ class kabusap:
         if hasattr(self, '_initialized'):
             return
             
-        self.API_URL = os.getenv('KABUSAP_API_PASSWORD',"http://localhost:18080/kabusapi")
+        self.API_URL = os.getenv('KABUSAP_API_URL', "http://localhost:18080/kabusapi")
         self.api_key = ""
         self.headers = {}  # 初期化を確実にする
         self._initialized = True

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "BackcastPro"
-version = "0.5.0"
+version = "0.5.1"
 authors = [
   { name="botterYosuke" },
 ]
@@ -52,6 +52,13 @@ packages = ["src/BackcastPro", "src/trading_data"]
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "pytest-cov>=4.1.0",
+    "flask>=3.0",
+    "google-api-python-client>=2.100",
+    "google-auth>=2.20",
+    "black>=24.0.0",
+    "flake8>=7.0.0",
+    "mypy>=1.8.0",
 ]
 docs = [
     "mkdocs>=1.6.0",

@@ -13,7 +13,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 from dotenv import load_dotenv
-from BackcastPro.api.lib.e_api import e_api
+from trading_data.lib.e_api import e_api
 
 
 # 環境変数を読み込み

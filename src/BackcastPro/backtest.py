@@ -448,16 +448,16 @@ class Backtest:
         return self._current_data
 
     @property
-    def position(self) -> int:
+    def position(self):
         """
-        現在のポジションサイズ（全銘柄合計）
+        現在のポジションオブジェクト（全銘柄合計）
 
         ⚠️ 注意: 複数銘柄を扱う場合は position_of(code) を使用してください。
         このプロパティは後方互換性のために残されています。
         """
         if not self._is_started or self._broker_instance is None:
             return 0
-        return self._broker_instance.position.size
+        return self._broker_instance.position
 
     def position_of(self, code: str) -> int:
         """

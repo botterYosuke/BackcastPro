@@ -1,0 +1,11 @@
+.git/
+.env
+*.duckdb
+tests/
+docs/
+*.md
+__pycache__/
+*.pyc
+.venv/
+uv.lock
+cloud-run/

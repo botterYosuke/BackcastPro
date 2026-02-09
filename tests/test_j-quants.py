@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from BackcastPro.api.lib.jquants import (
+from trading_data.lib.jquants import (
     _normalize_columns,
     _rename_daily_quote_columns,
     jquants,

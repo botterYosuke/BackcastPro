@@ -173,7 +173,7 @@ class db_stocks_info(db_manager):
 
     def ensure_db_ready(self) -> None:
         """
-        DuckDBファイルの準備を行う（存在しなければFTPからダウンロードを試行）
+        DuckDBファイルの準備を行う（存在しなければクラウドからダウンロードを試行）
         """
         if not self.isEnable:
             return
@@ -182,11 +182,11 @@ class db_stocks_info(db_manager):
 
         if not os.path.exists(db_path):
             os.makedirs(os.path.dirname(db_path), exist_ok=True)
-            # FTPからダウンロードを試行
-            if self._download_from_ftp(db_path):
-                logger.info(f"DuckDBファイルをFTPからダウンロードしました: {db_path}")
+            # クラウドからダウンロードを試行
+            if self._download_from_cloud(db_path):
+                logger.info(f"DuckDBファイルをクラウドからダウンロードしました: {db_path}")
             else:
-                logger.debug(f"FTPにDuckDBファイルが存在しません: listed_info.duckdb")
+                logger.debug(f"クラウドにDuckDBファイルが存在しません: listed_info.duckdb")
 
 
     @contextmanager
@@ -200,9 +200,9 @@ class db_stocks_info(db_manager):
         db_path = os.path.join(self.cache_dir, "listed_info.duckdb")
         if not os.path.exists(db_path):
             os.makedirs(os.path.dirname(db_path), exist_ok=True)
-            # FTPからダウンロードを試行
-            if self._download_from_ftp(db_path):
-                logger.info(f"DuckDBファイルをFTPからダウンロードしました: {db_path}")
+            # クラウドからダウンロードを試行
+            if self._download_from_cloud(db_path):
+                logger.info(f"DuckDBファイルをクラウドからダウンロードしました: {db_path}")
             else:
                 logger.info(f"DuckDBファイルを作成しました: {db_path}")
 
@@ -212,20 +212,12 @@ class db_stocks_info(db_manager):
         finally:
             db.close()
 
-    def _download_from_ftp(self, local_path: str) -> bool:
-        """クラウドストレージからDuckDBファイルをダウンロード（Google Drive優先、FTPフォールバック）"""
-        # 1. Google Drive (Cloud Run API) を試行
+    def _download_from_cloud(self, local_path: str) -> bool:
+        """Google DriveからDuckDBファイルをダウンロード"""
         from .gdrive_client import GDriveClient
         gdrive = GDriveClient()
         if gdrive.config.is_configured():
             if gdrive.download_listed_info(local_path):
                 return True
             logger.debug("Google Driveからダウンロード失敗: listed_info.duckdb")
-
-        # 2. FTPフォールバック
-        from .ftp_client import FTPClient
-        client = FTPClient()
-        if not client.config.is_configured():
-            logger.debug("FTP credentials not configured")
-            return False
-        return client.download_listed_info(local_path)
+        return False

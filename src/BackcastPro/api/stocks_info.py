@@ -18,7 +18,7 @@ class stocks_info:
 
     def get_japanese_listed_info(self, code = "", date: datetime = None) -> pd.DataFrame:
 
-        # DBファイルの準備（存在しなければFTPからダウンロードを試行）
+        # DBファイルの準備（存在しなければクラウドからダウンロードを試行）
         self.db.ensure_db_ready()
 
         # cacheフォルダから取得

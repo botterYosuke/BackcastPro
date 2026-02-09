@@ -42,7 +42,7 @@ python -m pip install -e .
 
 4. **開発用依存関係をインストール**
 ```powershell
-python -m pip install pytest pytest-cov black flake8 mypy
+python -m pip install pytest pytest-cov flask google-api-python-client google-auth
 ```
 
 ### VS Code設定
@@ -58,6 +58,15 @@ python -m pip install pytest pytest-cov black flake8 mypy
     "python.testing.pytestEnabled": true,
     "python.testing.pytestArgs": ["tests"]
 }
+```
+
+### 環境変数の設定
+
+`.env`ファイルをプロジェクトルートに作成し、以下の環境変数を設定してください（必要に応じて）：
+
+```bash
+# Google Drive API (Cloud Run) のURL
+BACKCASTPRO_GDRIVE_API_URL=https://your-cloud-run-url.a.run.app
 ```
 
 ## プロジェクト構造
@@ -82,7 +91,10 @@ BackcastPro/
 │           ├── db_stocks_daily.py
 │           ├── db_stocks_board.py
 │           ├── db_stocks_info.py
-│           └── ftp_client.py    # FTPクライアント
+│           └── gdrive_client.py # Cloud Run API経由のダウンローダー
+├── cloud-run/                    # Cloud Runデプロイ用コード
+│   ├── main.py                  # APIサーバー実装
+│   └── Dockerfile               # コンテナ定義
 ├── tests/                       # テストファイル
 ├── docs/                        # ドキュメント
 │   └── examples/                # サンプルコード
@@ -114,6 +126,10 @@ BackcastPro/
 - 外部APIからのデータ取得
 - DuckDBを使ったローカルキャッシュ
 - 日本株価・板情報・銘柄情報の取得
+- **データ取得フロー**:
+  1. ローカルキャッシュ（DuckDB）を確認
+  2. なければCloud Run API経由でGoogle Driveからダウンロード
+  3. **データ更新**: 夜間にCloud Run Jobが実行され、Google Drive上のデータを更新（詳細は[Cloud Run Jobによる株価データ更新](cloud-run-updater.md)を参照）
 
 ### データフロー
 
@@ -257,19 +273,29 @@ def calculate_rsi(data: pd.DataFrame, period: int = 14) -> pd.Series:
 ```
 tests/
 ├── test_backtest_api.py              # バックテストAPIのテスト
-├── test_backtest_chart_auto_update.py # チャート自動更新のテスト
 ├── test_backtest_set_data.py         # データ設定のテスト
 ├── test_backtest_step_loop.py        # ステップ実行のテスト
+├── test_cloud_run_main.py            # Cloud Run APIのテスト
 ├── test_db_stocks_board.py           # 板情報DBのテスト
 ├── test_db_stocks_daily.py           # 日足DBのテスト
 ├── test_db_stocks_info.py            # 銘柄情報DBのテスト
-├── test_e_api.py                     # 外部APIのテスト
-├── test_ftp_client.py                # FTPクライアントのテスト
-├── test_indicators.py                # インジケーターのテスト
-├── test_j-quants.py                  # J-Quantsのテスト
-├── test_stooq.py                     # Stooqのテスト
+├── test_e_api.py                     # 立花証券e支店APIのテスト
+├── test_gdrive_client.py             # Google Driveクライアントのテスト
+├── test_j-quants.py                  # J-Quants APIのテスト
+├── test_kabusap.py                   # kabuステーションAPIのテスト
+├── test_order.py                     # 注文クラスのテスト
+├── test_position.py                  # ポジションクラスのテスト
 ├── test_relative_size_option_c.py    # 相対サイズオプションのテスト
-└── marimo_test_indicators.py         # marimoインジケーターテスト
+├── test_stats.py                     # 統計計算のテスト
+├── test_stocks_board_wrapper.py      # 板情報ラッパーのテスト
+├── test_stocks_info_wrapper.py       # 銘柄情報ラッパーのテスト
+├── test_stocks_price_wrapper.py      # 株価情報ラッパーのテスト
+├── test_stooq.py                     # Stooqデータ取得のテスト
+├── test_trade.py                     # トレードクラスのテスト
+├── test_update_stocks_price.py       # データ更新ジョブのテスト
+├── test_util.py                      # ユーティリティのテスト
+├── import_equities_trades.py         # 株式取引データインポートスクリプト
+└── import_minute_bars.py             # 分足データインポートスクリプト
 ```
 
 ### テストの実行

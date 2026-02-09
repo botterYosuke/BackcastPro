@@ -35,10 +35,10 @@ class TestDbStocksDaily(unittest.TestCase):
         if 'BACKCASTPRO_CACHE_DIR' in os.environ:
             del os.environ['BACKCASTPRO_CACHE_DIR']
 
-    def test_download_from_ftp_success(self):
-        with patch('BackcastPro.api.ftp_client.FTPClient') as mock_ftp_client_cls:
+    def test_download_from_cloud_success(self):
+        with patch('BackcastPro.api.gdrive_client.GDriveClient') as mock_gdrive_cls:
             mock_client = MagicMock()
-            mock_ftp_client_cls.return_value = mock_client
+            mock_gdrive_cls.return_value = mock_client
             mock_client.config.is_configured.return_value = True
             mock_client.download_stocks_daily.return_value = True
 
@@ -46,7 +46,7 @@ class TestDbStocksDaily(unittest.TestCase):
             test_path = os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb")
             os.makedirs(os.path.dirname(test_path), exist_ok=True)
 
-            result = self.db_daily._download_from_ftp(code, test_path)
+            result = self.db_daily._download_from_cloud(code, test_path)
 
             self.assertTrue(result)
             mock_client.download_stocks_daily.assert_called_once_with(code, test_path)
@@ -55,7 +55,7 @@ class TestDbStocksDaily(unittest.TestCase):
         """Test _save_metadata and _get_metadata"""
         code = "1111"
         # We need a DB connection. Since get_db is a context manager using the cache dir, 
-        # let's manually create a db file and connect to avoid FTP logic triggering in get_db
+        # let's manually create a db file and connect to avoid cloud download logic triggering in get_db
         db_path = os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb")
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
         
@@ -124,8 +124,8 @@ class TestDbStocksDaily(unittest.TestCase):
         df = pd.DataFrame(data)
         
         # 1. Save data
-        # Mocking _download_from_ftp to avoid FTP check when get_db calls it on missing file
-        with patch.object(self.db_daily, '_download_from_ftp', return_value=False):
+        # Mocking _download_from_cloud to avoid cloud check when get_db calls it on missing file
+        with patch.object(self.db_daily, '_download_from_cloud', return_value=False):
             self.db_daily.save_stock_prices(code, df)
         
         # 2. Check DB content manually
@@ -172,10 +172,10 @@ class TestDbStocksDaily(unittest.TestCase):
         }
         df = pd.DataFrame(data)
         
-        with patch.object(self.db_daily, '_download_from_ftp', return_value=False):
+        with patch.object(self.db_daily, '_download_from_cloud', return_value=False):
             # First save
             self.db_daily.save_stock_prices(code, df)
-            
+
             # Second save (same data)
             self.db_daily.save_stock_prices(code, df)
             

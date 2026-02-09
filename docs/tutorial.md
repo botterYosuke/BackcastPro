@@ -106,6 +106,10 @@ start_date = end_date - timedelta(days=365)  # 1年前
 data = yf.download('7203.T', start=start_date, end=end_date)
 ```
 
+> [!NOTE]
+> BackcastProは、ローカルキャッシュにデータが存在しない場合、自動的にGoogle Driveからデータをダウンロードします。
+> これにより、手動でのデータ準備なしにバックテストを開始できる場合があります。
+
 ### カスタムデータの使用
 
 ```python

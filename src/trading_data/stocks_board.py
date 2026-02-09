@@ -27,7 +27,7 @@ class stocks_board:
         if not code or not isinstance(code, str) or not code.strip():
             raise ValueError("銘柄コードが指定されていません")
 
-        # DBファイルの準備（存在しなければFTPからダウンロードを試行）
+        # DBファイルの準備（存在しなければクラウドからダウンロードを試行）
         self.db.ensure_db_ready(code)
 
         # 時間が指定されている場合、指定時刻の板情報を取得
