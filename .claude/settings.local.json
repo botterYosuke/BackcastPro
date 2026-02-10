@@ -8,12 +8,16 @@
       "Bash(powershell.exe -Command \"cd ''D:\\\\Documents\\\\BackcastPro''; .\\\\.venv\\\\Scripts\\\\python.exe -m pytest tests\\\\test_achievements.py -v\")",
       "Bash(pushd \"D:\\\\Documents\\\\marimo\\\\frontend\")",
       "Bash(git -C \"D:/Documents/marimo\" show sasa/markdown:\"frontend/src/components/editor/renderers/cell-3d-wrapper.tsx\")",
-      "Bash(git -C \"D:/Documents/marimo\" show sasa/markdown:\"frontend/src/components/editor/renderers/cell-3d-wrapper.css\")"
+      "Bash(git -C \"D:/Documents/marimo\" show sasa/markdown:\"frontend/src/components/editor/renderers/cell-3d-wrapper.css\")",
+      "Bash(pushd:*)",
+      "Bash(git stash:*)",
+      "Read(//c/Users/sasac/AppData/Roaming/marimo/**)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\BackcastPro",
       "c:\\Users\\sasai\\Documents\\BackcastPro",
-      "S:\\jp\\stocks_daily"
+      "S:\\jp\\stocks_daily",
+      "D:\\Documents\\marimo\\.github\\workflows"
     ]
   }
 }

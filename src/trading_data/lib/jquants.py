@@ -133,10 +133,25 @@ class jquants:
             return pd.DataFrame()
 
         df = pd.DataFrame(data)
-        if "Code" not in df.columns and "code" in df.columns:
-            df = df.rename(columns={"code": "Code"})
-        if "CompanyName" not in df.columns and "Name" in df.columns:
-            df = df.rename(columns={"Name": "CompanyName"})
+        # V2 API の短縮カラム名を正規カラム名にリネーム
+        rename_map = {
+            "code": "Code",
+            "Name": "CompanyName",
+            "CoName": "CompanyName",
+            "CoNameEn": "CompanyNameEnglish",
+            "S17": "Sector17Code",
+            "S17Nm": "Sector17CodeName",
+            "S33": "Sector33Code",
+            "S33Nm": "Sector33CodeName",
+            "ScaleCat": "ScaleCategory",
+            "Mkt": "MarketCode",
+            "MktNm": "MarketCodeName",
+            "Mrgn": "MarginCode",
+            "MrgnNm": "MarginCodeName",
+        }
+        columns_to_rename = {k: v for k, v in rename_map.items() if k in df.columns}
+        if columns_to_rename:
+            df = df.rename(columns=columns_to_rename)
         df["source"] = "j-quants"
 
         return df
