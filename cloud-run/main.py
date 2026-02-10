@@ -22,7 +22,7 @@ DATA_DIR = os.environ.get("STOCKDATA_CACHE_DIR", "/cache")
 
 # Whitelist: only allow known file patterns
 ALLOWED_PATHS = re.compile(
-    r"^(stocks_daily/\d+\.duckdb|stocks_board/\d+\.duckdb|listed_info\.duckdb)$"
+    r"^jp/(stocks_daily/\d+\.duckdb|stocks_board/\d+\.duckdb|listed_info\.duckdb)$"
 )
 
 
@@ -31,12 +31,12 @@ def health():
     return "OK", 200
 
 
-@app.route("/jp/<path:file_path>", methods=["GET"])
+@app.route("/<path:file_path>", methods=["GET"])
 def download_file(file_path: str):
     if not ALLOWED_PATHS.match(file_path):
         return "Not Found", 404
 
-    directory = os.path.join(DATA_DIR, "jp")
+    directory = DATA_DIR
     logger.info("Serving: %s", file_path)
     try:
         return send_from_directory(

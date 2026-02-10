@@ -20,8 +20,14 @@ class TestDbManager(unittest.TestCase):
         self.test_dir = tempfile.mkdtemp()
         os.environ["STOCKDATA_CACHE_DIR"] = self.test_dir
         self.db_manager = db_manager()
+        # Mock cloud download to prevent real HTTP requests during tests
+        self._download_patcher = patch.object(
+            db_manager, '_download_from_cloud', return_value=False
+        )
+        self._download_patcher.start()
 
     def tearDown(self):
+        self._download_patcher.stop()
         # Remove the temporary directory after the test
         shutil.rmtree(self.test_dir)
         if "STOCKDATA_CACHE_DIR" in os.environ:
@@ -47,6 +53,9 @@ class TestDbManager(unittest.TestCase):
     @patch("BackcastPro.api.cloud_run_client.CloudRunClient")
     def test_get_db_downloads_from_cloud(self, MockCloudRunClient):
         """Test that get_db tries to download from cloud if local file is missing."""
+        # Stop the setUp-level mock so the real _download_from_cloud runs
+        self._download_patcher.stop()
+
         code = "5678"
         self.db_manager._db_subdir = "test_subdir"
         db_path = os.path.join(self.test_dir, "test_subdir", f"{code}.duckdb")
@@ -65,6 +74,9 @@ class TestDbManager(unittest.TestCase):
 
         # Verify download was attempted
         mock_client_instance.download_file.assert_called_once()
+
+        # Re-start the setUp-level mock for tearDown
+        self._download_patcher.start()
 
     def test_create_table_from_dataframe(self):
         """Test creating a table from a DataFrame."""

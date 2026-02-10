@@ -27,7 +27,11 @@ def db_board(temp_cache_dir):
     with patch.dict(os.environ, {"STOCKDATA_CACHE_DIR": temp_cache_dir}):
         instance = db_stocks_board()
         instance.isEnable = True  # 強制的に有効化
-        yield instance
+        # Mock cloud download to prevent real HTTP requests during tests
+        with patch.object(
+            type(instance), '_download_from_cloud', return_value=False
+        ):
+            yield instance
 
 
 @pytest.fixture

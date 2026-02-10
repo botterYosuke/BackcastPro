@@ -14,13 +14,19 @@
     python update_stocks_price.py --days 14           # 取得日数を指定
 """
 
+import os
 import sys
 import time
 import logging
 import argparse
+import tempfile
 from datetime import datetime, timedelta
 
 import pandas as pd
+
+# STOCKDATA_CACHE_DIR 配下の "jp" サブフォルダをデータ保存先に設定
+_base = os.environ.get("STOCKDATA_CACHE_DIR", tempfile.mkdtemp())
+os.environ["STOCKDATA_CACHE_DIR"] = os.path.join(os.path.abspath(_base), "jp")
 
 from trading_data.stocks_price import stocks_price
 from trading_data.stocks_info import stocks_info

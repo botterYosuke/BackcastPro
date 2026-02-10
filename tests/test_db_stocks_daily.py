@@ -55,7 +55,7 @@ class TestDbStocksDaily(unittest.TestCase):
 
             self.assertTrue(result)
             mock_client.download_file.assert_called_once_with(
-                f"stocks_daily/{code}.duckdb", test_path
+                f"jp/stocks_daily/{code}.duckdb", test_path
             )
 
     def test_metadata_operations(self):
