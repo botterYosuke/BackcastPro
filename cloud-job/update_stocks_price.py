@@ -15,6 +15,7 @@
 """
 
 import sys
+import time
 import logging
 import argparse
 from datetime import datetime, timedelta
@@ -50,15 +51,24 @@ def merge_jquants_priority(
 ) -> pd.DataFrame | None:
     """base_df と jq_df をマージ。同一日付は J-Quants で上書き。"""
     if jq_df is None or jq_df.empty:
-        return base_df
-    if base_df is None or base_df.empty:
-        return jq_df
+        result = base_df
+    elif base_df is None or base_df.empty:
+        result = jq_df
+    else:
+        base = base_df.set_index("Date") if "Date" in base_df.columns else base_df.copy()
+        jq = jq_df.set_index("Date") if "Date" in jq_df.columns else jq_df.copy()
+        base_only = base.loc[~base.index.isin(jq.index)]
+        result = pd.concat([jq, base_only]).sort_index()
 
-    base = base_df.set_index("Date") if "Date" in base_df.columns else base_df.copy()
-    jq = jq_df.set_index("Date") if "Date" in jq_df.columns else jq_df.copy()
+    # 戻り値を統一: DatetimeIndex named 'Date'
+    if result is not None and not result.empty:
+        if "Date" in result.columns:
+            result = result.set_index("Date")
+        if not isinstance(result.index, pd.DatetimeIndex):
+            result.index = pd.to_datetime(result.index)
+        result.index.name = "Date"
 
-    base_only = base.loc[~base.index.isin(jq.index)]
-    return pd.concat([jq, base_only]).sort_index()
+    return result
 
 
 def main():
@@ -107,18 +117,28 @@ def main():
             except Exception:
                 pass
 
-        # 3) J-Quants（常に取得→優先マージ）
+        # 3) J-Quants（常に取得→優先マージ、429時はリトライ）
         jq_df = None
-        try:
-            jq_df = sp._fetch_from_jquants(code, from_date, to_date)
-        except Exception:
-            pass
+        for attempt in range(3):
+            try:
+                jq_df = sp._fetch_from_jquants(code, from_date, to_date)
+                if jq_df is not None and not jq_df.empty:
+                    break
+            except Exception:
+                pass
+            if attempt < 2:
+                time.sleep(1)
 
         # マージ & 保存
         final_df = merge_jquants_priority(base_df, jq_df)
         if final_df is not None and not final_df.empty:
-            sp.db.save_stock_prices(code, final_df)
-            success += 1
+            try:
+                sp.db.save_stock_prices(code, final_df)
+                success += 1
+            except Exception as e:
+                logger.error(f"銘柄 {code} の保存に失敗: {e}")
+                failed += 1
+                errors.append(code)
         else:
             failed += 1
             errors.append(code)

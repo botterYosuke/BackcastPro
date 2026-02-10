@@ -10,7 +10,7 @@ import re
 
 from dotenv import load_dotenv
 from flask import Flask, send_from_directory
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import HTTPException, NotFound
 
 load_dotenv()
 
@@ -49,6 +49,8 @@ def download_file(file_path: str):
 
 @app.errorhandler(Exception)
 def handle_error(e):
+    if isinstance(e, HTTPException):
+        return e
     logger.error("Unexpected error: %s", e, exc_info=True)
     return "Internal error", 500
 
