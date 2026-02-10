@@ -1819,7 +1819,7 @@
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># DuckDBキャッシュディレクトリ</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nv">STOCKDATA_CACHE_DIR</span><span class="o">=</span>/path/to/your/duckdb/cache
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># NAS FTPS Proxy のURL（DuckDBダウンロード用、オプション）</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># Cloud Run ファイルサーバーのURL（DuckDBダウンロード用、オプション）</span>
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="nv">BACKCASTPRO_NAS_PROXY_URL</span><span class="o">=</span>https://your-cloud-run-url.a.run.app
 </span></code></pre></div>
 <h2 id="_7">プロジェクト構造<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
@@ -1842,19 +1842,21 @@
 </span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>│           ├── db_stocks_daily.py
 </span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>│           ├── db_stocks_board.py
 </span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>│           ├── db_stocks_info.py
-</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>│           └── cloud_run_client.py # NAS FTPS Proxy経由のダウンローダー
+</span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>│           └── cloud_run_client.py # Cloud Run ファイルサーバー経由のダウンローダー
 </span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>├── cloud-job/                    # 株価データ更新ジョブ
 </span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>│   ├── update_stocks_price.py   # 更新スクリプト
 </span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>│   ├── Dockerfile               # コンテナ定義（DockerHub: backcast/cloud-job）
-</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>│   └── requirements.txt         # 依存パッケージ
-</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>├── cloud-run/                    # NAS FTPS Proxyサーバー
-</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>│   ├── main.py                  # FTPS→HTTPプロキシ実装
-</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>│   └── Dockerfile               # コンテナ定義
-</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a>├── tests/                       # テストファイル
-</span><span id="__span-6-29"><a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a>├── docs/                        # ドキュメント
-</span><span id="__span-6-30"><a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a>│   └── examples/                # サンプルコード
-</span><span id="__span-6-31"><a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a>├── pyproject.toml              # プロジェクト設定
-</span><span id="__span-6-32"><a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a>└── README.md                   # プロジェクト説明
+</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>│   ├── .env.example             # 環境変数テンプレート
+</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>│   └── requirements.txt         # 依存パッケージ
+</span><span id="__span-6-26"><a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>├── cloud-run/                    # ローカルファイル配信サーバー
+</span><span id="__span-6-27"><a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>│   ├── main.py                  # ローカルファイル→HTTP配信実装
+</span><span id="__span-6-28"><a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a>│   ├── Dockerfile               # コンテナ定義
+</span><span id="__span-6-29"><a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a>│   └── .env.example             # 環境変数テンプレート
+</span><span id="__span-6-30"><a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a>├── tests/                       # テストファイル
+</span><span id="__span-6-31"><a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a>├── docs/                        # ドキュメント
+</span><span id="__span-6-32"><a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a>│   └── examples/                # サンプルコード
+</span><span id="__span-6-33"><a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a>├── pyproject.toml              # プロジェクト設定
+</span><span id="__span-6-34"><a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a>└── README.md                   # プロジェクト説明
 </span></code></pre></div>
 <h2 id="_8">アーキテクチャ<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
 <h3 id="_9">主要コンポーネント<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
@@ -1884,7 +1886,7 @@
 <li>日本株価・板情報・銘柄情報の取得</li>
 <li><strong>データ取得フロー</strong>:</li>
 <li>ローカルキャッシュ（DuckDB）を確認</li>
-<li>なければNAS FTPS Proxy経由でダウンロード</li>
+<li>なければCloud Run ファイルサーバー経由でダウンロード</li>
 <li><strong>データ更新</strong>: 夜間にDockerコンテナが実行され、マウントボリューム上のDuckDBファイルを更新（詳細は<a href="../cloud-run-updater/">Docker Jobによる株価データ更新</a>を参照）</li>
 </ul>
 <h3 id="_10">データフロー<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>

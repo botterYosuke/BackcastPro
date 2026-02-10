@@ -1610,11 +1610,11 @@
 </span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;2023-01-01&#39;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
 </span></code></pre></div></p>
 <h3 id="cloud-run-api">問題: Cloud Run API経由のデータダウンロード失敗<a class="headerlink" href="#cloud-run-api" title="Permanent link">&para;</a></h3>
-<p><strong>原因:</strong> Cloud Run APIのURLが設定されていない、Proxyが停止している、またはNASに接続できない。</p>
+<p><strong>原因:</strong> Cloud Run APIのURLが設定されていない、またはサービスが停止している。</p>
 <p><strong>解決方法:</strong>
-1. <code>.env</code> ファイルで <code>BACKCASTPRO_NAS_PROXY_URL</code>（NAS FTPS Proxy のURL）が正しく設定されているか確認してください。
+1. <code>.env</code> ファイルで <code>BACKCASTPRO_NAS_PROXY_URL</code>（Cloud Run ファイルサーバーのURL）が正しく設定されているか確認してください。
 2. APIが起動しているかブラウザでアクセスして確認してください（<code>https://.../</code>で<code>OK</code>が返ること）。
-3. NASが稼働中でFTPSサーバーが有効か確認してください。</p>
+3. Cloud Run にデータディレクトリが正しくマウントされているか確認してください。</p>
 <h3 id="_6">問題: データが空または取得できない<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
 <p><strong>原因:</strong> 銘柄コードが間違っている、または期間が無効</p>
 <p><strong>解決方法:</strong>

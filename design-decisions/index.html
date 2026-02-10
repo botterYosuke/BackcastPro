@@ -1026,6 +1026,67 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#ftps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FTPS廃止とローカルファイル配信への移行
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FTPS廃止とローカルファイル配信への移行">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        デプロイ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1406,6 +1467,67 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#ftps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FTPS廃止とローカルファイル配信への移行
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FTPS廃止とローカルファイル配信への移行">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        デプロイ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1436,6 +1558,7 @@
 <li><a href="#google-drive廃止と自宅nasftpsへの移行">Google Drive廃止と自宅NAS（FTPS）への移行</a></li>
 <li><a href="#cloud-run-proxyアップロード廃止とdockerボリュームマウントへの移行">Cloud Run Proxyアップロード廃止とDockerボリュームマウントへの移行</a></li>
 <li><a href="#cloud-run-job廃止とsynology-nas-docker--dockerhubへの移行">Cloud Run Job廃止とSynology NAS Docker + DockerHubへの移行</a></li>
+<li><a href="#ftps廃止とローカルファイル配信への移行">FTPS廃止とローカルファイル配信への移行</a></li>
 </ol>
 <hr />
 <h2 id="ftpgoogle-drive">FTP廃止とGoogle Driveへの完全移行<a class="headerlink" href="#ftpgoogle-drive" title="Permanent link">&para;</a></h2>
@@ -1526,7 +1649,7 @@
 <hr />
 <h2 id="google-drivenasftps">Google Drive廃止と自宅NAS（FTPS）への移行<a class="headerlink" href="#google-drivenasftps" title="Permanent link">&para;</a></h2>
 <p><strong>Date:</strong> 2026-02-10
-<strong>Status:</strong> Implemented</p>
+<strong>Status:</strong> <del>Implemented</del> Superseded（<a href="#ftps廃止とローカルファイル配信への移行">FTPS廃止とローカルファイル配信への移行</a>により置換）</p>
 <h3 id="context_3">Context<a class="headerlink" href="#context_3" title="Permanent link">&para;</a></h3>
 <p><a href="#ftp廃止とgoogle-driveへの完全移行">FTP廃止とGoogle Driveへの完全移行</a>で Google Drive に一本化したが、Google Drive API の制約（レート制限、API呼び出しの複雑さ、サービスアカウント管理）が運用上の課題となった。自宅に NAS（Synology DS218）が稼働しており、FTPS サーバーが利用可能であったため、ストレージを NAS に移行することを決定。</p>
 <h3 id="decision_3">Decision<a class="headerlink" href="#decision_3" title="Permanent link">&para;</a></h3>
@@ -1563,7 +1686,7 @@
 <ul>
 <li><strong><code>upload_to_cloud()</code> 関数の削除</strong>: Cloud Run Proxy へのアップロード処理を完全に削除。</li>
 <li><strong><code>--dry-run</code> 引数の削除</strong>: アップロードをスキップする目的のフラグだったため、不要に。</li>
-<li><strong>Dockerボリュームマウント方式に変更</strong>: <code>Dockerfile</code> に <code>ENV STOCKDATA_CACHE_DIR=/data</code> を追加。コンテナ実行時に <code>-v /host/path:/data</code> でマウントすることで、DuckDBファイルをホスト側に永続化。</li>
+<li><strong>Dockerボリュームマウント方式に変更</strong>: <code>Dockerfile</code> に <code>ENV STOCKDATA_CACHE_DIR=/cache</code> を追加。コンテナ実行時に <code>-v /host/path:/cache</code> でマウントすることで、DuckDBファイルをホスト側に永続化。</li>
 <li><strong><code>UpdateSummary</code> の簡素化</strong>: <code>uploaded</code> / <code>upload_failed</code> フィールドを削除。</li>
 </ul>
 <h3 id="consequences_4">Consequences<a class="headerlink" href="#consequences_4" title="Permanent link">&para;</a></h3>
@@ -1591,7 +1714,7 @@
 <li><strong>実行環境の変更</strong>: Google Cloud Run Job → Synology NAS の Docker。NAS のタスクスケジューラで定期実行。</li>
 <li><strong>イメージ配布の変更</strong>: Google Artifact Registry → DockerHub (<code>backcast/cloud-job</code>)。</li>
 <li><strong>CI/CDの変更</strong>: <code>cloudbuild-job.yaml</code>（Cloud Build）→ <code>.github/workflows/publish-dockerhub.yml</code>（GitHub Actions）。<code>main</code> ブランチへの push で自動ビルド・push。</li>
-<li><strong>ボリュームマウント</strong>: NAS のローカルディレクトリを <code>-v /volume1/docker/backcast/data:/data</code> でマウントし、DuckDB ファイルを永続化。</li>
+<li><strong>ボリュームマウント</strong>: NAS のローカルディレクトリを <code>-v /volume1/docker/backcast/cache:/cache</code> でマウントし、DuckDB ファイルを永続化。</li>
 </ul>
 <h3 id="consequences_5">Consequences<a class="headerlink" href="#consequences_5" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1608,6 +1731,47 @@
 </ul>
 </li>
 </ul>
+<hr />
+<h2 id="ftps">FTPS廃止とローカルファイル配信への移行<a class="headerlink" href="#ftps" title="Permanent link">&para;</a></h2>
+<p><strong>Date:</strong> 2026-02-10
+<strong>Status:</strong> Implemented</p>
+<h3 id="context_6">Context<a class="headerlink" href="#context_6" title="Permanent link">&para;</a></h3>
+<p><a href="#google-drive廃止と自宅nasftpsへの移行">Google Drive廃止と自宅NAS（FTPS）への移行</a>で Cloud Run Proxy のバックエンドを FTPS に変更したが、FTPS 接続の複雑さ（NAT 越え、SSL、per-request 接続）が不要なオーバーヘッドであった。NAS 上の Docker で Cloud Run Proxy を実行する場合、データディレクトリをボリュームマウントすればローカルファイルとして直接配信でき、FTPS を経由する必要がない。</p>
+<h3 id="decision_6">Decision<a class="headerlink" href="#decision_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>FTPS 関連コードの完全削除</strong>: <code>NASFtpsProxy</code> クラス、<code>_NatFriendlyFTP_TLS</code> クラス、<code>_get_proxy()</code> 関数を削除。<code>ftplib</code>、<code>ssl</code> のインポートも削除。</li>
+<li><strong><code>flask.send_from_directory</code> によるローカルファイル配信</strong>: 環境変数 <code>DATA_DIR</code>（デフォルト: <code>/cache</code>）で指定されたディレクトリからファイルを直接配信。</li>
+<li><strong>ディレクトリ構造</strong>: <code>{DATA_DIR}/jp/{file_path}</code>（例: <code>/cache/jp/stocks_daily/1234.duckdb</code>）。</li>
+<li><strong>HTTP API インターフェースは維持</strong>: <code>GET /jp/&lt;path:file_path&gt;</code> はそのまま。クライアント側（<code>CloudRunClient</code>）の変更は不要。</li>
+<li><strong><code>ALLOWED_PATHS</code> ホワイトリストは維持</strong>: セキュリティのためパス検証は継続。</li>
+</ul>
+<h3 id="consequences_6">Consequences<a class="headerlink" href="#consequences_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>メリット</strong>:<ul>
+<li>コードの大幅な簡素化（165行 → 53行）。</li>
+<li>FTPS 接続の複雑さ（NAT 越え、SSL コンテキスト、per-request 接続）を排除。</li>
+<li>FTP 関連の環境変数（<code>FTPS_HOST</code>, <code>FTPS_PORT</code>, <code>FTPS_USERNAME</code>, <code>FTPS_PASSWORD</code> 等）が不要に。</li>
+<li>NAS のインターネット公開（FTPS ポートフォワーディング）が不要に。</li>
+<li>ボリュームマウント（<code>-v /volume1/docker/backcast/cache:/cache</code>）のみで動作。</li>
+</ul>
+</li>
+<li><strong>注意点</strong>:<ul>
+<li>Cloud Run で使用する場合は GCS バケットや NFS 等のボリュームマウント設定が必要。</li>
+</ul>
+</li>
+</ul>
+<h3 id="_2">デプロイ<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>Docker でデプロイする場合、データが保存されているディレクトリを <code>/cache</code> にマウントすれば、<code>DATA_DIR</code> のデフォルト値でそのまま動作します。</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-v<span class="w"> </span>/volume1/docker/backcast/cache:/cache<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>cloud-run
+</span></code></pre></div>
+<p>マウント先のディレクトリ構造:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>/cache/
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  jp/
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    stocks_daily/1234.duckdb
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    stocks_board/8306.duckdb
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    listed_info.duckdb
+</span></code></pre></div>
+<p>Cloud Run にデプロイする場合は、GCS バケットや NFS などのボリュームを <code>/cache</code> にマウントしてください。</p>
 <hr />
 
 
