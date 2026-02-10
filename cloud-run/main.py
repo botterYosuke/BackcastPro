@@ -15,7 +15,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-DATA_DIR = os.environ.get("DATA_DIR", "/cache")
+DATA_DIR = os.environ.get("STOCKDATA_CACHE_DIR", "/cache")
 
 # Whitelist: only allow known file patterns
 ALLOWED_PATHS = re.compile(

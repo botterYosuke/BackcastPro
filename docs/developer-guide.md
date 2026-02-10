@@ -98,10 +98,12 @@ BackcastPro/
 ├── cloud-job/                    # 株価データ更新ジョブ
 │   ├── update_stocks_price.py   # 更新スクリプト
 │   ├── Dockerfile               # コンテナ定義（DockerHub: backcast/cloud-job）
+│   ├── .env.example             # 環境変数テンプレート
 │   └── requirements.txt         # 依存パッケージ
 ├── cloud-run/                    # ローカルファイル配信サーバー
 │   ├── main.py                  # ローカルファイル→HTTP配信実装
-│   └── Dockerfile               # コンテナ定義
+│   ├── Dockerfile               # コンテナ定義
+│   └── .env.example             # 環境変数テンプレート
 ├── tests/                       # テストファイル
 ├── docs/                        # ドキュメント
 │   └── examples/                # サンプルコード

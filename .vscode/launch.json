@@ -9,16 +9,37 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Streamlit: Run Current File",
+            "name": "pytest: Run All Tests",
             "type": "debugpy",
             "request": "launch",
-            "module": "streamlit",
+            "module": "pytest",
             "args": [
-                "run",
-                "${file}"
+                "tests",
+                "-v"
             ],
-            "console": "integratedTerminal",
-            "justMyCode": false
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Cloud Run: Local Server",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/cloud-run/main.py",
+            "envFile": "${workspaceFolder}/cloud-run/.env",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Cloud Job: Update Stocks",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/cloud-job/update_stocks_price.py",
+            "args": [
+                "--codes",
+                "7203",
+                "--days",
+                "7"
+            ],
+            "envFile": "${workspaceFolder}/cloud-job/.env",
+            "console": "integratedTerminal"
         }
     ]
 }

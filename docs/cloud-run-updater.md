@@ -86,7 +86,6 @@ docker run -v /path/to/duckdb:/cache \
 |---|---|---|
 | `--codes` | なし（全銘柄） | 処理対象の銘柄コード（カンマ区切り） |
 | `--days` | 7 | 取得する過去日数 |
-| `--workers` | 4 | 並列ワーカー数 |
 
 ## 定期実行の設定
 
@@ -119,12 +118,11 @@ PowerShellスクリプトを作成し、タスクスケジューラに登録し�
 
 ### ログ確認
 
-ログはコンソール（stdout）とファイルの両方に出力されます。
+ログはコンソール（stdout）に出力されます。
 
 ```bash
-# マウントボリューム内のログファイルを確認
-ls /path/to/duckdb/logs/
-# 例: update_stocks_price_20260210.log
+# コンテナのログを確認
+docker logs <container_id>
 ```
 
 ### データ確認
