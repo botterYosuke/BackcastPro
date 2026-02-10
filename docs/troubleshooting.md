@@ -149,12 +149,12 @@ custom_data = pd.DataFrame({
 
 ### 問題: Cloud Run API経由のデータダウンロード失敗
 
-**原因:** Cloud Run APIのURLが設定されていない、Proxyが停止している、またはNASに接続できない。
+**原因:** Cloud Run APIのURLが設定されていない、またはサービスが停止している。
 
 **解決方法:**
-1. `.env` ファイルで `BACKCASTPRO_NAS_PROXY_URL`（NAS FTPS Proxy のURL）が正しく設定されているか確認してください。
+1. `.env` ファイルで `BACKCASTPRO_NAS_PROXY_URL`（Cloud Run ファイルサーバーのURL）が正しく設定されているか確認してください。
 2. APIが起動しているかブラウザでアクセスして確認してください（`https://.../`で`OK`が返ること）。
-3. NASが稼働中でFTPSサーバーが有効か確認してください。
+3. Cloud Run にデータディレクトリが正しくマウントされているか確認してください。
 
 ### 問題: データが空または取得できない
 

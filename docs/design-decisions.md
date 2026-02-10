@@ -10,6 +10,7 @@
 4. [Google Drive廃止と自宅NAS（FTPS）への移行](#google-drive廃止と自宅nasftpsへの移行)
 5. [Cloud Run Proxyアップロード廃止とDockerボリュームマウントへの移行](#cloud-run-proxyアップロード廃止とdockerボリュームマウントへの移行)
 6. [Cloud Run Job廃止とSynology NAS Docker + DockerHubへの移行](#cloud-run-job廃止とsynology-nas-docker--dockerhubへの移行)
+7. [FTPS廃止とローカルファイル配信への移行](#ftps廃止とローカルファイル配信への移行)
 
 ---
 
@@ -110,7 +111,7 @@ ENTRYPOINT ["python", "/app/update_stocks_price.py"]
 ## Google Drive廃止と自宅NAS（FTPS）への移行
 
 **Date:** 2026-02-10
-**Status:** Implemented
+**Status:** ~~Implemented~~ Superseded（[FTPS廃止とローカルファイル配信への移行](#ftps廃止とローカルファイル配信への移行)により置換）
 
 ### Context
 
@@ -151,7 +152,7 @@ ENTRYPOINT ["python", "/app/update_stocks_price.py"]
 
 *   **`upload_to_cloud()` 関数の削除**: Cloud Run Proxy へのアップロード処理を完全に削除。
 *   **`--dry-run` 引数の削除**: アップロードをスキップする目的のフラグだったため、不要に。
-*   **Dockerボリュームマウント方式に変更**: `Dockerfile` に `ENV STOCKDATA_CACHE_DIR=/data` を追加。コンテナ実行時に `-v /host/path:/data` でマウントすることで、DuckDBファイルをホスト側に永続化。
+*   **Dockerボリュームマウント方式に変更**: `Dockerfile` に `ENV STOCKDATA_CACHE_DIR=/cache` を追加。コンテナ実行時に `-v /host/path:/cache` でマウントすることで、DuckDBファイルをホスト側に永続化。
 *   **`UpdateSummary` の簡素化**: `uploaded` / `upload_failed` フィールドを削除。
 
 ### Consequences
@@ -180,7 +181,7 @@ ENTRYPOINT ["python", "/app/update_stocks_price.py"]
 *   **実行環境の変更**: Google Cloud Run Job → Synology NAS の Docker。NAS のタスクスケジューラで定期実行。
 *   **イメージ配布の変更**: Google Artifact Registry → DockerHub (`backcast/cloud-job`)。
 *   **CI/CDの変更**: `cloudbuild-job.yaml`（Cloud Build）→ `.github/workflows/publish-dockerhub.yml`（GitHub Actions）。`main` ブランチへの push で自動ビルド・push。
-*   **ボリュームマウント**: NAS のローカルディレクトリを `-v /volume1/docker/backcast/data:/data` でマウントし、DuckDB ファイルを永続化。
+*   **ボリュームマウント**: NAS のローカルディレクトリを `-v /volume1/docker/backcast/cache:/cache` でマウントし、DuckDB ファイルを永続化。
 
 ### Consequences
 
@@ -192,5 +193,55 @@ ENTRYPOINT ["python", "/app/update_stocks_price.py"]
 *   **デメリット**:
     *   NAS の稼働率・ネットワーク環境に依存。
     *   DockerHub の pull rate limit（無料プラン: 100 pulls/6h）に注意が必要。
+
+---
+
+## FTPS廃止とローカルファイル配信への移行
+
+**Date:** 2026-02-10
+**Status:** Implemented
+
+### Context
+
+[Google Drive廃止と自宅NAS（FTPS）への移行](#google-drive廃止と自宅nasftpsへの移行)で Cloud Run Proxy のバックエンドを FTPS に変更したが、FTPS 接続の複雑さ（NAT 越え、SSL、per-request 接続）が不要なオーバーヘッドであった。NAS 上の Docker で Cloud Run Proxy を実行する場合、データディレクトリをボリュームマウントすればローカルファイルとして直接配信でき、FTPS を経由する必要がない。
+
+### Decision
+
+*   **FTPS 関連コードの完全削除**: `NASFtpsProxy` クラス、`_NatFriendlyFTP_TLS` クラス、`_get_proxy()` 関数を削除。`ftplib`、`ssl` のインポートも削除。
+*   **`flask.send_from_directory` によるローカルファイル配信**: 環境変数 `DATA_DIR`（デフォルト: `/cache`）で指定されたディレクトリからファイルを直接配信。
+*   **ディレクトリ構造**: `{DATA_DIR}/jp/{file_path}`（例: `/cache/jp/stocks_daily/1234.duckdb`）。
+*   **HTTP API インターフェースは維持**: `GET /jp/<path:file_path>` はそのまま。クライアント側（`CloudRunClient`）の変更は不要。
+*   **`ALLOWED_PATHS` ホワイトリストは維持**: セキュリティのためパス検証は継続。
+
+### Consequences
+
+*   **メリット**:
+    *   コードの大幅な簡素化（165行 → 53行）。
+    *   FTPS 接続の複雑さ（NAT 越え、SSL コンテキスト、per-request 接続）を排除。
+    *   FTP 関連の環境変数（`FTPS_HOST`, `FTPS_PORT`, `FTPS_USERNAME`, `FTPS_PASSWORD` 等）が不要に。
+    *   NAS のインターネット公開（FTPS ポートフォワーディング）が不要に。
+    *   ボリュームマウント（`-v /volume1/docker/backcast/cache:/cache`）のみで動作。
+*   **注意点**:
+    *   Cloud Run で使用する場合は GCS バケットや NFS 等のボリュームマウント設定が必要。
+
+### デプロイ
+
+Docker でデプロイする場合、データが保存されているディレクトリを `/cache` にマウントすれば、`DATA_DIR` のデフォルト値でそのまま動作します。
+
+```bash
+docker run -v /volume1/docker/backcast/cache:/cache -p 8080:8080 cloud-run
+```
+
+マウント先のディレクトリ構造:
+
+```
+/cache/
+  jp/
+    stocks_daily/1234.duckdb
+    stocks_board/8306.duckdb
+    listed_info.duckdb
+```
+
+Cloud Run にデプロイする場合は、GCS バケットや NFS などのボリュームを `/cache` にマウントしてください。
 
 ---

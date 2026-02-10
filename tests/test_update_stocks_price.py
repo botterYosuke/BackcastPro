@@ -4,7 +4,7 @@ import sys
 import logging
 import argparse
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
 import pandas as pd
 import pytest
@@ -14,15 +14,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 import update_stocks_price as usp
-from update_stocks_price import (
-    parse_arguments,
-    get_stock_codes_list,
-    get_fetch_date_range,
-    merge_with_jquants_priority,
-    _fetch_with_retry,
-    process_stock,
-    UpdateSummary,
-)
+from update_stocks_price import parse_arguments, merge_jquants_priority
 
 
 # ---------------------------------------------------------------------------
@@ -54,7 +46,6 @@ class TestParseArguments:
             args = parse_arguments()
         assert args.codes is None
         assert args.days == 7
-        assert args.workers == 4
 
     def test_codes_argument(self):
         with patch('sys.argv', ['prog', '--codes', '7203,8306']):
@@ -66,162 +57,56 @@ class TestParseArguments:
             args = parse_arguments()
         assert args.days == 30
 
-    def test_workers_custom(self):
-        with patch('sys.argv', ['prog', '--workers', '8']):
-            args = parse_arguments()
-        assert args.workers == 8
-
-    def test_all_arguments(self):
-        with patch('sys.argv', ['prog', '--codes', '1234', '--days', '14', '--workers', '2']):
-            args = parse_arguments()
-        assert args.codes == '1234'
-        assert args.days == 14
-        assert args.workers == 2
-
 
 # ===========================================================================
-# TestGetStockCodesList
+# TestMergeJquantsPriority
 # ===========================================================================
 
-class TestGetStockCodesList:
-    """銘柄コードリスト取得・正規化"""
-
-    @patch('update_stocks_price.stocks_info')
-    def test_success_with_code_column(self, mock_si_cls):
-        mock_si = MagicMock()
-        mock_si._fetch_from_jquants.return_value = pd.DataFrame({
-            'Code': ['72030', '83060', '1234']
-        })
-        mock_si_cls.return_value = mock_si
-        result = get_stock_codes_list()
-        assert result == ['7203', '8306', '1234']
-
-    @patch('update_stocks_price.stocks_info')
-    def test_success_with_lowercase_column(self, mock_si_cls):
-        mock_si = MagicMock()
-        mock_si._fetch_from_jquants.return_value = pd.DataFrame({
-            'code': ['72030', '83060']
-        })
-        mock_si_cls.return_value = mock_si
-        result = get_stock_codes_list()
-        assert result == ['7203', '8306']
-
-    @patch('update_stocks_price.stocks_info')
-    def test_empty_dataframe(self, mock_si_cls):
-        mock_si = MagicMock()
-        mock_si._fetch_from_jquants.return_value = pd.DataFrame()
-        mock_si_cls.return_value = mock_si
-        result = get_stock_codes_list()
-        assert result == []
-
-    @patch('update_stocks_price.stocks_info')
-    def test_none_dataframe(self, mock_si_cls):
-        mock_si = MagicMock()
-        mock_si._fetch_from_jquants.return_value = None
-        mock_si_cls.return_value = mock_si
-        result = get_stock_codes_list()
-        assert result == []
-
-    @patch('update_stocks_price.stocks_info')
-    def test_no_code_column(self, mock_si_cls):
-        mock_si = MagicMock()
-        mock_si._fetch_from_jquants.return_value = pd.DataFrame({
-            'Name': ['Toyota', 'Sony']
-        })
-        mock_si_cls.return_value = mock_si
-        result = get_stock_codes_list()
-        assert result == []
-
-    @patch('update_stocks_price.stocks_info')
-    def test_5digit_ending_0_trimmed(self, mock_si_cls):
-        mock_si = MagicMock()
-        mock_si._fetch_from_jquants.return_value = pd.DataFrame({
-            'Code': ['72030']
-        })
-        mock_si_cls.return_value = mock_si
-        result = get_stock_codes_list()
-        assert result == ['7203']
-
-    @patch('update_stocks_price.stocks_info')
-    def test_5digit_not_ending_0_kept(self, mock_si_cls):
-        mock_si = MagicMock()
-        mock_si._fetch_from_jquants.return_value = pd.DataFrame({
-            'Code': ['72031']
-        })
-        mock_si_cls.return_value = mock_si
-        result = get_stock_codes_list()
-        assert result == ['72031']
-
-    @patch('update_stocks_price.stocks_info')
-    def test_4digit_unchanged(self, mock_si_cls):
-        mock_si = MagicMock()
-        mock_si._fetch_from_jquants.return_value = pd.DataFrame({
-            'Code': ['7203']
-        })
-        mock_si_cls.return_value = mock_si
-        result = get_stock_codes_list()
-        assert result == ['7203']
-
-
-# ===========================================================================
-# TestGetFetchDateRange
-# ===========================================================================
-
-class TestGetFetchDateRange:
-    """日付範囲計算"""
-
-    def test_default_7_days(self):
-        from_date, to_date = get_fetch_date_range()
-        assert (to_date - from_date).days == 7
-
-    def test_custom_days(self):
-        from_date, to_date = get_fetch_date_range(days=30)
-        assert (to_date - from_date).days == 30
-
-    def test_to_date_is_midnight(self):
-        _, to_date = get_fetch_date_range()
-        assert to_date.hour == 0
-        assert to_date.minute == 0
-        assert to_date.second == 0
-        assert to_date.microsecond == 0
-
-
-# ===========================================================================
-# TestMergeWithJquantsPriority
-# ===========================================================================
-
-class TestMergeWithJquantsPriority:
+class TestMergeJquantsPriority:
     """J-Quants優先マージ"""
 
     def test_base_none_returns_jquants(self):
         jq_df = _make_price_df(['2024-01-01', '2024-01-02'], [200, 201])
-        result = merge_with_jquants_priority(None, jq_df)
+        result = merge_jquants_priority(None, jq_df)
         assert len(result) == 2
 
     def test_base_empty_returns_jquants(self):
         jq_df = _make_price_df(['2024-01-01'], [200])
-        result = merge_with_jquants_priority(pd.DataFrame(), jq_df)
+        result = merge_jquants_priority(pd.DataFrame(), jq_df)
         assert len(result) == 1
+
+    def test_jquants_none_returns_base(self):
+        base_df = _make_price_df(['2024-01-01'], [100])
+        result = merge_jquants_priority(base_df, None)
+        assert len(result) == 1
+
+    def test_jquants_empty_returns_base(self):
+        base_df = _make_price_df(['2024-01-01'], [100])
+        result = merge_jquants_priority(base_df, pd.DataFrame())
+        assert len(result) == 1
+
+    def test_both_none(self):
+        result = merge_jquants_priority(None, None)
+        assert result is None
 
     def test_no_overlap_concatenates(self):
         base = _make_price_df(['2024-01-01', '2024-01-02'], [100, 101])
         jq = _make_price_df(['2024-01-03', '2024-01-04'], [200, 201])
-        result = merge_with_jquants_priority(base, jq)
+        result = merge_jquants_priority(base, jq)
         assert len(result) == 4
 
     def test_overlap_jquants_wins(self):
         base = _make_price_df(['2024-01-01'], [100])
         jq = _make_price_df(['2024-01-01'], [200])
-        result = merge_with_jquants_priority(base, jq)
+        result = merge_jquants_priority(base, jq)
         assert len(result) == 1
         assert result['Close'].iloc[0] == 200
 
     def test_partial_overlap(self):
         base = _make_price_df(['2024-01-01', '2024-01-02', '2024-01-03'], [100, 101, 102])
         jq = _make_price_df(['2024-01-02', '2024-01-03', '2024-01-04'], [200, 201, 202])
-        result = merge_with_jquants_priority(base, jq)
+        result = merge_jquants_priority(base, jq)
         assert len(result) == 4
-        # Jan 2, 3 は J-Quants の値（200, 201）
         result_sorted = result.sort_index()
         assert result_sorted['Close'].iloc[1] == 200  # Jan 2
         assert result_sorted['Close'].iloc[2] == 201  # Jan 3
@@ -229,138 +114,8 @@ class TestMergeWithJquantsPriority:
     def test_result_sorted_by_date(self):
         base = _make_price_df(['2024-01-03'], [100])
         jq = _make_price_df(['2024-01-01'], [200])
-        result = merge_with_jquants_priority(base, jq)
+        result = merge_jquants_priority(base, jq)
         assert result.index.is_monotonic_increasing
-
-
-# ===========================================================================
-# TestFetchWithRetry
-# ===========================================================================
-
-class TestFetchWithRetry:
-    """指数バックオフ付きリトライ"""
-
-    def test_success_first_attempt(self):
-        df = pd.DataFrame({'Close': [100]})
-        fetch_fn = MagicMock(return_value=df)
-        result = _fetch_with_retry(fetch_fn, '7203', datetime.now(), datetime.now())
-        assert fetch_fn.call_count == 1
-        assert result is df
-
-    @patch('update_stocks_price.time.sleep')
-    def test_retry_then_success(self, mock_sleep):
-        df = pd.DataFrame({'Close': [100]})
-        fetch_fn = MagicMock(side_effect=[Exception("fail"), df])
-        result = _fetch_with_retry(fetch_fn, '7203', datetime.now(), datetime.now())
-        assert fetch_fn.call_count == 2
-        assert result is df
-        mock_sleep.assert_called_once_with(1)
-
-    @patch('update_stocks_price.time.sleep')
-    def test_max_retries_exhausted(self, mock_sleep):
-        fetch_fn = MagicMock(side_effect=Exception("persistent"))
-        with pytest.raises(Exception, match="persistent"):
-            _fetch_with_retry(fetch_fn, '7203', datetime.now(), datetime.now())
-        assert fetch_fn.call_count == 3
-
-    @patch('update_stocks_price.time.sleep')
-    def test_exponential_backoff(self, mock_sleep):
-        df = pd.DataFrame({'Close': [100]})
-        fetch_fn = MagicMock(side_effect=[Exception("1"), Exception("2"), df])
-        _fetch_with_retry(fetch_fn, '7203', datetime.now(), datetime.now())
-        assert mock_sleep.call_args_list == [call(1), call(2)]
-
-
-# ===========================================================================
-# TestProcessStock
-# ===========================================================================
-
-class TestProcessStock:
-    """パイプラインConsumer"""
-
-    def _make_sp_mock(self):
-        """stocks_price のモックを生成"""
-        sp = MagicMock()
-        sp._fetch_from_stooq.return_value = None
-        sp._fetch_from_jquants.return_value = None
-        sp.db.save_stock_prices.return_value = None
-        return sp
-
-    @patch('update_stocks_price.time.sleep')
-    @patch('update_stocks_price.stocks_price')
-    def test_tachibana_and_jquants_success(self, mock_sp_cls, mock_sleep):
-        sp = self._make_sp_mock()
-        mock_sp_cls.return_value = sp
-        tachi_df = _make_price_df(['2024-01-01'], [100])
-        jq_df = _make_price_df(['2024-01-01', '2024-01-02'], [200, 201])
-        sp._fetch_from_jquants.return_value = jq_df
-
-        code, ok, count, source = process_stock('7203', tachi_df, datetime.now(), datetime.now())
-        assert ok is True
-        assert source == 'tachibana+jquants'
-        sp.db.save_stock_prices.assert_called_once()
-        # stooq は呼ばれない
-        sp._fetch_from_stooq.assert_not_called()
-
-    @patch('update_stocks_price.time.sleep')
-    @patch('update_stocks_price.stocks_price')
-    def test_tachibana_success_jquants_fail(self, mock_sp_cls, mock_sleep):
-        sp = self._make_sp_mock()
-        mock_sp_cls.return_value = sp
-        tachi_df = _make_price_df(['2024-01-01'], [100])
-        sp._fetch_from_jquants.side_effect = Exception("jquants down")
-
-        code, ok, count, source = process_stock('7203', tachi_df, datetime.now(), datetime.now())
-        assert ok is True
-        assert source == 'tachibana'
-
-    @patch('update_stocks_price.time.sleep')
-    @patch('update_stocks_price.stocks_price')
-    def test_stooq_fallback(self, mock_sp_cls, mock_sleep):
-        sp = self._make_sp_mock()
-        mock_sp_cls.return_value = sp
-        stooq_df = _make_price_df(['2024-01-01'], [150])
-        jq_df = _make_price_df(['2024-01-01'], [200])
-        sp._fetch_from_stooq.return_value = stooq_df
-        sp._fetch_from_jquants.return_value = jq_df
-
-        code, ok, count, source = process_stock('7203', None, datetime.now(), datetime.now())
-        assert ok is True
-        assert source == 'stooq+jquants'
-
-    @patch('update_stocks_price.time.sleep')
-    @patch('update_stocks_price.stocks_price')
-    def test_all_sources_fail(self, mock_sp_cls, mock_sleep):
-        sp = self._make_sp_mock()
-        mock_sp_cls.return_value = sp
-        sp._fetch_from_stooq.side_effect = Exception("stooq down")
-        sp._fetch_from_jquants.side_effect = Exception("jquants down")
-
-        code, ok, count, source = process_stock('7203', None, datetime.now(), datetime.now())
-        assert ok is False
-        assert count == 0
-        assert source is None
-
-    @patch('update_stocks_price.time.sleep')
-    @patch('update_stocks_price.stocks_price')
-    def test_jquants_always_called(self, mock_sp_cls, mock_sleep):
-        sp = self._make_sp_mock()
-        mock_sp_cls.return_value = sp
-        tachi_df = _make_price_df(['2024-01-01'], [100])
-        jq_df = _make_price_df(['2024-01-01'], [200])
-        sp._fetch_from_jquants.return_value = jq_df
-
-        process_stock('7203', tachi_df, datetime.now(), datetime.now())
-        sp._fetch_from_jquants.assert_called_once()
-
-    @patch('update_stocks_price.time.sleep')
-    @patch('update_stocks_price.stocks_price')
-    def test_empty_tachibana_triggers_stooq(self, mock_sp_cls, mock_sleep):
-        sp = self._make_sp_mock()
-        mock_sp_cls.return_value = sp
-
-        process_stock('7203', pd.DataFrame(), datetime.now(), datetime.now())
-        sp._fetch_from_stooq.assert_called()
 
 
 # ===========================================================================
@@ -370,67 +125,59 @@ class TestProcessStock:
 class TestMain:
     """main() 統合テスト"""
 
-    @patch('update_stocks_price.process_stock')
     @patch('update_stocks_price.stocks_price')
     @patch('update_stocks_price.jquants_cls')
     @patch('update_stocks_price.e_api')
-    @patch('update_stocks_price.setup_logging')
-    def test_main_with_codes(self, mock_log, mock_eapi, mock_jq, mock_sp_cls,
-                             mock_process):
-        mock_log.return_value = logging.getLogger('test')
+    def test_main_with_codes_success(self, mock_eapi, mock_jq, mock_sp_cls):
         sp = MagicMock()
         mock_sp_cls.return_value = sp
-        sp._fetch_from_tachibana.return_value = None
-
-        mock_process.return_value = ('7203', True, 5, 'jquants')
+        jq_df = _make_price_df(['2024-01-01'], [200])
+        sp._fetch_from_tachibana.return_value = _make_price_df(['2024-01-01'], [100])
+        sp._fetch_from_jquants.return_value = jq_df
 
         with patch('sys.argv', ['prog', '--codes', '7203']):
             result = usp.main()
 
         assert result == 0
-        mock_process.assert_called_once()
+        sp.db.save_stock_prices.assert_called_once()
 
-    @patch('update_stocks_price.get_stock_codes_list', return_value=[])
-    @patch('update_stocks_price.setup_logging')
-    def test_main_no_codes_returns_1(self, mock_log, mock_codes):
-        mock_log.return_value = logging.getLogger('test')
+    @patch('update_stocks_price.stocks_info')
+    def test_main_no_codes_returns_1(self, mock_si_cls):
+        mock_si = MagicMock()
+        mock_si._fetch_from_jquants.return_value = pd.DataFrame()
+        mock_si_cls.return_value = mock_si
+
         with patch('sys.argv', ['prog']):
             result = usp.main()
         assert result == 1
 
-    @patch('update_stocks_price.process_stock', return_value=('7203', False, 0, None))
     @patch('update_stocks_price.stocks_price')
     @patch('update_stocks_price.jquants_cls')
     @patch('update_stocks_price.e_api')
-    @patch('update_stocks_price.setup_logging')
-    def test_main_failures_returns_1(self, mock_log, mock_eapi, mock_jq,
-                                     mock_sp_cls, mock_process):
-        mock_log.return_value = logging.getLogger('test')
+    def test_main_all_fail_returns_1(self, mock_eapi, mock_jq, mock_sp_cls):
         sp = MagicMock()
         mock_sp_cls.return_value = sp
-        sp._fetch_from_tachibana.return_value = None
+        sp._fetch_from_tachibana.side_effect = Exception("fail")
+        sp._fetch_from_stooq.side_effect = Exception("fail")
+        sp._fetch_from_jquants.side_effect = Exception("fail")
 
         with patch('sys.argv', ['prog', '--codes', '7203']):
             result = usp.main()
         assert result == 1
 
+    @patch('update_stocks_price.stocks_price')
+    @patch('update_stocks_price.jquants_cls')
+    @patch('update_stocks_price.e_api')
+    def test_stooq_fallback_when_tachibana_fails(self, mock_eapi, mock_jq, mock_sp_cls):
+        sp = MagicMock()
+        mock_sp_cls.return_value = sp
+        sp._fetch_from_tachibana.return_value = None
+        sp._fetch_from_stooq.return_value = _make_price_df(['2024-01-01'], [150])
+        sp._fetch_from_jquants.return_value = None
 
-# ===========================================================================
-# TestUpdateSummary
-# ===========================================================================
+        with patch('sys.argv', ['prog', '--codes', '7203']):
+            result = usp.main()
 
-class TestUpdateSummary:
-    """UpdateSummary データクラス"""
-
-    def test_default_values(self):
-        s = UpdateSummary()
-        assert s.total_stocks == 0
-        assert s.success_count == 0
-        assert s.failed_count == 0
-        assert s.errors == []
-        assert isinstance(s.start_time, datetime)
-
-    def test_error_tracking(self):
-        s = UpdateSummary()
-        s.errors.append(('7203', 'timeout'))
-        assert s.errors == [('7203', 'timeout')]
+        assert result == 0
+        sp._fetch_from_stooq.assert_called_once()
+        sp.db.save_stock_prices.assert_called_once()
