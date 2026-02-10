@@ -21,7 +21,7 @@ DuckDB への保存は元々 `db_stocks_daily.save_stock_prices()` が環境変�
 Docker 実行時に `-v` でホスト側ディレクトリをマウントすることで、DuckDB ファイルがホスト側に永続化される。
 
 ```bash
-docker run -v /host/duckdb-dir:/data backcastpro-updater --codes 7203 --days 3
+docker run -v /host/duckdb-dir:/cache backcastpro-updater --codes 7203 --days 3
 # → /host/duckdb-dir/stocks_daily/7203.duckdb に保存される
 ```
 
@@ -30,7 +30,7 @@ docker run -v /host/duckdb-dir:/data backcastpro-updater --codes 7203 --days 3
 | ファイル | 変更内容 |
 |---|---|
 | `cloud-job/update_stocks_price.py` | `upload_to_cloud()` 関数削除、`--dry-run` 引数削除、`UpdateSummary` のアップロード関連フィールド削除、docstring・サマリー出力の更新 |
-| `cloud-job/Dockerfile` | `ENV STOCKDATA_CACHE_DIR=/data` 追加（ボリュームマウントポイント） |
+| `cloud-job/Dockerfile` | `ENV STOCKDATA_CACHE_DIR=/cache` 追加（ボリュームマウントポイント） |
 | `tests/test_update_stocks_price.py` | `TestUploadToCloud` クラス削除、`--dry-run` 関連テスト削除、`TestMain` のアップロードモック削除 |
 | `cloud-job/requirements.txt` | 変更なし（`requests` は Stooq/J-Quants/Tachibana の API 呼び出しで引き続き必要） |
 
@@ -43,5 +43,5 @@ docker run -v /host/duckdb-dir:/data backcastpro-updater --codes 7203 --days 3
 
 1. テスト: `python -m pytest tests/test_update_stocks_price.py -v`（37 テスト全 PASSED 確認済み）
 2. Docker ビルド: `docker build -f cloud-job/Dockerfile -t backcastpro-updater .`
-3. 動作確認: `docker run -v <host-dir>:/data backcastpro-updater --codes 7203 --days 3`
-   - `/data/stocks_daily/7203.duckdb` にデータが保存されることを確認
+3. 動作確認: `docker run -v <host-dir>:/cache backcastpro-updater --codes 7203 --days 3`
+   - `/cache/stocks_daily/7203.duckdb` にデータが保存されることを確認

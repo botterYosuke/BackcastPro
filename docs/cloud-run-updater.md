@@ -19,7 +19,7 @@ graph LR
     A[NAS タスクスケジューラ] -->|docker run| B[Docker コンテナ]
     H -.->|docker pull| B
     B -->|データ取得| C[J-Quants / Tachibana / Stooq]
-    B -->|DuckDB保存| D[マウントボリューム /data]
+    B -->|DuckDB保存| D[マウントボリューム /cache]
 ```
 
 ## 構成要素
@@ -31,7 +31,7 @@ graph LR
 - **Dockerfile**: `cloud-job/Dockerfile`
 - **GitHub Action**: `.github/workflows/publish-dockerhub.yml`
 - **役割**: データの取得、加工、DuckDBファイルへの保存
-- **データ保存先**: 環境変数 `STOCKDATA_CACHE_DIR`（デフォルト: `/data`）で指定されたディレクトリ
+- **データ保存先**: 環境変数 `STOCKDATA_CACHE_DIR`（デフォルト: `/cache`）で指定されたディレクトリ
 
 ### 必要な環境変数・シークレット
 
@@ -61,7 +61,7 @@ docker build -f cloud-job/Dockerfile -t backcast/cloud-job .
 ### 特定銘柄で動作確認
 
 ```bash
-docker run -v /path/to/duckdb:/data \
+docker run -v /path/to/duckdb:/cache \
   -e JQUANTS_API_KEY=xxx \
   -e eAPI_URL=xxx \
   -e eAPI_USER_ID=xxx \
@@ -72,7 +72,7 @@ docker run -v /path/to/duckdb:/data \
 ### 全銘柄を更新
 
 ```bash
-docker run -v /path/to/duckdb:/data \
+docker run -v /path/to/duckdb:/cache \
   -e JQUANTS_API_KEY=xxx \
   -e eAPI_URL=xxx \
   -e eAPI_USER_ID=xxx \
@@ -96,7 +96,7 @@ Synology DSM の **コントロールパネル > タスクスケジューラ** �
 
 ```bash
 docker pull backcast/cloud-job:latest
-docker run --rm -v /volume1/docker/backcast/data:/data \
+docker run --rm -v /volume1/docker/backcast/cache:/cache \
   -e JQUANTS_API_KEY=xxx \
   -e eAPI_URL=xxx \
   -e eAPI_USER_ID=xxx \
@@ -108,7 +108,7 @@ docker run --rm -v /volume1/docker/backcast/data:/data \
 
 ```bash
 # 毎日 19:30 に実行
-30 19 * * 1-5 docker run --rm -v /path/to/duckdb:/data -e JQUANTS_API_KEY=xxx -e eAPI_URL=xxx -e eAPI_USER_ID=xxx -e eAPI_PASSWORD=xxx backcast/cloud-job --days 7
+30 19 * * 1-5 docker run --rm -v /path/to/duckdb:/cache -e JQUANTS_API_KEY=xxx -e eAPI_URL=xxx -e eAPI_USER_ID=xxx -e eAPI_PASSWORD=xxx backcast/cloud-job --days 7
 ```
 
 ### タスクスケジューラ（Windows）
