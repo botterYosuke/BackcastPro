@@ -41,37 +41,40 @@ class TestAllowedPaths:
     """パスホワイトリスト正規表現"""
 
     def test_stocks_daily_valid(self):
-        assert ALLOWED_PATHS.match('stocks_daily/1234.duckdb')
+        assert ALLOWED_PATHS.match('jp/stocks_daily/1234.duckdb')
 
     def test_stocks_daily_5digit(self):
-        assert ALLOWED_PATHS.match('stocks_daily/12345.duckdb')
+        assert ALLOWED_PATHS.match('jp/stocks_daily/12345.duckdb')
 
     def test_stocks_board_valid(self):
-        assert ALLOWED_PATHS.match('stocks_board/1234.duckdb')
+        assert ALLOWED_PATHS.match('jp/stocks_board/1234.duckdb')
 
     def test_listed_info_valid(self):
-        assert ALLOWED_PATHS.match('listed_info.duckdb')
+        assert ALLOWED_PATHS.match('jp/listed_info.duckdb')
 
     def test_path_traversal_rejected(self):
         assert not ALLOWED_PATHS.match('../etc/passwd')
 
     def test_arbitrary_extension_rejected(self):
-        assert not ALLOWED_PATHS.match('stocks_daily/1234.txt')
+        assert not ALLOWED_PATHS.match('jp/stocks_daily/1234.txt')
 
     def test_arbitrary_folder_rejected(self):
-        assert not ALLOWED_PATHS.match('other_folder/1234.duckdb')
+        assert not ALLOWED_PATHS.match('jp/other_folder/1234.duckdb')
 
     def test_nested_path_rejected(self):
-        assert not ALLOWED_PATHS.match('stocks_daily/sub/1234.duckdb')
+        assert not ALLOWED_PATHS.match('jp/stocks_daily/sub/1234.duckdb')
 
     def test_empty_string_rejected(self):
         assert not ALLOWED_PATHS.match('')
 
     def test_non_numeric_code_rejected(self):
-        assert not ALLOWED_PATHS.match('stocks_daily/abcd.duckdb')
+        assert not ALLOWED_PATHS.match('jp/stocks_daily/abcd.duckdb')
 
     def test_no_code_rejected(self):
-        assert not ALLOWED_PATHS.match('stocks_daily/.duckdb')
+        assert not ALLOWED_PATHS.match('jp/stocks_daily/.duckdb')
+
+    def test_without_jp_prefix_rejected(self):
+        assert not ALLOWED_PATHS.match('stocks_daily/1234.duckdb')
 
 
 # ===========================================================================

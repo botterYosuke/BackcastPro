@@ -3,6 +3,7 @@ Cloud Run APIクライアント
 
 Cloud RunからDuckDBファイルをダウンロードするモジュール。
 """
+
 import os
 import logging
 import requests
@@ -15,13 +16,16 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CloudRunConfig:
     """Cloud Run API接続設定"""
+
     api_base_url: str
 
     @classmethod
     def from_environment(cls) -> "CloudRunConfig":
         """環境変数から設定を読み込み"""
         return cls(
-            api_base_url=os.environ.get("BACKCASTPRO_NAS_PROXY_URL", ""),
+            api_base_url=os.environ.get(
+                "BACKCASTPRO_NAS_PROXY_URL", "https://backcast.i234.me:8080"
+            ),
         )
 
     def is_configured(self) -> bool:
@@ -59,7 +63,7 @@ class CloudRunClient:
 
             resp.raise_for_status()
 
-            with open(local_path, 'wb') as f:
+            with open(local_path, "wb") as f:
                 for chunk in resp.iter_content(chunk_size=8192):
                     if chunk:
                         f.write(chunk)

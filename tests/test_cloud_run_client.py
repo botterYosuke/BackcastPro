@@ -29,8 +29,8 @@ class TestCloudRunConfig(unittest.TestCase):
 
         try:
             config = CloudRunConfig.from_environment()
-            self.assertEqual(config.api_base_url, '')
-            self.assertFalse(config.is_configured())
+            self.assertEqual(config.api_base_url, 'https://backcast.i234.me')
+            self.assertTrue(config.is_configured())
         finally:
             os.environ.update(env_backup)
 
