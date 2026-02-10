@@ -8,8 +8,11 @@ import logging
 import os
 import re
 
+from dotenv import load_dotenv
 from flask import Flask, send_from_directory
 from werkzeug.exceptions import NotFound
+
+load_dotenv()
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
