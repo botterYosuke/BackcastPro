@@ -360,9 +360,9 @@ class db_manager:
         client = CloudRunClient()
         if client.config.is_configured():
             if self._db_subdir and code:
-                remote_path = f"{self._db_subdir}/{code}.duckdb"
+                remote_path = f"jp/{self._db_subdir}/{code}.duckdb"
             elif self._db_filename:
-                remote_path = self._db_filename
+                remote_path = f"jp/{self._db_filename}"
             else:
                 return False
             if client.download_file(remote_path, local_path):

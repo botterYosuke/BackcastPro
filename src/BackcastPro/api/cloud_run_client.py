@@ -24,7 +24,7 @@ class CloudRunConfig:
         """環境変数から設定を読み込み"""
         return cls(
             api_base_url=os.environ.get(
-                "BACKCASTPRO_NAS_PROXY_URL", "https://backcast.i234.me:8080"
+                "BACKCASTPRO_NAS_PROXY_URL", "http://backcast.i234.me:8080"
             ),
         )
 
@@ -44,13 +44,13 @@ class CloudRunClient:
         Cloud Run APIからファイルをストリームダウンロード
 
         Args:
-            remote_path: 論理パス (例: "stocks_daily/1234.duckdb")
+            remote_path: 論理パス (例: "jp/stocks_daily/1234.duckdb")
             local_path: ローカル保存先パス
 
         Returns:
             成功時True、失敗時False
         """
-        url = f"{self.config.api_base_url.rstrip('/')}/jp/{remote_path}"
+        url = f"{self.config.api_base_url.rstrip('/')}/{remote_path}"
 
         try:
             logger.info(f"ダウンロード開始: {remote_path} -> {local_path}")
@@ -82,12 +82,12 @@ class CloudRunClient:
 
     def download_stocks_daily(self, code: str, local_path: str) -> bool:
         """stocks_daily DuckDBファイルをダウンロード"""
-        return self.download_file(f"stocks_daily/{code}.duckdb", local_path)
+        return self.download_file(f"jp/stocks_daily/{code}.duckdb", local_path)
 
     def download_stocks_board(self, code: str, local_path: str) -> bool:
         """stocks_board DuckDBファイルをダウンロード"""
-        return self.download_file(f"stocks_board/{code}.duckdb", local_path)
+        return self.download_file(f"jp/stocks_board/{code}.duckdb", local_path)
 
     def download_listed_info(self, local_path: str) -> bool:
         """listed_info.duckdb ファイルをダウンロード"""
-        return self.download_file("listed_info.duckdb", local_path)
+        return self.download_file("jp/listed_info.duckdb", local_path)

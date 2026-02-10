@@ -48,7 +48,7 @@ class TestDbStocksInfo(unittest.TestCase):
 
             self.assertTrue(result, "Download should return True on success")
             mock_client.download_file.assert_called_once_with(
-                "listed_info.duckdb", test_path
+                "jp/listed_info.duckdb", test_path
             )
 
     def test_download_from_cloud_failure(self):
