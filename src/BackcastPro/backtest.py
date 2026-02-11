@@ -13,6 +13,7 @@ import pandas as pd
 
 from ._broker import _Broker
 from ._stats import compute_stats
+from .position import Position
 
 
 class Backtest:
@@ -456,7 +457,7 @@ class Backtest:
         このプロパティは後方互換性のために残されています。
         """
         if not self._is_started or self._broker_instance is None:
-            return 0
+            return Position._empty()
         return self._broker_instance.position
 
     def position_of(self, code: str) -> int:
@@ -546,7 +547,7 @@ class Backtest:
             "progress": float(self.progress),
             "equity": float(self.equity),
             "cash": float(self.cash),
-            "position": self.position,
+            "position": self.position.to_dict(),
             "positions": positions,
             "closed_trades": len(self.closed_trades),
             "step_index": self.step_index,

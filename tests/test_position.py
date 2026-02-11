@@ -30,6 +30,31 @@ def _create_bt(days=30, cash=1000000):
     return bt
 
 
+class TestPositionBeforeStart:
+    """未開始状態での Position テスト"""
+
+    def test_position_before_start_is_falsy(self):
+        """未開始状態のポジションはFalse"""
+        bt = _create_bt()
+        assert not bt.position
+
+    def test_position_before_start_size_zero(self):
+        """未開始状態のポジションサイズは0"""
+        bt = _create_bt()
+        assert bt.position.size == 0
+
+    def test_position_before_start_to_dict(self):
+        """未開始状態でも to_dict() が正常に動作"""
+        bt = _create_bt()
+        d = bt.position.to_dict()
+        assert d == {"size": 0, "pl": 0, "pl_pct": 0, "is_long": False, "is_short": False}
+
+    def test_position_before_start_close_noop(self):
+        """未開始状態での close() はエラーなし"""
+        bt = _create_bt()
+        bt.position.close()  # should not raise
+
+
 class TestPositionBool:
     """Position のブール値テスト"""
 
