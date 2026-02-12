@@ -254,7 +254,7 @@ class _Broker:
             else:
                 # 成行注文（Market-if-touched / market order）
                 # 条件付き注文は常に次の始値で
-                prev_close = df.Close.iloc[-2]
+                prev_close = df.Close.iloc[-2] if len(df) >= 2 else df.Close.iloc[-1]
                 price = prev_close if self._trade_on_close and not order.is_contingent else open
                 if stop_price:
                     price = max(price, stop_price) if order.is_long else min(price, stop_price)

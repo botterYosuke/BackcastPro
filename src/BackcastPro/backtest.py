@@ -547,7 +547,7 @@ class Backtest:
             "progress": float(self.progress),
             "equity": float(self.equity),
             "cash": float(self.cash),
-            "position": self.position.to_dict(),
+            "position": self.position.size,
             "positions": positions,
             "closed_trades": len(self.closed_trades),
             "step_index": self.step_index,
