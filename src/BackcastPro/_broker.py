@@ -17,6 +17,11 @@ if TYPE_CHECKING:
     pass
 
 
+class BankruptError(Exception):
+    """エクイティが0以下になった場合に発生する破産例外"""
+    pass
+
+
 class _Broker:
     """
     バックテストにおける証券取引の実行、注文管理、ポジション管理、損益計算を担当します。
@@ -199,7 +204,9 @@ class _Broker:
                 price = self._data[trade.code].Close.iloc[-1]
                 self._close_trade(trade, price, self._current_time)
             self._cash = 0
-            raise Exception
+            raise BankruptError(
+                f"エクイティが0以下になりました (equity={equity:.2f})"
+            )
 
     def _process_orders(self):
         data = self._data

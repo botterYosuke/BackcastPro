@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "BackcastPro"
-version = "0.6.3"
+version = "0.6.4"
 authors = [
   { name="botterYosuke" },
 ]
@@ -30,7 +30,7 @@ dependencies = [
     "duckdb>=0.9.0",
     "plotly>=5.0.0",
     "anywidget>=0.9.21",
-    "msgpack>=1.0.0",
+    "msgpack>=1.0.0"
 ]
 
 [project.optional-dependencies]
@@ -70,4 +70,3 @@ cloud-job = [
     "requests>=2.25.0",
     "yfinance>=0.2.0",
 ]
-

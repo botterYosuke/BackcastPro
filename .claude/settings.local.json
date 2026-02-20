@@ -11,7 +11,19 @@
       "Bash(git -C \"D:/Documents/marimo\" show sasa/markdown:\"frontend/src/components/editor/renderers/cell-3d-wrapper.css\")",
       "Bash(pushd:*)",
       "Bash(git stash:*)",
-      "Read(//c/Users/sasac/AppData/Roaming/marimo/**)"
+      "Read(//c/Users/sasac/AppData/Roaming/marimo/**)",
+      "Bash(npx:*)",
+      "Bash(where:*)",
+      "Bash(node -e \"console.log\\(require\\(''child_process''\\).execSync\\(''npx.cmd @playwright/mcp@latest --help''\\).toString\\(\\).substring\\(0, 200\\)\\)\")",
+      "Bash(npm ls:*)",
+      "Bash(npm cache:*)",
+      "Bash(npx.cmd:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(CLAUDE_CODE_GIT_BASH_PATH=\"/c/Program Files/Git/bin/bash.exe\" claude mcp add --transport stdio --scope user playwright -- npx.cmd @playwright/mcp@latest)",
+      "Bash(node -e \":*)",
+      "Bash(node -e:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot"
     ],
     "additionalDirectories": [
       "d:\\Documents\\BackcastPro",

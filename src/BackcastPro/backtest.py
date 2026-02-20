@@ -11,7 +11,7 @@ from typing import Callable, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
-from ._broker import _Broker
+from ._broker import _Broker, BankruptError
 from ._stats import compute_stats
 from .position import Position
 
@@ -304,7 +304,7 @@ class Backtest:
             try:
                 self._broker_instance._data = self._current_data
                 self._broker_instance.next(current_time)
-            except Exception:
+            except BankruptError:
                 self._is_finished = True
                 return False
 

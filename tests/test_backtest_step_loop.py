@@ -2,16 +2,12 @@
 TDD Tests for Backtest Step Loop Mechanism
 
 Goal: Verify that the step loop mechanism works correctly for game loop integration.
-This tests the core backtest step behavior that the marimo game loop relies on:
 
 1. bt.step() increments _step_index correctly
 2. bt.step() returns True while there are more steps
 3. bt.step() returns False when finished
 4. bt.is_finished reflects the correct state
 5. Multiple step() calls in a loop work correctly
-
-These tests do NOT test marimo UI parts (mo.state, mo.Thread),
-but focus on the underlying BackcastPro logic.
 """
 
 import pytest
@@ -332,7 +328,7 @@ class TestStepLoop:
 
 class TestGameLoopSimulation:
     """
-    Simulate the marimo game loop pattern:
+    Simulate the game loop pattern:
 
     def _game_loop():
         while bt.is_finished == False:
@@ -346,7 +342,7 @@ class TestGameLoopSimulation:
 
     def test_game_loop_pattern_basic(self):
         """
-        Test the basic game loop pattern without marimo state.
+        Test the basic game loop pattern.
         """
         code = "TEST"
         df = create_sample_df(10)
@@ -625,9 +621,6 @@ class TestMultipleStocksStepLoop:
 class TestStrategyDataAccess:
     """
     Test that strategy can access bt.data during step().
-
-    This is critical for the marimo game loop where the strategy
-    needs to read current data on each step.
     """
 
     def test_strategy_can_access_data_on_first_step(self):

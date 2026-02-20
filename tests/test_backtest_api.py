@@ -1,11 +1,11 @@
 """
 TDD Tests for BackcastPro Public API Extensions
 
-Goal: Add public API for marimo-independent state access and callback mechanism.
+Goal: Add public API for state access and callback mechanism.
 
 Phase 1 Tests:
 1. step_index property - read-only access to _step_index
-2. get_state_snapshot() - returns current state as dict (marimo-independent)
+2. get_state_snapshot() - returns current state as dict
 3. add_trade_callback() - multiple callback registration for trade events
 
 These tests follow TDD (Red-Green-Refactor):
