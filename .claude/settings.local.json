@@ -23,7 +23,8 @@
       "Bash(node -e \":*)",
       "Bash(node -e:*)",
       "mcp__playwright__browser_navigate",
-      "mcp__playwright__browser_take_screenshot"
+      "mcp__playwright__browser_take_screenshot",
+      "Read(//c/Users/sasai/Downloads/logs_57994019762/**)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\BackcastPro",
