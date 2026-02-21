@@ -216,6 +216,56 @@ class kabusap:
 
 
 
+    def get_current_price(self, code: str) -> dict | None:
+        """
+        現在値・出来高・時刻を取得する
+
+        Args:
+            code (str): 銘柄コード
+
+        Returns:
+            dict | None: {"price": float, "volume": float, "time": datetime} or None
+        """
+        if not self.isEnable:
+            return None
+
+        self._refresh_token_if_needed()
+
+        if not code or not isinstance(code, str) or not code.strip():
+            return None
+
+        url = f'{self.API_URL}/board/{code}@1'
+
+        try:
+            req = urllib.request.Request(url, method='GET')
+            req.add_header('Content-Type', 'application/json')
+            req.add_header('X-API-KEY', self.api_key)
+
+            with urllib.request.urlopen(req) as res:
+                content = json.loads(res.read())
+
+                if 'ResultCode' in content and content['ResultCode'] != 0:
+                    logger.error(f"API Error: {content.get('ResultCode')} - {content.get('Message', '')}")
+                    return None
+
+                price = content.get('CurrentPrice')
+                volume = content.get('TradingVolume')
+                time_str = content.get('CurrentPriceTime')
+
+                if price is None or time_str is None:
+                    return None
+
+                return {
+                    "price": float(price),
+                    "volume": float(volume) if volume is not None else 0.0,
+                    "time": datetime.fromisoformat(time_str),
+                }
+
+        except Exception as e:
+            logger.error(f"現在値の取得に失敗しました: {e}")
+            return None
+
+
 if __name__ == '__main__':
     kabusap = kabusap()
     df = kabusap.get_board('8306')
