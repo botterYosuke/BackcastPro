@@ -16,6 +16,7 @@ BackcastProは、トレーディング戦略のためのPythonバックテスト
 - **[約定ロジック分析レポート](execution-logic-report.md)** - 売買約定時の価格決定ロジック詳細
 - **[Docker Jobによる株価データ更新](cloud-run-updater.md)** - DockerHub + NAS での夜間データ更新の仕組み
 - **[設計判断記録](design-decisions.md)** - アーキテクチャ変更の経緯
+- **[NautilusTrader 移行計画](nautilus-migration-plan.md)** - バックテストエンジンの移行詳細
 - **[PyPIへのデプロイ方法](how-to-deploy-to-PyPI.md)** - パッケージの配布方法
 
 ### サンプルコード
