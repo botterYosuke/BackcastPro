@@ -1,0 +1,2162 @@
+
+<!doctype html>
+<html lang="ja" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="トレーディング戦略のためのPythonバックテストライブラリ">
+      
+      
+      
+        <link rel="canonical" href="https://botteryosuke.github.io/BackcastPro/nautilus-migration-plan/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../img/logo.drawio.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>BackcastPro → NautilusTrader バックテストエンジン移行 - BackcastPro</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+JP:300,300i,400,400i,700,700i%7CFira+Code:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans JP";--md-code-font:"Fira Code"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#backcastpro-nautilustrader" class="md-skip">
+          コンテンツにスキップ
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="ヘッダー">
+    <a href=".." title="BackcastPro" class="md-header__button md-logo" aria-label="BackcastPro" data-md-component="logo">
+      
+  <img src="../img/logo.drawio.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            BackcastPro
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              BackcastPro → NautilusTrader バックテストエンジン移行
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue"  aria-label="ダークモードに切り替え"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="ダークモードに切り替え" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="blue"  aria-label="ライトモードに切り替え"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="ライトモードに切り替え" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="検索" placeholder="検索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="検索">
+        
+        <button type="reset" class="md-search__icon md-icon" title="クリア" aria-label="クリア" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            検索を初期化
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/botterYosuke/BackcastPro" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    botterYosuke/BackcastPro
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="タブ" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  ホーム
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tutorial/" class="md-tabs__link">
+          
+  
+  
+  ユーザーガイド
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../developer-guide/" class="md-tabs__link">
+          
+  
+  
+  開発者向け
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../privacy/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  プライバシーポリシー
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="ナビゲーション" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="BackcastPro" class="md-nav__button md-logo" aria-label="BackcastPro" data-md-component="logo">
+      
+  <img src="../img/logo.drawio.svg" alt="logo">
+
+    </a>
+    BackcastPro
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/botterYosuke/BackcastPro" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    botterYosuke/BackcastPro
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ホーム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ユーザーガイド
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ユーザーガイド
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    チュートリアル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    トラブルシューティング
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発者向け
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    開発者向け
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    開発者ガイド
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../execution-logic-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    約定ロジック分析
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-to-deploy-to-PyPI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PyPIデプロイ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cloud-run-updater/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud Run データ更新
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design-decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    設計判断記録
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../privacy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    プライバシーポリシー
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#2026-02-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装状況（2026-02-22 更新）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装で判明した知見・設計思想・Tips
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装で判明した知見・設計思想・Tips">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ohlc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. OHLC 整数丸め問題（実装で初めて発覚）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-equity-poc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Equity の計算方法（PoC結果通り）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-commission" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. commission の適用方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-price_precision-price_incrementprecision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. price_precision は price_increment.precision と一致させる
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-strategyconfig-order_id_tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. StrategyConfig の order_id_tag は必須
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-goto" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. goto() での戦略スキップ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-bankrupterror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. BankruptError の挙動の変更点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. テストデータの注意点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-run-api-strategy-step_callback-2026-02-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. run() の API 拡張 — strategy と step_callback 引数（2026-02-22 追加）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-marimo-nautilus_adapterpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. ⚠️ marimo ノートブックが読む nautilus_adapter.py の場所問題
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#poc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PoC 検証結果
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#proposed-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proposed Changes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Proposed Changes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nautilustrader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NautilusTrader アダプター層（新規作成）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="NautilusTrader アダプター層（新規作成）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-nautilus_adapterpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [NEW] nautilus_adapter.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nautilusbacktest-backcastprobacktest-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NautilusBacktest クラス — BackcastPro.Backtest との完全API互換表
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interactivestrategy-nautilustrader-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InteractiveStrategy クラス — NautilusTrader の Strategy を継承
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tradecompat-trade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        TradeCompat クラス — Trade オブジェクト互換層
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        その他ヘルパー・例外クラス
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        既存ファイル修正
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="既存ファイル修正">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bugfix-bridgepy-phase-0-nautilustrader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [BUGFIX] bridge.py — Phase 0 で先行修正（NautilusTrader移行と独立）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modify-backtest_wrapperpy-phase-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [MODIFY] backtest_wrapper.py — Phase 2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modify-game_setuppy-phase-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [MODIFY] game_setup.py — Phase 2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modify-bridgepy-phase-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [MODIFY] bridge.py — Phase 2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modify-full_modepy-phase-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [MODIFY] full_mode.py — Phase 2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modify-sandboxpy-phase-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [MODIFY] sandbox.py — Phase 2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modify-headless_broadcastpy-phase-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [MODIFY] headless_broadcast.py — Phase 2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-change-chartpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [NO CHANGE] chart.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-change-boardpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [NO CHANGE] board.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-change-pyodidepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [NO CHANGE] pyodide.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modify-backcastpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [MODIFY] backcast.py
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        依存関係
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="依存関係">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nautilus_trader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nautilus_trader インストール
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実装フェーズ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実装フェーズ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-0-bridgepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Phase 0: bridge.py 既存バグ修正（完了）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-nautilus_adapterpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Phase 1: nautilus_adapter.py 単体実装・ユニットテスト（完了）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Phase 2: 各ファイルのインポート変更（完了）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⏳ Phase 3: 統合テスト（ユーザーによる動作確認）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#blacksheeppy-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ blacksheep.py — run 方式への移行（コード変更完了、動作未確認）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        フォールバック戦略
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Plan
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verification Plan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Phase 0: 既存バグ修正の確認（完了）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-3838" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Phase 1: ユニットテスト（完了 — 38/38 通過）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⏳ Phase 3: 手動確認（ユーザーによるテスト）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="backcastpro-nautilustrader">BackcastPro → NautilusTrader バックテストエンジン移行<a class="headerlink" href="#backcastpro-nautilustrader" title="Permanent link">&para;</a></h1>
+<h2 id="2026-02-22">実装状況（2026-02-22 更新）<a class="headerlink" href="#2026-02-22" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>フェーズ</th>
+<th>内容</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 0</td>
+<td>bridge.py バグ修正</td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>Phase 1</td>
+<td>nautilus_adapter.py 実装 + ユニットテスト（38/38 通過）</td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>Phase 2</td>
+<td>各ファイルのインポート切り替え</td>
+<td>✅ 完了</td>
+</tr>
+<tr>
+<td>Phase 3</td>
+<td>統合テスト（ユーザーによるアプリ動作確認）</td>
+<td>⏳ 未実施</td>
+</tr>
+<tr>
+<td>追加作業</td>
+<td><code>run(strategy, step_callback)</code> API 追加 + blacksheep.py の run 方式移行</td>
+<td>⚠️ 要確認（後述）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="tips">実装で判明した知見・設計思想・Tips<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
+<h3 id="1-ohlc">1. OHLC 整数丸め問題（実装で初めて発覚）<a class="headerlink" href="#1-ohlc" title="Permanent link">&para;</a></h3>
+<p>NautilusTrader の <code>Bar</code> は <code>low &lt;= open</code> かつ <code>low &lt;= close</code> を厳格にバリデーションする。
+日本株データを整数円に丸める際、丸め誤差で制約が破られることがある。</p>
+<p><strong>対処</strong>: <code>ohlcv_to_bars()</code> で丸め後に制約を強制する。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">o</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Open&quot;</span><span class="p">]))))</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">h</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;High&quot;</span><span class="p">]))))</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">lo</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Low&quot;</span><span class="p">]))))</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">c</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Close&quot;</span><span class="p">]))))</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">h</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>   <span class="c1"># High は常に最大値</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">lo</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="c1"># Low は常に最小値</span>
+</span></code></pre></div>
+<h3 id="2-equity-poc">2. Equity の計算方法（PoC結果通り）<a class="headerlink" href="#2-equity-poc" title="Permanent link">&para;</a></h3>
+<p><code>balance_total(JPY)</code> はキャッシュ残高**のみ**を返す（ポジションのMTMを含まない）。
+真のエクイティは自前で計算する必要がある：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">account</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">portfolio</span><span class="o">.</span><span class="n">account</span><span class="p">(</span><span class="n">VENUE</span><span class="p">)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">cash</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">account</span><span class="o">.</span><span class="n">balance_total</span><span class="p">(</span><span class="n">JPY</span><span class="p">)</span><span class="o">.</span><span class="n">as_decimal</span><span class="p">())</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">positions_open</span><span class="p">():</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">price</span> <span class="o">=</span> <span class="n">current_close_of</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">instrument_id</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">cash</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">signed_qty</span><span class="p">)</span> <span class="o">*</span> <span class="n">price</span>
+</span></code></pre></div>
+<h3 id="3-commission">3. <code>commission</code> の適用方法<a class="headerlink" href="#3-commission" title="Permanent link">&para;</a></h3>
+<p><code>MakerTakerFeeModel()</code> を Venue に設定し、Equity の <code>maker_fee</code> / <code>taker_fee</code> フィールドに手数料率（Decimal）を設定する。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># add_venue 時</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">fee_model</span><span class="o">=</span><span class="n">MakerTakerFeeModel</span><span class="p">()</span> <span class="k">if</span> <span class="n">commission</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1"># Equity 作成時</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">maker_fee</span><span class="o">=</span><span class="n">Decimal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">commission</span><span class="p">)),</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">taker_fee</span><span class="o">=</span><span class="n">Decimal</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">commission</span><span class="p">)),</span>
+</span></code></pre></div>
+<p>commission=0 の場合は <code>fee_model=None</code>（引数省略ではなく明示的に None を渡す）。</p>
+<h3 id="4-price_precision-price_incrementprecision">4. <code>price_precision</code> は <code>price_increment.precision</code> と一致させる<a class="headerlink" href="#4-price_precision-price_incrementprecision" title="Permanent link">&para;</a></h3>
+<p><code>Equity</code> 初期化時に <code>price_precision</code> と <code>price_increment</code> の精度が一致しないと <code>ValueError</code> になる。
+日本株（整数円）の場合は <code>price_precision=0</code>、<code>price_increment=Price.from_str("1")</code>。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># 正しい</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">Equity</span><span class="p">(</span><span class="n">price_precision</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">price_increment</span><span class="o">=</span><span class="n">Price</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">),</span> <span class="o">...</span><span class="p">)</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># NG: precision=1 だが increment は整数</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">Equity</span><span class="p">(</span><span class="n">price_precision</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">price_increment</span><span class="o">=</span><span class="n">Price</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">),</span> <span class="o">...</span><span class="p">)</span>  <span class="c1"># ValueError</span>
+</span></code></pre></div>
+<h3 id="5-strategyconfig-order_id_tag">5. <code>StrategyConfig</code> の <code>order_id_tag</code> は必須<a class="headerlink" href="#5-strategyconfig-order_id_tag" title="Permanent link">&para;</a></h3>
+<p><code>Strategy</code> サブクラスを作る際、<code>StrategyConfig</code> に <code>order_id_tag</code> を設定しないと
+エンジンがストラテジーを識別できない。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">_InteractiveStrategyConfig</span><span class="p">(</span><span class="n">StrategyConfig</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="k">pass</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">_InteractiveStrategyConfig</span><span class="p">(</span><span class="n">order_id_tag</span><span class="o">=</span><span class="s2">&quot;001&quot;</span><span class="p">))</span>
+</span></code></pre></div>
+<h3 id="6-goto">6. <code>goto()</code> での戦略スキップ<a class="headerlink" href="#6-goto" title="Permanent link">&para;</a></h3>
+<p><code>goto()</code> 中は <code>_strategy_fn = None</code> にして高速実行する設計。
+これにより SMA 等の計算が走らず goto がフレーム単位で速くなる。
+ただし**戦略が累積状態を持つ場合**（例: 学習系モデル）は注意が必要。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">goto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="o">...</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">saved_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy_fn</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_strategy_fn</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># goto 中は戦略をスキップ</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_index</span> <span class="o">&lt;</span> <span class="n">step</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_finished</span><span class="p">:</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="k">finally</span><span class="p">:</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_strategy_fn</span> <span class="o">=</span> <span class="n">saved_fn</span>  <span class="c1"># 必ず復元</span>
+</span></code></pre></div>
+<h3 id="7-bankrupterror">7. <code>BankruptError</code> の挙動の変更点<a class="headerlink" href="#7-bankrupterror" title="Permanent link">&para;</a></h3>
+<p>BackcastPro の <code>step()</code> は内部で <code>BankruptError</code> を <strong>catch して False を返す</strong>（re-raise しない）。
+NautilusBacktest では game_setup.py の catch ブロックを活かすため <strong>raise する</strong> 設計に変更した。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># NautilusBacktest.step() の末尾</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">equity</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_is_finished</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="k">raise</span> <span class="n">BankruptError</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># BackcastProと違い、re-raiseする</span>
+</span></code></pre></div>
+<p>game_setup.py の <code>step()</code> がこれを catch して <code>FAIL_003</code> スキルを発火させる（既存動作を維持）。</p>
+<h3 id="8">8. テストデータの注意点<a class="headerlink" href="#8" title="Permanent link">&para;</a></h3>
+<p>合成データで <code>pd.date_range(..., freq="B")</code> （営業日）を使う点に注意。
+<code>freq="D"</code> にすると土日が含まれ、実際の株価データとの挙動差が出やすい。</p>
+<h3 id="9-run-api-strategy-step_callback-2026-02-22">9. <code>run()</code> の API 拡張 — <code>strategy</code> と <code>step_callback</code> 引数（2026-02-22 追加）<a class="headerlink" href="#9-run-api-strategy-step_callback-2026-02-22" title="Permanent link">&para;</a></h3>
+<p>NautilusTrader チュートリアルの「strategy を登録して <code>engine.run()</code> を1回呼ぶ」方式に合わせるため、
+<code>NautilusBacktest.run()</code> に2つのオプション引数を追加した。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># nautilus_adapter.py — 変更後の run()</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">step_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;全バーを実行して統計を返す&quot;&quot;&quot;</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="k">if</span> <span class="n">strategy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">set_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_finished</span><span class="p">:</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="k">if</span> <span class="n">step_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>            <span class="n">step_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+</span></code></pre></div>
+<p><strong>設計ポイント</strong>:
+- <code>strategy</code> を渡すと <code>set_strategy()</code> を内部で呼ぶ → 呼び出し側で別途 <code>set_strategy()</code> 不要
+- <code>step_callback</code> は <code>step()</code> 完了後（注文執行済み）に呼ばれる → チャート更新タイミングが旧ループと同一
+- 既存の <code>run()</code> との後方互換性あり（引数なしで呼べば従来通り動作）</p>
+<p><strong>blacksheep.py での使用例</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">strategy</span><span class="p">(</span><span class="n">bt</span><span class="p">):</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">_df</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_df</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">long_window</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>        <span class="k">return</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">sma_short</span> <span class="o">=</span> <span class="n">_df</span><span class="o">.</span><span class="n">Close</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">short_window</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">sma_long</span>  <span class="o">=</span> <span class="n">_df</span><span class="o">.</span><span class="n">Close</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">long_window</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="n">prev_short</span><span class="p">,</span> <span class="n">curr_short</span> <span class="o">=</span> <span class="n">sma_short</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">sma_short</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="n">prev_long</span><span class="p">,</span>  <span class="n">curr_long</span>  <span class="o">=</span> <span class="n">sma_long</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>  <span class="n">sma_long</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="n">pos</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>    <span class="k">if</span> <span class="n">prev_short</span> <span class="o">&lt;=</span> <span class="n">prev_long</span> <span class="ow">and</span> <span class="n">curr_short</span> <span class="o">&gt;</span> <span class="n">curr_long</span> <span class="ow">and</span> <span class="n">pos</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>        <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">)</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    <span class="k">elif</span> <span class="n">prev_short</span> <span class="o">&gt;=</span> <span class="n">prev_long</span> <span class="ow">and</span> <span class="n">curr_short</span> <span class="o">&lt;</span> <span class="n">curr_long</span> <span class="ow">and</span> <span class="n">pos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>        <span class="n">bt</span><span class="o">.</span><span class="n">sell</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">pos</span><span class="p">)</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="k">try</span><span class="p">:</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">,</span> <span class="n">step_callback</span><span class="o">=</span><span class="n">update_all_backtest_charts</span><span class="p">)</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="k">except</span> <span class="n">BankruptError</span><span class="p">:</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>    <span class="n">update_all_backtest_charts</span><span class="p">(</span><span class="n">bt</span><span class="p">)</span>
+</span></code></pre></div></p>
+<p>旧方式 <code>for i in range(200): if not bt.step(): break</code> との比較：</p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>旧ループ方式</th>
+<th>run 方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>最大ステップ</td>
+<td>200回</td>
+<td>全データ消費まで（上限なし）</td>
+</tr>
+<tr>
+<td>戦略の位置</td>
+<td>ループ内インライン</td>
+<td><code>strategy()</code> 関数として分離</td>
+</tr>
+<tr>
+<td>チャート更新</td>
+<td><code>step()</code> 後に明示呼び出し</td>
+<td><code>step_callback</code> で自動呼び出し</td>
+</tr>
+<tr>
+<td>BankruptError</td>
+<td>ループの try/except</td>
+<td><code>run()</code> の try/except</td>
+</tr>
+</tbody>
+</table>
+<h3 id="10-marimo-nautilus_adapterpy">10. ⚠️ marimo ノートブックが読む <code>nautilus_adapter.py</code> の場所問題<a class="headerlink" href="#10-marimo-nautilus_adapterpy" title="Permanent link">&para;</a></h3>
+<p><code>blacksheep.py</code>（<code>C:\Users\sasai\AppData\Roaming\marimo\notebooks\</code>）で実行時に以下のエラーが発生した：</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>TypeError: NautilusBacktest.run() got an unexpected keyword argument &#39;strategy&#39;
+</span></code></pre></div>
+<p>編集したファイルは <code>C:\Users\sasai\Documents\marimo\src-tauri\resources\files\nautilus_adapter.py</code> だが、
+marimo ノートブックが <strong>別の場所の <code>nautilus_adapter.py</code></strong> を import している可能性がある。</p>
+<p><strong>調査すべき場所</strong>:
+- <code>C:\Users\sasai\AppData\Roaming\marimo\notebooks\nautilus_adapter.py</code>（ノートブックと同じディレクトリ）
+- Python の <code>sys.path</code> に含まれるどこか</p>
+<blockquote>
+<p>[!IMPORTANT]
+<code>nautilus_adapter.py</code> の編集後はノートブック側の Python プロセスを再起動しないと変更が反映されない場合がある（Python のモジュールキャッシュ）。
+marimo の場合は <code>mo.restart_kernel()</code> またはサーバー再起動が必要。
+また、**ノートブックファイルと同じディレクトリに <code>nautilus_adapter.py</code> が存在する場合、そちらが優先される**ため、
+複数の場所に同名ファイルが存在しないか確認すること。</p>
+</blockquote>
+<hr />
+<p>BackcastProのバックテストエンジンをNautilusTraderに置き換える。データ取得部分（<a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/game_setup.py#161-170">get_stock_daily</a>等）はBackcastProを継続利用。ゲームUI（<code>bt.step()</code>, <code>bt.buy()</code>, <code>bt.chart()</code>のインターフェース）は維持する。</p>
+<h2 id="poc">PoC 検証結果<a class="headerlink" href="#poc" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>[!NOTE]
+<a href="poc_result.md">poc_result.md</a> で3方式を実機検証済み（nautilus_trader 1.221.0）。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>内容</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A: <code>run(start=ts, end=ts)</code></td>
+<td>start/end フィルタで1バー実行</td>
+<td>❌ Strategy が step 2 以降のバーを受け取らない</td>
+</tr>
+<tr>
+<td>B: streaming 1バーずつ</td>
+<td><code>add_data</code> → <code>run(streaming=True)</code> → <code>clear_data</code> サイクル</td>
+<td>✅ <strong>採用</strong></td>
+</tr>
+<tr>
+<td>C: event-driven callback</td>
+<td>全データ登録後 <code>run()</code> 1回、Strategy でコールバック</td>
+<td>✅ （将来候補）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>採用方式: B（streaming 1バーずつ）</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>step() ごとに:
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  1. _current_data を現在バーまで更新
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  2. strategy_fn(self) を呼ぶ（現在バーが見える状態）
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  3. engine.add_data([bar])
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>  4. engine.run(streaming=True)  ← 最終バーのみ streaming=False
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>     └─ on_bar() が発火 → 注文キューをフラッシュ
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>  5. engine.clear_data()
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>  6. self._step_index += 1
+</span></code></pre></div>
+<blockquote>
+<p>[!IMPORTANT]
+NautilusTraderには**ステップ実行API（<a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/game_setup.py#102-115">step()</a>）が存在しません**。
+本計画では**streaming モードで1バーずつデータを追加して <code>run()</code> を呼ぶことでステップ実行をエミュレート**するアダプター層を作成します。</p>
+<p>[!WARNING]
+NautilusTraderはRust/Cythonベースの高性能エンジンで、<strong>Pyodide（WASM）環境では動作しません</strong>。
+<a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/pyodide.py">pyodide.py</a> と <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/wasm-intro.py">wasm-intro.py</a> は BackcastPro のままにするか、別途対応が必要です。</p>
+</blockquote>
+<hr />
+<h2 id="proposed-changes">Proposed Changes<a class="headerlink" href="#proposed-changes" title="Permanent link">&para;</a></h2>
+<h3 id="nautilustrader">NautilusTrader アダプター層（新規作成）<a class="headerlink" href="#nautilustrader" title="Permanent link">&para;</a></h3>
+<p>NautilusTraderの<code>BacktestEngine</code>をラップし、既存のゲームインターフェースと同じAPI（<a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/game_setup.py#102-115">step()</a>, <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/game_setup.py#83-90">buy()</a>, <a href="file:///C:/Users/sasai/Documents/BackcastPro/src/BackcastPro/backtest.py#406-439">sell()</a>, <a href="file:///C:/Users/sasai/Documents/BackcastPro/src/BackcastPro/backtest.py#477-483">equity</a>, <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/game_setup.py#133-144">trades</a>等）を提供する。</p>
+<h4 id="new-nautilus_adapterpy">[NEW] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/nautilus_adapter.py">nautilus_adapter.py</a><a class="headerlink" href="#new-nautilus_adapterpy" title="Permanent link">&para;</a></h4>
+<p>NautilusTrader ↔ ゲームUIのブリッジ。以下のクラスを含む：</p>
+<hr />
+<h4 id="nautilusbacktest-backcastprobacktest-api"><code>NautilusBacktest</code> クラス — BackcastPro.Backtest との完全API互換表<a class="headerlink" href="#nautilusbacktest-backcastprobacktest-api" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>BackcastPro メソッド/プロパティ</th>
+<th>NautilusBacktest での実装方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>__init__(data, cash, commission, ...)</code></td>
+<td>BacktestEngine 初期化、Venue・Instrument 設定（下記パラメータ表参照）</td>
+</tr>
+<tr>
+<td><code>set_data(dct)</code></td>
+<td>OHLCV DataFrame → Bar リストに変換、<code>_all_bars_by_ts</code> として保持。完了後 <code>start()</code> を自動呼び出し（BackcastPro互換）</td>
+</tr>
+<tr>
+<td><code>set_cash(cash)</code></td>
+<td><code>_initial_cash</code> を更新、次の <code>start()</code> で反映</td>
+</tr>
+<tr>
+<td><code>set_strategy(fn)</code></td>
+<td><code>_strategy_fn</code> に格納（<code>step()</code> 内で <code>_current_data</code> 更新後に呼び出す）</td>
+</tr>
+<tr>
+<td><code>start()</code></td>
+<td>エンジン初期化、<code>_step_index = 0</code>、<code>_is_finished = False</code></td>
+</tr>
+<tr>
+<td><code>reset()</code></td>
+<td><code>engine.reset()</code> → <code>_step_index = 0</code>、<code>_is_finished = False</code></td>
+</tr>
+<tr>
+<td><code>step() → bool</code></td>
+<td>streaming 1バーサイクル実行（詳細下記）</td>
+</tr>
+<tr>
+<td><code>goto(step, strategy)</code></td>
+<td><code>step &lt; _step_index</code> なら <code>reset()</code> してから <code>step()</code> を繰り返す</td>
+</tr>
+<tr>
+<td><code>run() → pd.Series</code></td>
+<td>全バー <code>step()</code> → <code>finalize()</code></td>
+</tr>
+<tr>
+<td><code>finalize() → pd.Series</code></td>
+<td><code>engine.get_result()</code> から統計を生成</td>
+</tr>
+<tr>
+<td><code>buy(code, size, limit, stop, sl, tp, tag)</code></td>
+<td>注文キューに追加、次の <code>on_bar()</code> で <code>submit_order()</code></td>
+</tr>
+<tr>
+<td><code>sell(code, size, limit, stop, sl, tp, tag)</code></td>
+<td>売り注文キューに追加、次の <code>on_bar()</code> で <code>submit_order()</code></td>
+</tr>
+<tr>
+<td><code>equity</code> (property)</td>
+<td><code>cash + Σ(open_pos.signed_qty × current_close)</code></td>
+</tr>
+<tr>
+<td><code>cash</code> (property)</td>
+<td><code>account.balance_free(JPY).as_decimal()</code></td>
+</tr>
+<tr>
+<td><code>trades</code> (property)</td>
+<td>open positions → <code>TradeCompat</code> リスト</td>
+</tr>
+<tr>
+<td><code>closed_trades</code> (property)</td>
+<td>closed positions → <code>TradeCompat</code> リスト</td>
+</tr>
+<tr>
+<td><code>orders</code> (property)</td>
+<td>open orders → <code>OrderCompat</code> リスト</td>
+</tr>
+<tr>
+<td><code>position</code> (property)</td>
+<td><code>Position._empty()</code> 互換オブジェクト（後方互換）</td>
+</tr>
+<tr>
+<td><code>position_of(code)</code></td>
+<td><code>cache.positions_open()</code> から銘柄別に集計</td>
+</tr>
+<tr>
+<td><code>data</code> (property)</td>
+<td><code>_current_data</code>（現在ステップまでのスライス済み DataFrame）</td>
+</tr>
+<tr>
+<td><code>current_time</code> (property)</td>
+<td><code>_all_timestamps[_step_index - 1]</code></td>
+</tr>
+<tr>
+<td><code>progress</code> (property)</td>
+<td><code>_step_index / len(_all_timestamps)</code></td>
+</tr>
+<tr>
+<td><code>step_index</code> (property)</td>
+<td><code>_step_index</code>（read-only）</td>
+</tr>
+<tr>
+<td><code>is_finished</code> (property)</td>
+<td><code>_is_finished</code></td>
+</tr>
+<tr>
+<td><code>get_state_snapshot()</code></td>
+<td>辞書形式でスナップショットを返す</td>
+</tr>
+<tr>
+<td><code>add_trade_callback(cb)</code></td>
+<td><code>_trade_callbacks</code> リストに追加</td>
+</tr>
+<tr>
+<td><code>_chart_state</code></td>
+<td><code>Backtest_Wrapper</code> が設定する属性。<code>NautilusBacktest</code> は <code>__dict__</code> で動的に受け付ける</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>__init__</code> パラメータの実装方針（Phase 1）</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>Phase 1 の扱い</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cash</code></td>
+<td>Venue の初期残高として設定</td>
+</tr>
+<tr>
+<td><code>commission</code></td>
+<td><code>FeeModel</code> として設定（float のみ対応、callable は Phase 2 以降）</td>
+</tr>
+<tr>
+<td><code>spread</code></td>
+<td><code>0.0</code> 固定（Phase 1 では未実装）</td>
+</tr>
+<tr>
+<td><code>margin</code></td>
+<td><code>1.0</code> 固定（レバレッジなし、Phase 1 では未実装）</td>
+</tr>
+<tr>
+<td><code>trade_on_close</code></td>
+<td><code>False</code> 固定（次バー始値約定、Phase 1 では未実装）</td>
+</tr>
+<tr>
+<td><code>exclusive_orders</code></td>
+<td><code>False</code> 固定（Phase 1 では未実装）</td>
+</tr>
+<tr>
+<td><code>finalize_trades</code></td>
+<td><code>True</code> 固定（Phase 1 では全オープン取引を終値でクローズ）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!NOTE]
+<code>spread</code>, <code>margin</code>, <code>trade_on_close</code>, <code>exclusive_orders</code> は現在のゲームUIでは使用されていないため、Phase 1 では固定値でスタブする。</p>
+</blockquote>
+<p><strong><code>step()</code> の詳細フロー</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_finished</span><span class="p">:</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>        <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="c1"># 1. _current_data を現在バーまで更新（戦略が現在バーを見える状態にする）</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_update_current_data</span><span class="p">()</span>  <span class="c1"># _bars_flat[_step_index] の値を _current_data に反映</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    <span class="c1"># 2. 戦略関数を呼ぶ（BackcastPro 互換: 現在バーのデータで判断）</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy_fn</span><span class="p">:</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_strategy_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    <span class="c1"># 3. streaming サイクル（注文キューは on_bar() でフラッシュ）</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="n">bar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bars_flat</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_index</span><span class="p">]</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">add_data</span><span class="p">([</span><span class="n">bar</span><span class="p">])</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="n">is_last</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_index</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bars_flat</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">streaming</span><span class="o">=</span><span class="ow">not</span> <span class="n">is_last</span><span class="p">)</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">clear_data</span><span class="p">()</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_step_index</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>    <span class="k">if</span> <span class="n">is_last</span><span class="p">:</span>
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_is_finished</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>    <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_finished</span>
+</span></code></pre></div></p>
+<blockquote>
+<p>[!CAUTION]
+<strong><code>_update_current_data()</code> は必ず戦略呼び出しの前に行うこと。</strong>
+BackcastPro の <code>step()</code> は「現在バーのスライス更新 → 戦略呼び出し → ブローカー処理」の順。
+NautilusBacktest でこの順序を逆にすると、戦略が1ステップ古いデータで判断することになり、
+SMA等のインジケーターが1バーずれる。</p>
+</blockquote>
+<hr />
+<h4 id="interactivestrategy-nautilustrader-strategy"><code>InteractiveStrategy</code> クラス — NautilusTrader の <code>Strategy</code> を継承<a class="headerlink" href="#interactivestrategy-nautilustrader-strategy" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>on_bar()</code> でユーザーからの注文キューをフラッシュ（<code>submit_order()</code> を呼び出すのみ）</li>
+<li><code>on_order_filled()</code> で <code>_trade_callbacks</code> を呼び出し</li>
+<li>戦略ロジック自体は <code>NautilusBacktest.step()</code> が呼ぶ <code>_strategy_fn</code> に委譲するため、<code>on_bar()</code> の責務は「注文のフラッシュ」のみ</li>
+</ul>
+<h4 id="tradecompat-trade"><code>TradeCompat</code> クラス — Trade オブジェクト互換層<a class="headerlink" href="#tradecompat-trade" title="Permanent link">&para;</a></h4>
+<p>BackcastPro の <code>Trade</code> と同じプロパティ/メソッドを提供する:</p>
+<table>
+<thead>
+<tr>
+<th>BackcastPro <code>Trade</code></th>
+<th><code>TradeCompat</code> の実装</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trade.code</code></td>
+<td><code>position.instrument_id.symbol.value</code></td>
+</tr>
+<tr>
+<td><code>trade.size</code></td>
+<td><code>int(position.signed_qty)</code></td>
+</tr>
+<tr>
+<td><code>trade.entry_price</code></td>
+<td><code>float(position.avg_px_open)</code></td>
+</tr>
+<tr>
+<td><code>trade.pl</code></td>
+<td><code>float(position.unrealized_pnl(...).as_decimal())</code></td>
+</tr>
+<tr>
+<td><code>trade.close()</code></td>
+<td>売り注文キューに追加して次の <code>on_bar()</code> で約定</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_1">その他ヘルパー・例外クラス<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong><code>create_jpx_equity(code, venue)</code></strong>: 日本株のEquityインストゥルメントを生成</li>
+<li><strong><code>ohlcv_to_bars(df, instrument)</code></strong>: BackcastProのDataFrame → NautilusTrader の Bar リストに変換</li>
+<li><strong><code>BankruptError</code></strong>: 互換性用（equity &lt;= 0 検知時に raise）</li>
+</ul>
+<hr />
+<h3 id="_2">既存ファイル修正<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<h4 id="bugfix-bridgepy-phase-0-nautilustrader">[BUGFIX] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/bridge.py">bridge.py</a> — Phase 0 で先行修正（NautilusTrader移行と独立）<a class="headerlink" href="#bugfix-bridgepy-phase-0-nautilustrader" title="Permanent link">&para;</a></h4>
+<p>bridge.py には NautilusTrader 移行とは無関係の既存バグが3つある。Phase 0 として先に修正する。</p>
+<p><strong>バグ1</strong>: <code>Backtest</code> を直接使っているが <code>color_theme</code> 引数が存在しない（<code>TypeError</code>）
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="gd">-from BackcastPro import Backtest, get_stock_daily</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="gi">+from backtest_wrapper import Backtest_Wrapper as Backtest</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="gi">+from BackcastPro import get_stock_daily</span>
+</span></code></pre></div>
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="gd">-bt = Backtest(</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="gd">-    cash=100_000,</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="gd">-    commission=0.001,</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="gd">-    finalize_trades=True,</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="gd">-    color_theme=&quot;light&quot;,</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="gd">-)</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="gi">+bt = Backtest(</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="gi">+    cash=100_000,</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="gi">+    commission=0.001,</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="gi">+    finalize_trades=True,</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="gi">+    color_theme=&quot;light&quot;,</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="gi">+)</span>
+</span></code></pre></div>
+（<code>Backtest_Wrapper</code> に変更することで <code>color_theme</code> と <code>_chart_state</code> が正しく扱われる）</p>
+<p><strong>バグ2</strong>: <code>bt._chart_state.reset()</code> が <code>AttributeError</code>（<code>Backtest</code> には <code>_chart_state</code> がない）
+→ バグ1の修正（<code>Backtest_Wrapper</code> 使用）で自動的に解消。</p>
+<p><strong>バグ3</strong>: <code>bt.trades()</code> を callable として呼んでいるが <code>@property</code>
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="gd">-    for trade in bt.trades():</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="gi">+    for trade in bt.trades:</span>
+</span></code></pre></div></p>
+<h4 id="modify-backtest_wrapperpy-phase-2">[MODIFY] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/backtest_wrapper.py">backtest_wrapper.py</a> — Phase 2<a class="headerlink" href="#modify-backtest_wrapperpy-phase-2" title="Permanent link">&para;</a></h4>
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="gd">-from BackcastPro import Backtest, get_stock_daily as _get_stock_daily</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="gi">+from nautilus_adapter import NautilusBacktest as Backtest</span>
+</span></code></pre></div>
+<p><code>Backtest_Wrapper</code> は <code>NautilusBacktest</code> を継承する形に変更。<code>_ChartState</code> はそのまま維持。
+<code>_chart_state</code> は動的属性として <code>NautilusBacktest</code> 側で透過的に扱われる。</p>
+<h4 id="modify-game_setuppy-phase-2">[MODIFY] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/game_setup.py">game_setup.py</a> — Phase 2<a class="headerlink" href="#modify-game_setuppy-phase-2" title="Permanent link">&para;</a></h4>
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="gd">-from BackcastPro import get_stock_daily as _get_stock_daily, BankruptError</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="gi">+from BackcastPro import get_stock_daily as _get_stock_daily</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="gi">+from nautilus_adapter import BankruptError</span>
+</span></code></pre></div>
+<p>データ取得（<code>_get_stock_daily</code>）はBackcastProを維持。<code>BankruptError</code> は新アダプターから。</p>
+<h4 id="modify-bridgepy-phase-2">[MODIFY] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/bridge.py">bridge.py</a> — Phase 2<a class="headerlink" href="#modify-bridgepy-phase-2" title="Permanent link">&para;</a></h4>
+<div class="language-diff highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="gd">-from backtest_wrapper import Backtest_Wrapper as Backtest</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="gi">+from backtest_wrapper import Backtest_Wrapper as Backtest  # 変更なし（Phase 0 で修正済み）</span>
+</span></code></pre></div>
+<p>Phase 0 で <code>Backtest_Wrapper</code> 使用に切り替え済みのため、Phase 2 では <code>backtest_wrapper.py</code> の差し替えのみで自動的に NautilusBacktest に切り替わる。</p>
+<h4 id="modify-full_modepy-phase-2">[MODIFY] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/full_mode.py">full_mode.py</a> — Phase 2<a class="headerlink" href="#modify-full_modepy-phase-2" title="Permanent link">&para;</a></h4>
+<p>同様に<a href="file:///C:/Users/sasai/Documents/BackcastPro/src/BackcastPro/backtest.py#19-644">Backtest</a>のインポート元を変更。<a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/game_setup.py#161-170">get_stock_daily</a>はBackcastProのまま。</p>
+<h4 id="modify-sandboxpy-phase-2">[MODIFY] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/sandbox.py">sandbox.py</a> — Phase 2<a class="headerlink" href="#modify-sandboxpy-phase-2" title="Permanent link">&para;</a></h4>
+<p>同様にインポート変更。</p>
+<h4 id="modify-headless_broadcastpy-phase-2">[MODIFY] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/headless_broadcast.py">headless_broadcast.py</a> — Phase 2<a class="headerlink" href="#modify-headless_broadcastpy-phase-2" title="Permanent link">&para;</a></h4>
+<p><a href="file:///C:/Users/sasai/Documents/BackcastPro/src/BackcastPro/backtest.py#19-644">Backtest</a> 型アノテーションのインポート元を変更。</p>
+<h4 id="no-change-chartpy">[NO CHANGE] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/chart.py">chart.py</a><a class="headerlink" href="#no-change-chartpy" title="Permanent link">&para;</a></h4>
+<p><code>BackcastPro.api.stocks_price</code> のインポートはデータ取得用なので変更なし。</p>
+<h4 id="no-change-boardpy">[NO CHANGE] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/board.py">board.py</a><a class="headerlink" href="#no-change-boardpy" title="Permanent link">&para;</a></h4>
+<p><code>BackcastPro.api.stocks_board</code> のインポートはデータ取得用なので変更なし。</p>
+<h4 id="no-change-pyodidepy">[NO CHANGE] <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/pyodide.py">pyodide.py</a><a class="headerlink" href="#no-change-pyodidepy" title="Permanent link">&para;</a></h4>
+<p>Pyodide環境ではNautilusTraderは動作しないため変更なし。</p>
+<h4 id="modify-backcastpy">[MODIFY] <a href="file:///C:/Users/sasai/AppData/Roaming/marimo/notebooks/backcast.py">backcast.py</a><a class="headerlink" href="#modify-backcastpy" title="Permanent link">&para;</a></h4>
+<p>ノートブック自体の変更は不要（<code>game_setup</code> 経由でラップされるため）。ただし説明テキストを更新。</p>
+<hr />
+<h3 id="_3">依存関係<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h4 id="nautilus_trader">nautilus_trader インストール<a class="headerlink" href="#nautilus_trader" title="Permanent link">&para;</a></h4>
+<p>BackcastPro プロジェクトの仮想環境に <code>nautilus_trader</code> を追加インストール。</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>uv pip install nautilus_trader
+</span></code></pre></div>
+<p><strong>確認済み</strong>: v1.221.0 が <code>.venv</code>（Python 3.11.14）に既にインストール済み。</p>
+<hr />
+<h2 id="_4">実装フェーズ<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="phase-0-bridgepy">✅ Phase 0: bridge.py 既存バグ修正（完了）<a class="headerlink" href="#phase-0-bridgepy" title="Permanent link">&para;</a></h3>
+<p>以下の3つのバグを修正済み（NautilusTrader移行と独立した修正）：</p>
+<ol>
+<li>✅ <code>bridge.py</code> のインポートを <code>Backtest_Wrapper</code> に変更（<code>color_theme</code> + <code>_chart_state</code> のバグ解消）</li>
+<li>✅ <code>bridge.py</code> の <code>bt.trades()</code> → <code>bt.trades</code>（property 呼び出しのバグ修正）</li>
+</ol>
+<h3 id="phase-1-nautilus_adapterpy">✅ Phase 1: <code>nautilus_adapter.py</code> 単体実装・ユニットテスト（完了）<a class="headerlink" href="#phase-1-nautilus_adapterpy" title="Permanent link">&para;</a></h3>
+<ol>
+<li>✅ <code>nautilus_adapter.py</code> を新規作成（328行）</li>
+<li><code>NautilusBacktest</code>, <code>TradeCompat</code>, <code>_InteractiveStrategy</code>, <code>BankruptError</code>, <code>create_jpx_equity()</code>, <code>ohlcv_to_bars()</code></li>
+<li>✅ <code>tests/test_nautilus_adapter.py</code> を新規作成（38テスト）</li>
+<li>✅ 全38テスト通過（<code>pytest tests/test_nautilus_adapter.py</code> で 2.74秒）</li>
+</ol>
+<p><strong>実際に実装したファイル</strong>:
+- <a href="file:///C:/Users/sasai/Documents/marimo/src-tauri/resources/files/nautilus_adapter.py"><code>nautilus_adapter.py</code></a> — NautilusTrader アダプター本体
+- <a href="file:///C:/Users/sasai/Documents/BackcastPro/tests/test_nautilus_adapter.py"><code>tests/test_nautilus_adapter.py</code></a> — ユニットテスト</p>
+<h3 id="phase-2">✅ Phase 2: 各ファイルのインポート変更（完了）<a class="headerlink" href="#phase-2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>変更内容</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>backtest_wrapper.py</code></td>
+<td><code>BackcastPro.Backtest</code> → <code>nautilus_adapter.NautilusBacktest</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>game_setup.py</code></td>
+<td><code>BankruptError</code> を <code>nautilus_adapter</code> から取得</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>full_mode.py</code></td>
+<td><code>Backtest</code> を <code>backtest_wrapper.Backtest_Wrapper</code> 経由に変更</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>bridge.py</code></td>
+<td>Phase 0 で修正済み。追加変更なし</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>sandbox.py</code></td>
+<td><code>game_setup</code> 経由のため変更不要</td>
+<td>✅（変更なし）</td>
+</tr>
+<tr>
+<td><code>headless_broadcast.py</code></td>
+<td>TYPE_CHECKING のみ。実行時影響なし</td>
+<td>✅（変更なし）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!NOTE]
+<code>backtest_wrapper.py</code> の変更が核心。<code>class Backtest_Wrapper(Backtest)</code> の構造を変えず、
+<code>Backtest</code> のインポート元を差し替えるだけで全体が NautilusBacktest に切り替わる。</p>
+</blockquote>
+<h3 id="phase-3">⏳ Phase 3: 統合テスト（ユーザーによる動作確認）<a class="headerlink" href="#phase-3" title="Permanent link">&para;</a></h3>
+<p><code>pnpm tauri:dev</code> でアプリを起動し、実際のゲームUIを操作して動作確認。</p>
+<p><strong>確認チェックリスト</strong>:
+- [ ] <code>bt.chart("7203")</code> でチャートが表示される
+- [ ] <code>bt.buy()</code> で注文が作成される
+- [ ] <code>bt.step()</code> で日が進み、注文が約定する
+- [ ] <code>bt.sell()</code> で保有株を売却できる
+- [ ] equity / cash が正しく更新される
+- [ ] <code>BankruptError</code> が equity &lt;= 0 で発生する
+- [ ] ブリッジモード（bridge.py）の golden cross 戦略が動作する
+- [ ] フルモード（full_mode.py）が動作する</p>
+<h3 id="blacksheeppy-run">✅ blacksheep.py — run 方式への移行（コード変更完了、動作未確認）<a class="headerlink" href="#blacksheeppy-run" title="Permanent link">&para;</a></h3>
+<p><code>C:\Users\sasai\AppData\Roaming\marimo\notebooks\blacksheep.py</code> を NautilusTrader チュートリアルの run 方式に書き換え済み。</p>
+<p>変更内容:
+- ✅ <code>for i in range(200): bt.step()</code> ループを <code>bt.run(strategy=..., step_callback=...)</code> に置き換え
+- ✅ 戦略ロジックを <code>strategy()</code> 関数として分離
+- ✅ <code>update_all_backtest_charts</code> を <code>step_callback</code> として渡し（チャート更新タイミング維持）</p>
+<p>⚠️ <strong>未解決</strong>: <code>nautilus_adapter.py</code> の <code>run(strategy, step_callback)</code> 変更が marimo ノートブックに反映されていない（知見10参照）。
+正しい <code>nautilus_adapter.py</code> のパスを特定し、そちらを編集する必要がある。</p>
+<h3 id="_5">フォールバック戦略<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p>NautilusTrader移行が困難な場合（特定APIの再現が不可能と判明した場合）は、
+BackcastPro を継続利用し、移行を中止する。
+Phase 1 のユニットテストが通らない場合はこのフォールバックを適用する。</p>
+<hr />
+<h2 id="verification-plan">Verification Plan<a class="headerlink" href="#verification-plan" title="Permanent link">&para;</a></h2>
+<h3 id="phase-0">✅ Phase 0: 既存バグ修正の確認（完了）<a class="headerlink" href="#phase-0" title="Permanent link">&para;</a></h3>
+<p><code>tests/test_nautilus_adapter.py::TestPhase0Compat</code> で検証済み：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_bridge_trades_is_property</span><span class="p">():</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;bt.trades が property であり callable でないこと&quot;&quot;&quot;</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest_Wrapper</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">100_000</span><span class="p">)</span>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">bt</span><span class="o">.</span><span class="n">trades</span><span class="p">)</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_bridge_chart_state_exists</span><span class="p">():</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Backtest_Wrapper に _chart_state が存在すること&quot;&quot;&quot;</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">Backtest_Wrapper</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span> <span class="n">color_theme</span><span class="o">=</span><span class="s2">&quot;light&quot;</span><span class="p">)</span>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>    <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">bt</span><span class="p">,</span> <span class="s2">&quot;_chart_state&quot;</span><span class="p">)</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">_chart_state</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>  <span class="c1"># AttributeError が出ないこと</span>
+</span></code></pre></div>
+<h3 id="phase-1-3838">✅ Phase 1: ユニットテスト（完了 — 38/38 通過）<a class="headerlink" href="#phase-1-3838" title="Permanent link">&para;</a></h3>
+<p>実行コマンド:
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nb">cd</span><span class="w"> </span>C:/Users/sasai/Documents/BackcastPro
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>.venv/Scripts/python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/test_nautilus_adapter.py<span class="w"> </span>-v
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="c1"># 38 passed in 2.74s</span>
+</span></code></pre></div></p>
+<p><code>tests/test_nautilus_adapter.py</code> に実装済み:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_step_execution</span><span class="p">():</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">NautilusBacktest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">synthetic_df</span><span class="p">})</span>
+</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">is_finished</span> <span class="o">==</span> <span class="kc">False</span>
+</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">step_index</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">step_index</span> <span class="o">==</span> <span class="mi">1</span>
+</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">current_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>
+</span><span id="__span-21-9"><a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_current_data_visible_to_strategy</span><span class="p">():</span>
+</span><span id="__span-21-10"><a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;step() 内で戦略が呼ばれる時点で現在バーが bt.data に見えること&quot;&quot;&quot;</span>
+</span><span id="__span-21-11"><a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>    <span class="n">seen_lengths</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-21-12"><a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">strategy</span><span class="p">(</span><span class="n">bt</span><span class="p">):</span>
+</span><span id="__span-21-13"><a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>        <span class="n">seen_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bt</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;7203&quot;</span><span class="p">]))</span>
+</span><span id="__span-21-14"><a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">NautilusBacktest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">synthetic_df</span><span class="p">})</span>
+</span><span id="__span-21-15"><a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_strategy</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span>
+</span><span id="__span-21-16"><a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># step 1: 戦略が呼ばれる時点で data に1行目が見えること</span>
+</span><span id="__span-21-17"><a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># step 2: 戦略が呼ばれる時点で data に2行目が見えること</span>
+</span><span id="__span-21-18"><a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>    <span class="k">assert</span> <span class="n">seen_lengths</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;expected [1, 2], got </span><span class="si">{</span><span class="n">seen_lengths</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-21-19"><a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>
+</span><span id="__span-21-20"><a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_set_data_auto_starts</span><span class="p">():</span>
+</span><span id="__span-21-21"><a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;set_data() の後に明示的 start() なしで step() が動作すること&quot;&quot;&quot;</span>
+</span><span id="__span-21-22"><a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">NautilusBacktest</span><span class="p">(</span><span class="n">cash</span><span class="o">=</span><span class="mi">100_000</span><span class="p">)</span>
+</span><span id="__span-21-23"><a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_data</span><span class="p">({</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">synthetic_df</span><span class="p">})</span>  <span class="c1"># start() が自動で呼ばれる</span>
+</span><span id="__span-21-24"><a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># RuntimeError が出ないこと</span>
+</span><span id="__span-21-25"><a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a>
+</span><span id="__span-21-26"><a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_buy_and_equity</span><span class="p">():</span>
+</span><span id="__span-21-27"><a id="__codelineno-21-27" name="__codelineno-21-27" href="#__codelineno-21-27"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">NautilusBacktest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">synthetic_df</span><span class="p">})</span>
+</span><span id="__span-21-28"><a id="__codelineno-21-28" name="__codelineno-21-28" href="#__codelineno-21-28"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># 最初のバーを進める</span>
+</span><span id="__span-21-29"><a id="__codelineno-21-29" name="__codelineno-21-29" href="#__codelineno-21-29"></a>    <span class="n">initial_equity</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">equity</span>
+</span><span id="__span-21-30"><a id="__codelineno-21-30" name="__codelineno-21-30" href="#__codelineno-21-30"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">buy</span><span class="p">()</span>
+</span><span id="__span-21-31"><a id="__codelineno-21-31" name="__codelineno-21-31" href="#__codelineno-21-31"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>  <span class="c1"># 注文約定</span>
+</span><span id="__span-21-32"><a id="__codelineno-21-32" name="__codelineno-21-32" href="#__codelineno-21-32"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">equity</span> <span class="o">!=</span> <span class="n">initial_equity</span>  <span class="c1"># ポジションのMTM反映</span>
+</span><span id="__span-21-33"><a id="__codelineno-21-33" name="__codelineno-21-33" href="#__codelineno-21-33"></a>
+</span><span id="__span-21-34"><a id="__codelineno-21-34" name="__codelineno-21-34" href="#__codelineno-21-34"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_goto</span><span class="p">():</span>
+</span><span id="__span-21-35"><a id="__codelineno-21-35" name="__codelineno-21-35" href="#__codelineno-21-35"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">NautilusBacktest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">synthetic_df</span><span class="p">})</span>
+</span><span id="__span-21-36"><a id="__codelineno-21-36" name="__codelineno-21-36" href="#__codelineno-21-36"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</span><span id="__span-21-37"><a id="__codelineno-21-37" name="__codelineno-21-37" href="#__codelineno-21-37"></a>    <span class="k">assert</span> <span class="n">bt</span><span class="o">.</span><span class="n">step_index</span> <span class="o">==</span> <span class="mi">5</span>
+</span><span id="__span-21-38"><a id="__codelineno-21-38" name="__codelineno-21-38" href="#__codelineno-21-38"></a>
+</span><span id="__span-21-39"><a id="__codelineno-21-39" name="__codelineno-21-39" href="#__codelineno-21-39"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_finalize</span><span class="p">():</span>
+</span><span id="__span-21-40"><a id="__codelineno-21-40" name="__codelineno-21-40" href="#__codelineno-21-40"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">NautilusBacktest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">synthetic_df</span><span class="p">})</span>
+</span><span id="__span-21-41"><a id="__codelineno-21-41" name="__codelineno-21-41" href="#__codelineno-21-41"></a>    <span class="k">while</span> <span class="ow">not</span> <span class="n">bt</span><span class="o">.</span><span class="n">is_finished</span><span class="p">:</span>
+</span><span id="__span-21-42"><a id="__codelineno-21-42" name="__codelineno-21-42" href="#__codelineno-21-42"></a>        <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-21-43"><a id="__codelineno-21-43" name="__codelineno-21-43" href="#__codelineno-21-43"></a>    <span class="n">result</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+</span><span id="__span-21-44"><a id="__codelineno-21-44" name="__codelineno-21-44" href="#__codelineno-21-44"></a>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span>
+</span><span id="__span-21-45"><a id="__codelineno-21-45" name="__codelineno-21-45" href="#__codelineno-21-45"></a>
+</span><span id="__span-21-46"><a id="__codelineno-21-46" name="__codelineno-21-46" href="#__codelineno-21-46"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_all_api_methods</span><span class="p">():</span>
+</span><span id="__span-21-47"><a id="__codelineno-21-47" name="__codelineno-21-47" href="#__codelineno-21-47"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;全メソッド/プロパティが例外なく呼び出せること&quot;&quot;&quot;</span>
+</span><span id="__span-21-48"><a id="__codelineno-21-48" name="__codelineno-21-48" href="#__codelineno-21-48"></a>    <span class="n">bt</span> <span class="o">=</span> <span class="n">NautilusBacktest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;7203&quot;</span><span class="p">:</span> <span class="n">synthetic_df</span><span class="p">})</span>
+</span><span id="__span-21-49"><a id="__codelineno-21-49" name="__codelineno-21-49" href="#__codelineno-21-49"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_cash</span><span class="p">(</span><span class="mi">500_000</span><span class="p">)</span>
+</span><span id="__span-21-50"><a id="__codelineno-21-50" name="__codelineno-21-50" href="#__codelineno-21-50"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">set_strategy</span><span class="p">(</span><span class="k">lambda</span> <span class="n">b</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="__span-21-51"><a id="__codelineno-21-51" name="__codelineno-21-51" href="#__codelineno-21-51"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</span><span id="__span-21-52"><a id="__codelineno-21-52" name="__codelineno-21-52" href="#__codelineno-21-52"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="__span-21-53"><a id="__codelineno-21-53" name="__codelineno-21-53" href="#__codelineno-21-53"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">equity</span>
+</span><span id="__span-21-54"><a id="__codelineno-21-54" name="__codelineno-21-54" href="#__codelineno-21-54"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">cash</span>
+</span><span id="__span-21-55"><a id="__codelineno-21-55" name="__codelineno-21-55" href="#__codelineno-21-55"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">trades</span>
+</span><span id="__span-21-56"><a id="__codelineno-21-56" name="__codelineno-21-56" href="#__codelineno-21-56"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">closed_trades</span>
+</span><span id="__span-21-57"><a id="__codelineno-21-57" name="__codelineno-21-57" href="#__codelineno-21-57"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">orders</span>
+</span><span id="__span-21-58"><a id="__codelineno-21-58" name="__codelineno-21-58" href="#__codelineno-21-58"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">position</span>
+</span><span id="__span-21-59"><a id="__codelineno-21-59" name="__codelineno-21-59" href="#__codelineno-21-59"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">position_of</span><span class="p">(</span><span class="s2">&quot;7203&quot;</span><span class="p">)</span>
+</span><span id="__span-21-60"><a id="__codelineno-21-60" name="__codelineno-21-60" href="#__codelineno-21-60"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">data</span>
+</span><span id="__span-21-61"><a id="__codelineno-21-61" name="__codelineno-21-61" href="#__codelineno-21-61"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">current_time</span>
+</span><span id="__span-21-62"><a id="__codelineno-21-62" name="__codelineno-21-62" href="#__codelineno-21-62"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">progress</span>
+</span><span id="__span-21-63"><a id="__codelineno-21-63" name="__codelineno-21-63" href="#__codelineno-21-63"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">step_index</span>
+</span><span id="__span-21-64"><a id="__codelineno-21-64" name="__codelineno-21-64" href="#__codelineno-21-64"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">is_finished</span>
+</span><span id="__span-21-65"><a id="__codelineno-21-65" name="__codelineno-21-65" href="#__codelineno-21-65"></a>    <span class="n">_</span> <span class="o">=</span> <span class="n">bt</span><span class="o">.</span><span class="n">get_state_snapshot</span><span class="p">()</span>
+</span><span id="__span-21-66"><a id="__codelineno-21-66" name="__codelineno-21-66" href="#__codelineno-21-66"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">add_trade_callback</span><span class="p">(</span><span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="__span-21-67"><a id="__codelineno-21-67" name="__codelineno-21-67" href="#__codelineno-21-67"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+</span><span id="__span-21-68"><a id="__codelineno-21-68" name="__codelineno-21-68" href="#__codelineno-21-68"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="__span-21-69"><a id="__codelineno-21-69" name="__codelineno-21-69" href="#__codelineno-21-69"></a>    <span class="n">bt</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+</span></code></pre></div>
+<h3 id="phase-3_1">⏳ Phase 3: 手動確認（ユーザーによるテスト）<a class="headerlink" href="#phase-3_1" title="Permanent link">&para;</a></h3>
+<ol class="task-list">
+<li><strong>nautilus_trader インストール確認</strong></li>
+<li>
+<p>✅ <code>python -c "import nautilus_trader; print(nautilus_trader.__version__)"</code> → <code>1.221.0</code> 確認済み</p>
+</li>
+<li>
+<p><strong>ゲームUI動作確認</strong>（ユーザーによるテスト）
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>pnpm<span class="w"> </span>tauri:dev
+</span></code></pre></div></p>
+</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <a href="file:///C:/Users/sasai/AppData/Roaming/marimo/notebooks/backcast.py">backcast.py</a> ノートブックを開く</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>bt.chart("7203")</code> でチャートが表示される</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>bt.buy()</code> で注文が作成される</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>bt.step()</code> で日が進み、注文が約定する</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>bt.sell()</code> で保有株を売却できる</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> equity / cash が正しく更新される</p>
+</li>
+<li>
+<p><strong>エラーハンドリング確認</strong></p>
+</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> equity &lt;= 0 になった場合に <code>BankruptError</code> が発生すること</p>
+</li>
+<li>
+<p><strong>回帰テスト</strong>
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="nb">cd</span><span class="w"> </span>C:/Users/sasai/Documents/BackcastPro
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>.venv/Scripts/python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/test_nautilus_adapter.py<span class="w"> </span>-v
+</span></code></pre></div></p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  ページトップへ戻る
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2024-2025 botterYosuke
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/botterYosuke/BackcastPro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://discord.gg/fzJTbpzE" target="_blank" rel="noopener" title="discord.gg" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/BackcastPro/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "content.code.annotate", "navigation.instant", "navigation.tabs", "navigation.top", "navigation.footer", "search.highlight", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
