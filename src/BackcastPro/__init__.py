@@ -10,21 +10,22 @@ BackcastPro をご利用いただきありがとうございます。
 
 ※ 使い始めはチュートリアル → 詳細はAPIリファレンスをご参照ください。
 """
+
 from .backtest import Backtest
 from ._broker import BankruptError
 
 from .api.stocks_price import get_stock_daily
-from .api.stocks_minute_price import get_stock_minute
+from trading_data.stocks_price import get_stock_minute
 from .api.stocks_board import get_stock_board
 from trading_data.stocks_info import get_stock_info
 from .api.stocks_current_price import get_stock_current_price
 
 __all__ = [
-    'Backtest',
-    'BankruptError',
-    'get_stock_daily',
-    'get_stock_minute',
-    'get_stock_board',
-    'get_stock_info',
-    'get_stock_current_price',
+    "Backtest",
+    "BankruptError",
+    "get_stock_daily",
+    "get_stock_minute",
+    "get_stock_board",
+    "get_stock_info",
+    "get_stock_current_price",
 ]

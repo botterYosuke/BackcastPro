@@ -13,3 +13,4 @@ dist
 site/
 nul
 logs/
+.cocoindex_code/

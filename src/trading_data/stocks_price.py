@@ -122,6 +122,7 @@ def get_stock_daily(code, from_: datetime = None, to: datetime = None) -> pd.Dat
         DataFrame: 株価データ（DatetimeIndexとして日付がインデックスに設定されている）
     """
     from .stocks_price import stocks_price
+
     __sp__ = stocks_price()
 
     # 株価データを取得（内部で自動的にデータベースに保存される）
@@ -131,24 +132,77 @@ def get_stock_daily(code, from_: datetime = None, to: datetime = None) -> pd.Dat
     if df is not None and not df.empty:
         if not isinstance(df.index, pd.DatetimeIndex):
             # Date列がある場合はそれをインデックスに設定
-            if 'Date' in df.columns:
+            if "Date" in df.columns:
                 df = df.copy()
-                df['Date'] = pd.to_datetime(df['Date'])
-                df = df.set_index('Date')
-            elif 'date' in df.columns:
+                df["Date"] = pd.to_datetime(df["Date"])
+                df = df.set_index("Date")
+            elif "date" in df.columns:
                 df = df.copy()
-                df['date'] = pd.to_datetime(df['date'])
-                df = df.set_index('date')
-                df.index.name = 'Date'
+                df["date"] = pd.to_datetime(df["date"])
+                df = df.set_index("date")
+                df.index.name = "Date"
             else:
                 import warnings
+
                 warnings.warn(
                     f"get_stock_daily('{code}') が返したDataFrameにDate列がなく、"
                     "インデックスもDatetimeIndexではありません。",
-                    stacklevel=2
+                    stacklevel=2,
                 )
         # 日付順にソート
         if isinstance(df.index, pd.DatetimeIndex):
             df = df.sort_index()
 
     return df
+
+
+def get_stock_minute(
+    code: str, from_: datetime = None, to: datetime = None
+) -> pd.DataFrame:
+    """
+    1分足データを duckdb (S:\\jp\\stocks_minute\\{code}.duckdb) から取得
+    """
+    import duckdb
+    import os
+    import pandas as pd
+    from .lib.util import _Timestamp
+
+    norm_from = _Timestamp(from_)
+    norm_to = _Timestamp(to)
+
+    if norm_from and norm_to and norm_from > norm_to:
+        raise ValueError("開始日が終了日より後になっています")
+
+    base_code = str(code).split(".")[0]
+    db_path = f"S:\\jp\\stocks_minute\\{base_code}.duckdb"
+
+    if not os.path.exists(db_path):
+        raise ValueError(f"1分足DBが存在しません: {db_path}")
+
+    con = duckdb.connect(db_path, read_only=True)
+    try:
+        query = "SELECT * FROM stocks_minute WHERE 1=1"
+        params = []
+        if norm_from:
+            query += " AND Date >= ?"
+            params.append(norm_from.date())
+        if norm_to:
+            query += " AND Date <= ?"
+            params.append(norm_to.date())
+
+        df = con.execute(query, params).df()
+
+        if not df.empty:
+            df["Datetime"] = pd.to_datetime(df["Date"].astype(str) + " " + df["Time"])
+            df = df.set_index("Datetime")
+            df = df.sort_index()
+            # Convert columns to ensure they are float/int
+            for col in ["Open", "High", "Low", "Close"]:
+                if col in df.columns:
+                    df[col] = df[col].astype(float)
+            if "Volume" in df.columns:
+                df["Volume"] = df["Volume"].astype(float)  # handle NA
+
+        return df
+    finally:
+        con.close()
