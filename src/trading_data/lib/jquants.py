@@ -69,7 +69,16 @@ class jquants:
 
     def _handle_auth_error(self, res: requests.Response) -> None:
         if res.status_code in (401, 403):
-            logger.error(f"API認証エラー: {res.status_code}")
+            try:
+                body = res.json()
+                message = body.get("message", res.text)
+            except Exception:
+                message = res.text
+            logger.error(
+                f"API認証エラー: {res.status_code} - {message}\n"
+                "J-Quantsのサブスクリプション契約状況を確認してください: "
+                "https://jpx-jquants.com/"
+            )
             self.isEnable = False
 
     def _get_all_pages(self, endpoint: str, params: dict) -> list:
