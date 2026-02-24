@@ -9,6 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 class stocks_info:
     """
     銘柄のデータを取得するためのクラス
@@ -18,7 +19,9 @@ class stocks_info:
         self.db = db_stocks_info()
         self.jq = jquants()
 
-    def _fetch_from_jquants(self, code: str = "", date: datetime = None) -> pd.DataFrame | None:
+    def _fetch_from_jquants(
+        self, code: str = "", date: datetime = None
+    ) -> pd.DataFrame | None:
         """
         J-Quantsから銘柄情報を取得する
 
@@ -34,11 +37,11 @@ class stocks_info:
             return None
 
         # Codeを4文字にする
-        df['Code'] = df['Code'].str[:4]
+        df["Code"] = df["Code"].str[:4]
 
         return df
 
-    def get_japanese_listed_info(self, code = "", date: datetime = None) -> pd.DataFrame:
+    def get_japanese_listed_info(self, code="", date: datetime = None) -> pd.DataFrame:
 
         # DBファイルの準備（存在しなければクラウドからダウンロードを試行）
         self.db.ensure_db_ready()
@@ -47,8 +50,10 @@ class stocks_info:
         df = self._fetch_from_jquants(code=code, date=date)
         if df is not None:
             # DataFrameをcacheフォルダに保存
-            # 非同期、遅延を避けるためデーモンスレッドで実行
-            threading.Thread(target=self.db.save_listed_info, args=(df,), daemon=True).start()
+            # 非同期、遅延を避けるためスレッドで実行するが、メインプロセス終了で中断されないようdaemon=Falseに変更
+            threading.Thread(
+                target=self.db.save_listed_info, args=(df,), daemon=False
+            ).start()
             return df
 
         # 2) cacheフォルダから取得
@@ -59,7 +64,9 @@ class stocks_info:
         else:
             return df
 
-        raise ValueError(f"日本株式上場銘柄一覧の取得に失敗しました: {self.jq.isEnable}")
+        raise ValueError(
+            f"日本株式上場銘柄一覧の取得に失敗しました: {self.jq.isEnable}"
+        )
 
     def get_company_name(self, code: str):
         """
@@ -67,27 +74,27 @@ class stocks_info:
         """
         if not self.jq.isEnable:
             return str(code)
-        
+
         title = None
-        try:           
+        try:
             # 銘柄コードを正規化（4桁の場合はそのまま、5桁の場合はそのまま）
             code_for_lookup = str(code).strip()
             # .JPなどのサフィックスを除去
-            if '.' in code_for_lookup:
-                code_for_lookup = code_for_lookup.split('.')[0]
-            
+            if "." in code_for_lookup:
+                code_for_lookup = code_for_lookup.split(".")[0]
+
             # 銘柄情報を取得
             df_info = self.jq.get_listed_info(code=code_for_lookup)
-            
+
             # 銘柄名称を取得（CompanyNameカラムから）
-            if not df_info.empty and 'CompanyName' in df_info.columns:
-                company_name = df_info.iloc[0]['CompanyName']
+            if not df_info.empty and "CompanyName" in df_info.columns:
+                company_name = df_info.iloc[0]["CompanyName"]
                 if pd.notna(company_name) and company_name:
                     title = str(company_name)
         except Exception as e:
             # エラーが発生してもチャートの表示は継続（タイトルなしで表示）
             print(f"警告: 銘柄名称の取得に失敗しました: {e}", file=sys.stderr)
-            
+
         # タイトルが取得できなかった場合は、銘柄コードをフォールバックとして使用
         if title is None:
             title = str(code)
@@ -100,6 +107,7 @@ def get_stock_info(code="", date: datetime = None) -> pd.DataFrame:
     銘柄の情報を取得する
     """
     from .stocks_info import stocks_info
-    __si__ = stocks_info()    
+
+    __si__ = stocks_info()
 
     return __si__.get_japanese_listed_info(code=code, date=date)

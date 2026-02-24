@@ -10,16 +10,18 @@ import pandas as pd
 
 # 環境変数を読み込み
 from dotenv import load_dotenv
+
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+
 class kabusap:
     """
     kabuステーションAPI Client (Singleton)
     """
-    
+
     _instance = None
     _lock = threading.Lock()
 
@@ -32,56 +34,58 @@ class kabusap:
 
     def __init__(self):
         # 既に初期化済みの場合はスキップ
-        if hasattr(self, '_initialized'):
+        if hasattr(self, "_initialized"):
             return
-            
-        self.API_URL = os.getenv('KABUSAP_API_URL', "http://localhost:18080/kabusapi")
+
+        self.API_URL = os.getenv("KABUSAP_API_URL", "http://localhost:18080/kabusapi")
         self.api_key = ""
         self.headers = {}  # 初期化を確実にする
         self._initialized = True
         self.isEnable = self._set_token()
         if self.isEnable:
             self.headers = {
-                'Content-Type': 'application/json',
-                'X-API-KEY': self.api_key
+                "Content-Type": "application/json",
+                "X-API-KEY": self.api_key,
             }
 
     def _set_token(self) -> bool:
         """
         APIトークンを取得
-        
+
         正しく設定ファイルが作成されていれば、本コードを実行することで、APIトークンを取得することができます。
         「APIを使用する準備が完了しました。」と出力されれば、kabuステーションAPIをコールすることができるようになります！
         """
-        api_password = os.getenv('KABUSAP_API_PASSWORD')
-        
+        api_password = os.getenv("KABUSAP_API_PASSWORD")
+
         # 環境変数が設定されていない場合はAPI呼び出しを行わない
         if not api_password:
-            logger.warning("kabuステーションAPIの認証情報（KABUSAP_API_PASSWORD）が設定されていません。")
+            logger.warning(
+                "kabuステーションAPIの認証情報（KABUSAP_API_PASSWORD）が設定されていません。"
+            )
             return False
-        
+
         # トークン取得
         try:
-            obj = {'APIPassword': api_password}
-            json_data = json.dumps(obj).encode('utf8')
-            
-            url = f'{self.API_URL}/token'
-            req = urllib.request.Request(url, json_data, method='POST')
-            req.add_header('Content-Type', 'application/json')
-            
+            obj = {"APIPassword": api_password}
+            json_data = json.dumps(obj).encode("utf8")
+
+            url = f"{self.API_URL}/token"
+            req = urllib.request.Request(url, json_data, method="POST")
+            req.add_header("Content-Type", "application/json")
+
             with urllib.request.urlopen(req) as res:
                 content = json.loads(res.read())
                 # レスポンスからトークンを取得
                 # レスポンス形式は {'ResultCode': 0, 'Token': '...'} の形式を想定
-                if 'Token' in content:
-                    self.api_key = content['Token']
+                if "Token" in content:
+                    self.api_key = content["Token"]
                     logger.info("API使用の準備が完了しました。")
                     return True
                 else:
                     logger.error(f"トークンの取得に失敗しました。レスポンス: {content}")
                     return False
         except urllib.error.HTTPError as e:
-            error_content = json.loads(e.read().decode('utf-8'))
+            error_content = json.loads(e.read().decode("utf-8"))
             logger.error(f"HTTPエラー: {e.code} - {error_content}")
             return False
         except Exception as e:
@@ -125,96 +129,136 @@ class kabusap:
 
         # 板情報取得のURLを構築（銘柄コード@市場コードの形式）
         # 市場コード1は東証を表す
-        url = f'{self.API_URL}/board/{code}@1'
-        
+        url = f"{self.API_URL}/board/{code}@1"
+
         try:
             # GETリクエストを送信
-            req = urllib.request.Request(url, method='GET')
-            req.add_header('Content-Type', 'application/json')
-            req.add_header('X-API-KEY', self.api_key)
-            
+            req = urllib.request.Request(url, method="GET")
+            req.add_header("Content-Type", "application/json")
+            req.add_header("X-API-KEY", self.api_key)
+
             with urllib.request.urlopen(req) as res:
                 content = json.loads(res.read())
-                
+
                 # エラーチェック
-                if 'ResultCode' in content and content['ResultCode'] != 0:
-                    logger.error(f"API Error: {content.get('ResultCode')} - {content.get('Message', '')}")
+                if "ResultCode" in content and content["ResultCode"] != 0:
+                    logger.error(
+                        f"API Error: {content.get('ResultCode')} - {content.get('Message', '')}"
+                    )
                     return pd.DataFrame()
-                
+
                 # 板情報をDataFrameに変換
                 # APIレスポンスの構造に応じてデータを抽出
                 board_data = []
-                
+
                 # パターン1: Bid/Askキーが存在する場合（JSON配列形式）
-                if 'Bid' in content and isinstance(content['Bid'], list):
-                    for bid in content['Bid']:
-                        board_data.append({
-                            'Price': bid.get('Price', 0),
-                            'Qty': bid.get('Qty', 0),
-                            'Type': 'Bid'
-                        })
-                
-                if 'Ask' in content and isinstance(content['Ask'], list):
-                    for ask in content['Ask']:
-                        board_data.append({
-                            'Price': ask.get('Price', 0),
-                            'Qty': ask.get('Qty', 0),
-                            'Type': 'Ask'
-                        })
-                
+                if "Bid" in content and isinstance(content["Bid"], list):
+                    for bid in content["Bid"]:
+                        board_data.append(
+                            {
+                                "Price": bid.get("Price", 0),
+                                "Qty": bid.get("Qty", 0),
+                                "Type": "Bid",
+                            }
+                        )
+
+                if "Ask" in content and isinstance(content["Ask"], list):
+                    for ask in content["Ask"]:
+                        board_data.append(
+                            {
+                                "Price": ask.get("Price", 0),
+                                "Qty": ask.get("Qty", 0),
+                                "Type": "Ask",
+                            }
+                        )
+
                 # パターン2: Sell1.Price, Buy1.Price形式の場合（json_normalize後の形式）
                 if not board_data:
                     normalized_df = pd.json_normalize(content)
-                    
+
                     # 買い板（Buy1～Buy10）の処理
                     for i in range(1, 11):
-                        price_col = f'Buy{i}.Price'
-                        qty_col = f'Buy{i}.Qty'
-                        if price_col in normalized_df.columns and qty_col in normalized_df.columns:
-                            price = normalized_df[price_col].iloc[0] if len(normalized_df) > 0 else 0
-                            qty = normalized_df[qty_col].iloc[0] if len(normalized_df) > 0 else 0
-                            if pd.notna(price) and pd.notna(qty) and price > 0 and qty > 0:
-                                board_data.append({
-                                    'Price': float(price),
-                                    'Qty': int(qty),
-                                    'Type': 'Bid'
-                                })
-                    
+                        price_col = f"Buy{i}.Price"
+                        qty_col = f"Buy{i}.Qty"
+                        if (
+                            price_col in normalized_df.columns
+                            and qty_col in normalized_df.columns
+                        ):
+                            price = (
+                                normalized_df[price_col].iloc[0]
+                                if len(normalized_df) > 0
+                                else 0
+                            )
+                            qty = (
+                                normalized_df[qty_col].iloc[0]
+                                if len(normalized_df) > 0
+                                else 0
+                            )
+                            if (
+                                pd.notna(price)
+                                and pd.notna(qty)
+                                and price > 0
+                                and qty > 0
+                            ):
+                                board_data.append(
+                                    {
+                                        "Price": float(price),
+                                        "Qty": int(qty),
+                                        "Type": "Bid",
+                                    }
+                                )
+
                     # 売り板（Sell1～Sell10）の処理
                     for i in range(1, 11):
-                        price_col = f'Sell{i}.Price'
-                        qty_col = f'Sell{i}.Qty'
-                        if price_col in normalized_df.columns and qty_col in normalized_df.columns:
-                            price = normalized_df[price_col].iloc[0] if len(normalized_df) > 0 else 0
-                            qty = normalized_df[qty_col].iloc[0] if len(normalized_df) > 0 else 0
-                            if pd.notna(price) and pd.notna(qty) and price > 0 and qty > 0:
-                                board_data.append({
-                                    'Price': float(price),
-                                    'Qty': int(qty),
-                                    'Type': 'Ask'
-                                })
-                
+                        price_col = f"Sell{i}.Price"
+                        qty_col = f"Sell{i}.Qty"
+                        if (
+                            price_col in normalized_df.columns
+                            and qty_col in normalized_df.columns
+                        ):
+                            price = (
+                                normalized_df[price_col].iloc[0]
+                                if len(normalized_df) > 0
+                                else 0
+                            )
+                            qty = (
+                                normalized_df[qty_col].iloc[0]
+                                if len(normalized_df) > 0
+                                else 0
+                            )
+                            if (
+                                pd.notna(price)
+                                and pd.notna(qty)
+                                and price > 0
+                                and qty > 0
+                            ):
+                                board_data.append(
+                                    {
+                                        "Price": float(price),
+                                        "Qty": int(qty),
+                                        "Type": "Ask",
+                                    }
+                                )
+
                 # DataFrameに変換
                 if board_data:
                     df = pd.DataFrame(board_data)
                     # ソース情報を追加
-                    df['source'] = 'kabu-station'
-                    df['code'] = code
+                    df["source"] = "kabu-station"
+                    df["code"] = code
                     return df
                 else:
                     # 板情報が取得できなかった場合
                     logger.warning(f"板情報が取得できませんでした: {code}")
                     return pd.DataFrame()
-                
+
         except urllib.error.HTTPError as e:
-            error_content = json.loads(e.read().decode('utf-8'))
+            error_content = json.loads(e.read().decode("utf-8"))
             logger.error(f"HTTPエラー: {e.code} - {error_content}")
             return pd.DataFrame()
         except Exception as e:
             logger.error(f"板情報の取得に失敗しました: {e}")
             return pd.DataFrame()
-
-
 
     def get_current_price(self, code: str) -> dict | None:
         """
@@ -234,23 +278,25 @@ class kabusap:
         if not code or not isinstance(code, str) or not code.strip():
             return None
 
-        url = f'{self.API_URL}/board/{code}@1'
+        url = f"{self.API_URL}/board/{code}@1"
 
         try:
-            req = urllib.request.Request(url, method='GET')
-            req.add_header('Content-Type', 'application/json')
-            req.add_header('X-API-KEY', self.api_key)
+            req = urllib.request.Request(url, method="GET")
+            req.add_header("Content-Type", "application/json")
+            req.add_header("X-API-KEY", self.api_key)
 
             with urllib.request.urlopen(req) as res:
                 content = json.loads(res.read())
 
-                if 'ResultCode' in content and content['ResultCode'] != 0:
-                    logger.error(f"API Error: {content.get('ResultCode')} - {content.get('Message', '')}")
+                if "ResultCode" in content and content["ResultCode"] != 0:
+                    logger.error(
+                        f"API Error: {content.get('ResultCode')} - {content.get('Message', '')}"
+                    )
                     return None
 
-                price = content.get('CurrentPrice')
-                volume = content.get('TradingVolume')
-                time_str = content.get('CurrentPriceTime')
+                price = content.get("CurrentPrice")
+                volume = content.get("TradingVolume")
+                time_str = content.get("CurrentPriceTime")
 
                 if price is None or time_str is None:
                     return None
@@ -265,8 +311,118 @@ class kabusap:
             logger.error(f"現在値の取得に失敗しました: {e}")
             return None
 
+    def send_order(self, order_dict: dict) -> dict | None:
+        """
+        新規注文を発注する
 
-if __name__ == '__main__':
+        Args:
+            order_dict (dict): APIリクエストボディの辞書
+                (例: Password, Symbol, Exchange, SecurityType, Side, CashMargin, MarginTradeType, DelivType, AccountType, Qty, Price, ExpireDay, FrontOrderType)
+        Returns:
+            dict | None: 発注結果 (Result, OrderIdなど) 失敗時はNone
+        """
+        if not self.isEnable:
+            return None
+
+        self._refresh_token_if_needed()
+        url = f"{self.API_URL}/sendorder"
+
+        try:
+            json_data = json.dumps(order_dict).encode("utf8")
+            req = urllib.request.Request(url, json_data, method="POST")
+            req.add_header("Content-Type", "application/json")
+            req.add_header("X-API-KEY", self.api_key)
+
+            with urllib.request.urlopen(req) as res:
+                content = json.loads(res.read())
+                if "ResultCode" in content and content["ResultCode"] != 0:
+                    logger.error(
+                        f"API Error (send_order): {content.get('ResultCode')} - {content.get('Message', '')}"
+                    )
+                    return None
+                return content
+        except urllib.error.HTTPError as e:
+            error_content = json.loads(e.read().decode("utf-8"))
+            logger.error(f"HTTPエラー (send_order): {e.code} - {error_content}")
+            return None
+        except Exception as e:
+            logger.error(f"注文発注に失敗しました: {e}")
+            return None
+
+    def cancel_order(self, order_id: str, order_password: str) -> dict | None:
+        """
+        注文を取消する
+        """
+        if not self.isEnable:
+            return None
+
+        self._refresh_token_if_needed()
+        url = f"{self.API_URL}/cancelorder"
+
+        try:
+            obj = {"OrderId": order_id, "Password": order_password}
+            json_data = json.dumps(obj).encode("utf8")
+            req = urllib.request.Request(url, json_data, method="PUT")
+            req.add_header("Content-Type", "application/json")
+            req.add_header("X-API-KEY", self.api_key)
+
+            with urllib.request.urlopen(req) as res:
+                content = json.loads(res.read())
+                if "ResultCode" in content and content["ResultCode"] != 0:
+                    logger.error(
+                        f"API Error (cancel_order): {content.get('ResultCode')} - {content.get('Message', '')}"
+                    )
+                    return None
+                return content
+        except urllib.error.HTTPError as e:
+            error_content = json.loads(e.read().decode("utf-8"))
+            logger.error(f"HTTPエラー (cancel_order): {e.code} - {error_content}")
+            return None
+        except Exception as e:
+            logger.error(f"注文取消に失敗しました: {e}")
+            return None
+
+    def get_orders(self, product: str = "0") -> list | None:
+        """
+        注文約定照会を行う
+
+        Args:
+            product (str): 取得する商品 (0:すべて、1:現物、2:信用、3:先物、4:OP)
+        """
+        if not self.isEnable:
+            return None
+
+        self._refresh_token_if_needed()
+        url = f"{self.API_URL}/orders?product={product}"
+
+        try:
+            req = urllib.request.Request(url, method="GET")
+            req.add_header("Content-Type", "application/json")
+            req.add_header("X-API-KEY", self.api_key)
+
+            with urllib.request.urlopen(req) as res:
+                content = json.loads(res.read())
+                if (
+                    isinstance(content, dict)
+                    and "ResultCode" in content
+                    and content["ResultCode"] != 0
+                ):
+                    logger.error(
+                        f"API Error (get_orders): {content.get('ResultCode')} - {content.get('Message', '')}"
+                    )
+                    return None
+
+                return content if isinstance(content, list) else [content]
+        except urllib.error.HTTPError as e:
+            error_content = json.loads(e.read().decode("utf-8"))
+            logger.error(f"HTTPエラー (get_orders): {e.code} - {error_content}")
+            return None
+        except Exception as e:
+            logger.error(f"注文照会に失敗しました: {e}")
+            return None
+
+
+if __name__ == "__main__":
     kabusap = kabusap()
-    df = kabusap.get_board('8306')
+    df = kabusap.get_board("8306")
     print(df)
