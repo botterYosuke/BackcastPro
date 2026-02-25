@@ -47,7 +47,7 @@ class TestDbStocksDaily(unittest.TestCase):
 
             code = "9999"
             test_path = os.path.join(
-                self.test_cache_dir, "stocks_daily", f"{code}.duckdb"
+                self.test_cache_dir, "jp", "stocks_daily", f"{code}.duckdb"
             )
             os.makedirs(os.path.dirname(test_path), exist_ok=True)
 
@@ -63,7 +63,9 @@ class TestDbStocksDaily(unittest.TestCase):
         code = "1111"
         # We need a DB connection. Since get_db is a context manager using the cache dir,
         # let's manually create a db file and connect to avoid cloud download logic triggering in get_db
-        db_path = os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb")
+        db_path = os.path.join(
+            self.test_cache_dir, "jp", "stocks_daily", f"{code}.duckdb"
+        )
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
         con = duckdb.connect(db_path)
@@ -146,7 +148,9 @@ class TestDbStocksDaily(unittest.TestCase):
             self.db_daily.save_stock_prices(code, df)
 
         # 2. Check DB content manually
-        db_path = os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb")
+        db_path = os.path.join(
+            self.test_cache_dir, "jp", "stocks_daily", f"{code}.duckdb"
+        )
         self.assertTrue(os.path.exists(db_path))
 
         con = duckdb.connect(db_path)
@@ -208,7 +212,7 @@ class TestDbStocksDaily(unittest.TestCase):
             self.db_daily.save_stock_prices(code, df)
 
         con = duckdb.connect(
-            os.path.join(self.test_cache_dir, "stocks_daily", f"{code}.duckdb")
+            os.path.join(self.test_cache_dir, "jp", "stocks_daily", f"{code}.duckdb")
         )
         try:
             count = con.execute("SELECT COUNT(*) FROM stocks_daily").fetchone()[0]

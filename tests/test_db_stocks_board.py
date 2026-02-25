@@ -28,9 +28,7 @@ def db_board(temp_cache_dir):
         instance = db_stocks_board()
         instance.isEnable = True  # 強制的に有効化
         # Mock cloud download to prevent real HTTP requests during tests
-        with patch.object(
-            type(instance), '_download_from_cloud', return_value=False
-        ):
+        with patch.object(type(instance), "_download_from_cloud", return_value=False):
             yield instance
 
 
@@ -277,7 +275,9 @@ class TestDbStocksBoard:
         code = "5678"
 
         # DBファイルのパスを確認
-        db_path = os.path.join(db_board.cache_dir, "stocks_board", f"{code}.duckdb")
+        db_path = os.path.join(
+            db_board.cache_dir, "jp", "stocks_board", f"{code}.duckdb"
+        )
         assert not os.path.exists(db_path)
 
         # DBを取得

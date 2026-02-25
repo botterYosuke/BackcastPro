@@ -22,7 +22,7 @@ class TestDbManager(unittest.TestCase):
         self.db_manager = db_manager()
         # Mock cloud download to prevent real HTTP requests during tests
         self._download_patcher = patch.object(
-            db_manager, '_download_from_cloud', return_value=False
+            db_manager, "_download_from_cloud", return_value=False
         )
         self._download_patcher.start()
 
@@ -47,7 +47,7 @@ class TestDbManager(unittest.TestCase):
         with self.db_manager.get_db(code) as db:
             pass
 
-        db_path = os.path.join(self.test_dir, "test_subdir", f"{code}.duckdb")
+        db_path = os.path.join(self.test_dir, "jp", "test_subdir", f"{code}.duckdb")
         self.assertTrue(os.path.exists(db_path))
 
     @patch("BackcastPro.api.cloud_run_client.CloudRunClient")
@@ -58,7 +58,7 @@ class TestDbManager(unittest.TestCase):
 
         code = "5678"
         self.db_manager._db_subdir = "test_subdir"
-        db_path = os.path.join(self.test_dir, "test_subdir", f"{code}.duckdb")
+        db_path = os.path.join(self.test_dir, "jp", "test_subdir", f"{code}.duckdb")
 
         # Mock client behavior
         mock_client_instance = MockCloudRunClient.return_value
