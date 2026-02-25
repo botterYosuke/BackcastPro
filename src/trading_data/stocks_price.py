@@ -174,7 +174,13 @@ def get_stock_minute(
         raise ValueError("開始日が終了日より後になっています")
 
     base_code = str(code).split(".")[0]
-    db_path = f"S:\\jp\\stocks_minute\\{base_code}.duckdb"
+
+    # 環境変数からキャッシュディレクトリを取得、デフォルトパスを構築
+    cache_dir = os.environ.get("STOCKDATA_CACHE_DIR", "")
+    minute_data_dir = os.environ.get(
+        "STOCKDATA_MINUTE_DIR", os.path.join(cache_dir, "jp", "stocks_minute")
+    )
+    db_path = os.path.join(minute_data_dir, f"{base_code}.duckdb")
 
     if not os.path.exists(db_path):
         raise ValueError(f"1分足DBが存在しません: {db_path}")

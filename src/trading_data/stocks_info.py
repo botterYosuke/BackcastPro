@@ -64,9 +64,14 @@ class stocks_info:
         else:
             return df
 
-        raise ValueError(
-            f"日本株式上場銘柄一覧の取得に失敗しました: {self.jq.isEnable}"
+        error_msg = (
+            "日本株式上場銘柄一覧の取得に失敗しました。\n"
+            "以下の原因が考えられます:\n"
+            "1. J-Quants APIの契約が有効ではないか、APIキーが設定されていない\n"
+            "2. キャッシュデータベース(listed_info.duckdb)が存在しない、またはクラウドからのダウンロードに失敗した\n"
+            "3. 指定した日付または銘柄のデータが存在しない"
         )
+        raise ValueError(error_msg)
 
     def get_company_name(self, code: str):
         """

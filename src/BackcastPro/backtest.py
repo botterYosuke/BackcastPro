@@ -189,7 +189,7 @@ class Backtest:
         return df
 
 
-    def set_data(self, data):
+    def set_data(self, data, start=None, end=None):
         self._data = None
         if data is None:
             return
@@ -199,6 +199,13 @@ class Backtest:
         # 各DataFrameをバリデーションして準備
         for code, df in data.items():
             data[code] = self._validate_and_prepare_df(df, code)
+
+        # start/end が指定された場合、各DataFrameをトリム
+        if start is not None or end is not None:
+            s = pd.Timestamp(start) if start is not None else None
+            e = pd.Timestamp(end)   if end   is not None else None
+            for code, df in data.items():
+                data[code] = df.loc[s:e]
 
         # 辞書dataに含まれる全てのdf.index一覧を作成
         # df.indexが不一致の場合のために、どれかに固有値があれば抽出しておくため
@@ -306,7 +313,7 @@ class Backtest:
                 self._broker_instance.next(current_time)
             except BankruptError:
                 self._is_finished = True
-                return False
+                raise
 
         self._step_index += 1
 
@@ -617,15 +624,24 @@ class Backtest:
 
         return self._results
 
-    def run(self) -> pd.Series:
+    def run(self, strategy=None, step_callback=None) -> pd.Series:
         """
         バックテストを最後まで実行（ステップ実行API版）
         """
+        if strategy is not None:
+            self.set_strategy(strategy)
+
         if not self._is_started:
             self.start()
 
-        while not self._is_finished:
-            self.step()
+        try:
+            while not self._is_finished:
+                self.step()
+                if step_callback is not None:
+                    step_callback(self)
+        except BankruptError:
+            self.finalize()
+            raise
 
         return self.finalize()
 

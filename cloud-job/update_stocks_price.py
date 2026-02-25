@@ -24,9 +24,9 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-# STOCKDATA_CACHE_DIR 配下の "jp" サブフォルダをデータ保存先に設定
+# STOCKDATA_CACHE_DIR をそのまま利用
 _base = os.environ.get("STOCKDATA_CACHE_DIR", tempfile.mkdtemp())
-os.environ["STOCKDATA_CACHE_DIR"] = os.path.join(os.path.abspath(_base), "jp")
+os.environ["STOCKDATA_CACHE_DIR"] = os.path.abspath(_base)
 
 from trading_data.stocks_price import stocks_price
 from trading_data.stocks_info import stocks_info
@@ -61,7 +61,9 @@ def merge_jquants_priority(
     elif base_df is None or base_df.empty:
         result = jq_df
     else:
-        base = base_df.set_index("Date") if "Date" in base_df.columns else base_df.copy()
+        base = (
+            base_df.set_index("Date") if "Date" in base_df.columns else base_df.copy()
+        )
         jq = jq_df.set_index("Date") if "Date" in jq_df.columns else jq_df.copy()
         base_only = base.loc[~base.index.isin(jq.index)]
         result = pd.concat([jq, base_only]).sort_index()

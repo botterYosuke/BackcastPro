@@ -22,7 +22,7 @@ DATA_DIR = os.environ.get("STOCKDATA_CACHE_DIR", "/cache")
 
 # Whitelist: only allow known file patterns
 ALLOWED_PATHS = re.compile(
-    r"^jp/(stocks_daily/\d+\.duckdb|stocks_board/\d+\.duckdb|listed_info\.duckdb)$"
+    r"^jp/(stocks_daily/\d+\.duckdb|stocks_board/\d+\.duckdb|stocks_minute/\d+\.duckdb|listed_info\.duckdb)$"
 )
 
 

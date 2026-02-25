@@ -347,9 +347,9 @@ class db_manager:
     def _get_db_path(self, code: str = None) -> str:
         """DBファイルパスを取得"""
         if self._db_subdir and code:
-            return os.path.join(self.cache_dir, self._db_subdir, f"{code}.duckdb")
+            return os.path.join(self.cache_dir, "jp", self._db_subdir, f"{code}.duckdb")
         elif self._db_filename:
-            return os.path.join(self.cache_dir, self._db_filename)
+            return os.path.join(self.cache_dir, "jp", self._db_filename)
         else:
             raise ValueError("DB path configuration is incomplete")
 
