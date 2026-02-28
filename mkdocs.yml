@@ -29,7 +29,7 @@ theme:
     # Light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: blue
+      primary: custom
       accent: blue
       toggle:
         icon: material/brightness-7
@@ -38,26 +38,42 @@ theme:
     # Dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: blue
+      primary: custom
       accent: blue
       toggle:
         icon: material/brightness-4
         name: ライトモードに切り替え
 
   features:
-    - content.code.copy
+    - content.action.edit
+    - content.action.view
     - content.code.annotate
-    - navigation.instant
-    - navigation.tabs
-    - navigation.top
+    - content.code.copy
+    - content.tabs.link
+    - navigation.expand
     - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.path
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
     - search.highlight
+    - search.share
     - search.suggest
     - toc.follow
+    - toc.integrate
 
   font:
-    text: Noto Sans JP
+    text: Inter
     code: Fira Code
+
+extra_css:
+  - stylesheets/extra.css
+
 
 extra:
   social:
