@@ -36,6 +36,11 @@ def stooq_daily_quotes(code: str, from_: datetime = None, to: datetime = None) -
             end = None if to is None else to.strftime('%Y-%m-%d')
             df = yf.download(f"{code}.T", start, end, progress=False)
             if not df.empty:
+                # yfinance 1.0 は MultiIndex columns を返す（level-1 にtickerコード）
+                # → level-0 のカラム名（Open, High, Low, Close, Volume）にフラット化
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = df.columns.get_level_values(0)
+
                 # データを日付昇順に並び替え
                 df = df.sort_index()
 
@@ -47,6 +52,8 @@ def stooq_daily_quotes(code: str, from_: datetime = None, to: datetime = None) -
                     else:
                         df.index = pd.to_datetime(df.index)
                         df.index.name = 'Date'
+                else:
+                    df.index.name = 'Date'
 
                 return df
 

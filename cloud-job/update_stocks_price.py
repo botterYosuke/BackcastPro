@@ -32,6 +32,7 @@ from trading_data.stocks_price import stocks_price
 from trading_data.stocks_info import stocks_info
 from trading_data.lib.e_api import e_api
 from trading_data.lib.jquants import jquants as jquants_cls
+from BackcastPro.api.db_stocks_daily_mother import db_stocks_daily_mother
 
 logging.basicConfig(
     level=logging.INFO,
@@ -105,6 +106,7 @@ def main():
     sp = stocks_price()
     sp.e_shiten = e_api()
     sp.jq = jquants_cls()
+    mother_db = db_stocks_daily_mother()
 
     # 逐次処理
     success, failed, errors = 0, 0, []
@@ -141,7 +143,7 @@ def main():
         final_df = merge_jquants_priority(base_df, jq_df)
         if final_df is not None and not final_df.empty:
             try:
-                sp.db.save_stock_prices(code, final_df)
+                mother_db.save_stock_prices(code, final_df)
                 success += 1
             except Exception as e:
                 logger.error(f"銘柄 {code} の保存に失敗: {e}")
@@ -153,6 +155,13 @@ def main():
 
         if i % 100 == 0 or i == len(codes):
             logger.info(f"進捗: {i}/{len(codes)} (成功={success}, 失敗={failed})")
+
+    # mother.duckdb → 個別DB 分割
+    logger.info("mother.duckdb → 個別DB 分割開始...")
+    split_result = mother_db.split_to_individual(
+        sp.db, from_date=from_date.strftime("%Y-%m-%d")
+    )
+    logger.info(f"split完了: 成功={split_result['success']}, 失敗={split_result['failed']}")
 
     # サマリー
     logger.info(f"完了: 成功={success}, 失敗={failed}")

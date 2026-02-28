@@ -11,6 +11,7 @@
 5. [Cloud Run Proxyアップロード廃止とDockerボリュームマウントへの移行](#cloud-run-proxyアップロード廃止とdockerボリュームマウントへの移行)
 6. [Cloud Run Job廃止とSynology NAS Docker + DockerHubへの移行](#cloud-run-job廃止とsynology-nas-docker--dockerhubへの移行)
 7. [FTPS廃止とローカルファイル配信への移行](#ftps廃止とローカルファイル配信への移行)
+8. [mother.duckdb 統合DBの導入と GraphQL ランキングAPI](#motherduckdb-統合dbの導入と-graphql-ランキングapi)
 
 ---
 
@@ -243,5 +244,74 @@ docker run -v /volume1/docker/backcast/cache:/cache -p 8080:8080 cloud-run
 ```
 
 Cloud Run にデプロイする場合は、GCS バケットや NFS などのボリュームを `/cache` にマウントしてください。
+
+---
+
+## mother.duckdb 統合DBの導入と GraphQL ランキングAPI
+
+**Date:** 2026-02-28
+**Status:** Implemented
+
+### Context
+
+約4000銘柄の株価データが `S:\jp\stocks_daily\{code}.duckdb` として個別ファイルに分散している。
+値上がり率ランキングなどの全銘柄横断クエリを行うには4000ファイルを逐次 open/close する必要があり、
+接続オーバーヘッドが累積してランキング算出が現実的でなかった。
+
+### Decision
+
+**統合DBの導入：** 全銘柄を1つの `mother.duckdb` にまとめるアーキテクチャに変更。
+
+```
+APIs → update_stocks_price.py
+         ↓ fetch → upsert
+       S:\jp\stocks_daily\mother.duckdb   ← 全銘柄統合ソース
+         ↓ split_to_individual（日次）
+       S:\jp\stocks_daily\{code}.duckdb   ← 単一銘柄取得用（現状維持）
+
+GraphQL query → cloud-run/main.py → mother.duckdb
+                                   （ranking SQL on-the-fly）
+```
+
+- **`db_stocks_daily_mother` クラスの新規作成**（`src/BackcastPro/api/db_stocks_daily_mother.py`）:
+  `db_stocks_daily` を継承し `_db_subdir=None`、`_db_filename="stocks_daily/mother.duckdb"` を設定するだけで
+  既存の `save_stock_prices` / `load_stock_prices_from_cache` をそのまま再利用できる。
+  `split_to_individual()` メソッドで mother.duckdb の接続を1回だけオープンして全銘柄を個別DBへ分割（冪等）。
+
+- **`update_stocks_price.py` の保存先変更**: `sp.db`（個別DB）→ `mother_db`（統合DB）に変更。
+  フェッチループ完了後に `split_to_individual(sp.db, from_date=...)` で個別DBへ差分反映。
+  個別DBへの直接保存は廃止。
+
+- **GraphQL ランキングAPI の追加**（`cloud-run/main.py`）:
+  `strawberry-graphql[flask]` を採用。`mother.duckdb` に対して CTE + Window 関数で
+  値上がり率・値下がり率・出来高の各ランキングを on-the-fly で算出する。
+  `_ORDER_MAP` ホワイトリストで SQL injection を防止。
+
+- **`ALLOWED_PATHS` の更新**: `stocks_daily/mother.duckdb` をホワイトリストに追加。
+
+### Consequences
+
+*   **メリット**:
+    *   値上がり率ランキング等の全銘柄横断クエリが単一DBへの1回のクエリで完結。
+    *   GraphQL の型安全なスキーマで3種のランキング（値上がり・値下がり・出来高）を提供。
+    *   `split_to_individual` の1接続ループにより4000回の open/close を回避。
+    *   単一銘柄取得（`get_stock_daily`）は個別DBから引き続き読み込むため現状維持。
+*   **注意点**:
+    *   初回デプロイ時（新環境）は全量投入 → 全量 split の2ステップが必要:
+        ```bash
+        python update_stocks_price.py --days 1000        # Step 1: 全量投入
+        # Step 2: mother.duckdb → 個別DB へ全量分割（from_date=None）
+        ```
+    *   DuckDB の WAL モードにより、バッチ書き込み中の `read_only=True` アクセスは許容されるが、
+        長時間バッチと同時アクセスが重なる場合は競合に注意。
+
+### 変更ファイル
+
+| 操作 | ファイル |
+|------|---------|
+| 新規 | `src/BackcastPro/api/db_stocks_daily_mother.py` |
+| 修正 | `cloud-job/update_stocks_price.py`（保存先変更 + split 追加） |
+| 修正 | `cloud-run/requirements.txt`（`strawberry-graphql[flask]`, `duckdb` 追加） |
+| 修正 | `cloud-run/main.py`（`ALLOWED_PATHS` 更新 + `/graphql` endpoint 追加） |
 
 ---
