@@ -79,5 +79,5 @@ mo.vstack([slider, info])
 ## バグ報告 / サポート
 
 - バグ報告や要望は GitHub Issues へ
-- 質問は Discord コミュニティへ（[招待リンク](https://discord.gg/fzJTbpzE)）
+- 質問は Discord コミュニティへ（[招待リンク](https://discord.gg/3YUUqzWWxr)）
 - 使い方はドキュメントをご参照ください
