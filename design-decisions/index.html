@@ -1087,6 +1087,67 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#motherduckdb-db-graphql-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mother.duckdb 統合DBの導入と GraphQL ランキングAPI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mother.duckdb 統合DBの導入と GraphQL ランキングAPI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更ファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1528,6 +1589,67 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#motherduckdb-db-graphql-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mother.duckdb 統合DBの導入と GraphQL ランキングAPI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="mother.duckdb 統合DBの導入と GraphQL ランキングAPI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        変更ファイル
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1559,6 +1681,7 @@
 <li><a href="#cloud-run-proxyアップロード廃止とdockerボリュームマウントへの移行">Cloud Run Proxyアップロード廃止とDockerボリュームマウントへの移行</a></li>
 <li><a href="#cloud-run-job廃止とsynology-nas-docker--dockerhubへの移行">Cloud Run Job廃止とSynology NAS Docker + DockerHubへの移行</a></li>
 <li><a href="#ftps廃止とローカルファイル配信への移行">FTPS廃止とローカルファイル配信への移行</a></li>
+<li><a href="#motherduckdb-統合dbの導入と-graphql-ランキングapi">mother.duckdb 統合DBの導入と GraphQL ランキングAPI</a></li>
 </ol>
 <hr />
 <h2 id="ftpgoogle-drive">FTP廃止とGoogle Driveへの完全移行<a class="headerlink" href="#ftpgoogle-drive" title="Permanent link">&para;</a></h2>
@@ -1772,6 +1895,93 @@
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    listed_info.duckdb
 </span></code></pre></div>
 <p>Cloud Run にデプロイする場合は、GCS バケットや NFS などのボリュームを <code>/cache</code> にマウントしてください。</p>
+<hr />
+<h2 id="motherduckdb-db-graphql-api">mother.duckdb 統合DBの導入と GraphQL ランキングAPI<a class="headerlink" href="#motherduckdb-db-graphql-api" title="Permanent link">&para;</a></h2>
+<p><strong>Date:</strong> 2026-02-28
+<strong>Status:</strong> Implemented</p>
+<h3 id="context_7">Context<a class="headerlink" href="#context_7" title="Permanent link">&para;</a></h3>
+<p>約4000銘柄の株価データが <code>S:\jp\stocks_daily\{code}.duckdb</code> として個別ファイルに分散している。
+値上がり率ランキングなどの全銘柄横断クエリを行うには4000ファイルを逐次 open/close する必要があり、
+接続オーバーヘッドが累積してランキング算出が現実的でなかった。</p>
+<h3 id="decision_7">Decision<a class="headerlink" href="#decision_7" title="Permanent link">&para;</a></h3>
+<p><strong>統合DBの導入：</strong> 全銘柄を1つの <code>mother.duckdb</code> にまとめるアーキテクチャに変更。</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>APIs → update_stocks_price.py
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>         ↓ fetch → upsert
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>       S:\jp\stocks_daily\mother.duckdb   ← 全銘柄統合ソース
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>         ↓ split_to_individual（日次）
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>       S:\jp\stocks_daily\{code}.duckdb   ← 単一銘柄取得用（現状維持）
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>GraphQL query → cloud-run/main.py → mother.duckdb
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>                                   （ranking SQL on-the-fly）
+</span></code></pre></div>
+<ul>
+<li>
+<p><strong><code>db_stocks_daily_mother</code> クラスの新規作成</strong>（<code>src/BackcastPro/api/db_stocks_daily_mother.py</code>）:
+  <code>db_stocks_daily</code> を継承し <code>_db_subdir=None</code>、<code>_db_filename="stocks_daily/mother.duckdb"</code> を設定するだけで
+  既存の <code>save_stock_prices</code> / <code>load_stock_prices_from_cache</code> をそのまま再利用できる。
+  <code>split_to_individual()</code> メソッドで mother.duckdb の接続を1回だけオープンして全銘柄を個別DBへ分割（冪等）。</p>
+</li>
+<li>
+<p><strong><code>update_stocks_price.py</code> の保存先変更</strong>: <code>sp.db</code>（個別DB）→ <code>mother_db</code>（統合DB）に変更。
+  フェッチループ完了後に <code>split_to_individual(sp.db, from_date=...)</code> で個別DBへ差分反映。
+  個別DBへの直接保存は廃止。</p>
+</li>
+<li>
+<p><strong>GraphQL ランキングAPI の追加</strong>（<code>cloud-run/main.py</code>）:
+  <code>strawberry-graphql[flask]</code> を採用。<code>mother.duckdb</code> に対して CTE + Window 関数で
+  値上がり率・値下がり率・出来高の各ランキングを on-the-fly で算出する。
+  <code>_ORDER_MAP</code> ホワイトリストで SQL injection を防止。</p>
+</li>
+<li>
+<p><strong><code>ALLOWED_PATHS</code> の更新</strong>: <code>stocks_daily/mother.duckdb</code> をホワイトリストに追加。</p>
+</li>
+</ul>
+<h3 id="consequences_7">Consequences<a class="headerlink" href="#consequences_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>メリット</strong>:<ul>
+<li>値上がり率ランキング等の全銘柄横断クエリが単一DBへの1回のクエリで完結。</li>
+<li>GraphQL の型安全なスキーマで3種のランキング（値上がり・値下がり・出来高）を提供。</li>
+<li><code>split_to_individual</code> の1接続ループにより4000回の open/close を回避。</li>
+<li>単一銘柄取得（<code>get_stock_daily</code>）は個別DBから引き続き読み込むため現状維持。</li>
+</ul>
+</li>
+<li><strong>注意点</strong>:<ul>
+<li>初回デプロイ時（新環境）は全量投入 → 全量 split の2ステップが必要:
+    <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python<span class="w"> </span>update_stocks_price.py<span class="w"> </span>--days<span class="w"> </span><span class="m">1000</span><span class="w">        </span><span class="c1"># Step 1: 全量投入</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="c1"># Step 2: mother.duckdb → 個別DB へ全量分割（from_date=None）</span>
+</span></code></pre></div></li>
+<li>DuckDB の WAL モードにより、バッチ書き込み中の <code>read_only=True</code> アクセスは許容されるが、
+    長時間バッチと同時アクセスが重なる場合は競合に注意。</li>
+</ul>
+</li>
+</ul>
+<h3 id="_3">変更ファイル<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>ファイル</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新規</td>
+<td><code>src/BackcastPro/api/db_stocks_daily_mother.py</code></td>
+</tr>
+<tr>
+<td>修正</td>
+<td><code>cloud-job/update_stocks_price.py</code>（保存先変更 + split 追加）</td>
+</tr>
+<tr>
+<td>修正</td>
+<td><code>cloud-run/requirements.txt</code>（<code>strawberry-graphql[flask]</code>, <code>duckdb</code> 追加）</td>
+</tr>
+<tr>
+<td>修正</td>
+<td><code>cloud-run/main.py</code>（<code>ALLOWED_PATHS</code> 更新 + <code>/graphql</code> endpoint 追加）</td>
+</tr>
+</tbody>
+</table>
 <hr />
 
 
