@@ -214,6 +214,57 @@ class jquants:
 
         return df
 
+    def get_daily_quotes_bulk_by_date(self, date: "datetime | str") -> pd.DataFrame:
+        """
+        日付を指定して全銘柄の株価を一括取得（/v2/equities/bars/daily?date=）
+
+        - 銘柄コードを指定せず date のみを指定することで、全銘柄のデータを返す。
+        - 全銘柄分のレスポンスが大きいため timeout=60 を使用。
+        - 返却される Code 列は5桁（例: "72030"）。
+        """
+        if isinstance(date, datetime):
+            date_str = date.strftime("%Y-%m-%d")
+        else:
+            date_str = str(date)
+
+        if not self._ensure_api_key():
+            return pd.DataFrame()
+
+        data: list = []
+        params: dict = {"date": date_str}
+        while True:
+            res = requests.get(
+                f"{self.API_URL}/v2/equities/bars/daily",
+                params=params,
+                headers=self.headers,
+                timeout=60,
+            )
+            if res.status_code in (401, 403):
+                self._handle_auth_error(res)
+                break
+            if res.status_code != 200:
+                try:
+                    logger.error(f"Bulk API Error: {res.status_code} - {res.json()}")
+                except Exception:
+                    logger.error(f"Bulk API Error: {res.status_code} - {res.text}")
+                break
+            d = res.json()
+            data += d.get("data", [])
+            pagination_key = d.get("pagination_key")
+            if pagination_key:
+                params["pagination_key"] = pagination_key
+                continue
+            break
+
+        if not data:
+            return pd.DataFrame()
+
+        df = pd.DataFrame(data)
+        df = _rename_daily_quote_columns(df)
+        df = _normalize_columns(df)
+        df["source"] = "j-quants"
+        return df
+
     def get_fins_statements(self, code="", date="", from_="", to="") -> pd.DataFrame:
         """
         財務情報（/v2/fins/summary）

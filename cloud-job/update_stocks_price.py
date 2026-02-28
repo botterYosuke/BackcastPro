@@ -4,9 +4,9 @@
 複数のデータソースから株価を取得し、DuckDBに保存する。
 
 取得優先度:
-1. Tachibana（立花証券 e-支店）を試行
-2. Tachibana失敗時は Stooq を試行
-3. 1 or 2 の成功に関わらず J-Quants も取得し、J-Quantsのデータで上書き
+1. J-Quants を試行
+2. J-Quants 失敗時は Tachibana（立花証券 e-支店）を試行
+3. Tachibana 失敗時は Stooq を試行
 
 使用方法:
     python update_stocks_price.py                    # 全銘柄処理
@@ -53,32 +53,6 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def merge_jquants_priority(
-    base_df: pd.DataFrame | None, jq_df: pd.DataFrame | None
-) -> pd.DataFrame | None:
-    """base_df と jq_df をマージ。同一日付は J-Quants で上書き。"""
-    if jq_df is None or jq_df.empty:
-        result = base_df
-    elif base_df is None or base_df.empty:
-        result = jq_df
-    else:
-        base = (
-            base_df.set_index("Date") if "Date" in base_df.columns else base_df.copy()
-        )
-        jq = jq_df.set_index("Date") if "Date" in jq_df.columns else jq_df.copy()
-        base_only = base.loc[~base.index.isin(jq.index)]
-        result = pd.concat([jq, base_only]).sort_index()
-
-    # 戻り値を統一: DatetimeIndex named 'Date'
-    if result is not None and not result.empty:
-        if "Date" in result.columns:
-            result = result.set_index("Date")
-        if not isinstance(result.index, pd.DatetimeIndex):
-            result.index = pd.to_datetime(result.index)
-        result.index.name = "Date"
-
-    return result
-
 
 def main():
     args = parse_arguments()
@@ -108,39 +82,72 @@ def main():
     sp.jq = jquants_cls()
     mother_db = db_stocks_daily_mother()
 
+    # J-Quants 一括プリフェッチ（日付ごとに全銘柄を取得してメモリ上にキャッシュ）
+    logger.info("J-Quants 一括取得中...")
+    jq_bulk_dfs: dict[str, "pd.DataFrame"] = {}  # code (4桁) -> DataFrame
+
+    if sp.jq.isEnable and not args.codes:
+        all_bulk: list["pd.DataFrame"] = []
+        date_range = [
+            (from_date + timedelta(days=i)).strftime("%Y-%m-%d")
+            for i in range((to_date - from_date).days + 1)
+        ]
+        for date_str in date_range:
+            try:
+                bulk_df = sp.jq.get_daily_quotes_bulk_by_date(date_str)
+                if bulk_df is not None and not bulk_df.empty:
+                    all_bulk.append(bulk_df)
+            except Exception as e:
+                logger.warning(f"Bulk fetch 失敗 ({date_str}): {e}")
+
+        if all_bulk:
+            combined = pd.concat(all_bulk, ignore_index=True)
+            # Code を4桁に変換してから groupby（codes リストが4桁のため）
+            combined["Code"] = combined["Code"].str[:4]
+            jq_bulk_dfs = dict(tuple(combined.groupby("Code")))
+
+    logger.info(f"J-Quants 一括取得完了: {len(jq_bulk_dfs)} 銘柄")
+
     # 逐次処理
     success, failed, errors = 0, 0, []
 
     for i, code in enumerate(codes, 1):
-        base_df = None
+        # 1) J-Quants（バルクキャッシュ優先、未取得時のみAPIコール）
+        final_df = jq_bulk_dfs.get(code)
+        if final_df is None:
+            for attempt in range(3):
+                try:
+                    final_df = sp._fetch_from_jquants(code, from_date, to_date)
+                    if final_df is not None and not final_df.empty:
+                        break
+                except Exception:
+                    pass
+                if attempt < 2:
+                    time.sleep(1)
 
-        # 1) Tachibana
-        try:
-            base_df = sp._fetch_from_tachibana(code, from_date, to_date)
-        except Exception:
-            pass
-
-        # 2) Stooq fallback
-        if base_df is None or base_df.empty:
+        # 2) J-Quants 失敗 → Tachibana
+        if final_df is None or final_df.empty:
             try:
-                base_df = sp._fetch_from_stooq(code, from_date, to_date)
+                final_df = sp._fetch_from_tachibana(code, from_date, to_date)
             except Exception:
                 pass
 
-        # 3) J-Quants（常に取得→優先マージ、429時はリトライ）
-        jq_df = None
-        for attempt in range(3):
+        # 3) Tachibana 失敗 → Stooq
+        if final_df is None or final_df.empty:
             try:
-                jq_df = sp._fetch_from_jquants(code, from_date, to_date)
-                if jq_df is not None and not jq_df.empty:
-                    break
+                final_df = sp._fetch_from_stooq(code, from_date, to_date)
             except Exception:
                 pass
-            if attempt < 2:
-                time.sleep(1)
 
-        # マージ & 保存
-        final_df = merge_jquants_priority(base_df, jq_df)
+        # DatetimeIndex 正規化（全ソース共通・無条件に実行）
+        if final_df is not None and not final_df.empty:
+            if "Date" in final_df.columns:
+                final_df = final_df.set_index("Date")
+            if not isinstance(final_df.index, pd.DatetimeIndex):
+                final_df.index = pd.to_datetime(final_df.index)
+            final_df.index.name = "Date"
+
+        # 保存
         if final_df is not None and not final_df.empty:
             try:
                 mother_db.save_stock_prices(code, final_df)

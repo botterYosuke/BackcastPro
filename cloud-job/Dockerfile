@@ -29,8 +29,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY src/BackcastPro/ /app/src/BackcastPro/
 COPY src/trading_data/ /app/src/trading_data/
 COPY cloud-job/update_stocks_price.py /app/update_stocks_price.py
-COPY cloud-job/update_stocks_ranking.py /app/update_stocks_ranking.py
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-ENTRYPOINT ["/bin/sh", "-c", "python /app/update_stocks_price.py && python /app/update_stocks_ranking.py"]
+ENTRYPOINT ["/bin/sh", "-c", "python /app/update_stocks_price.py"]
