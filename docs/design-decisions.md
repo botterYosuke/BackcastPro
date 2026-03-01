@@ -12,6 +12,7 @@
 6. [Cloud Run Job廃止とSynology NAS Docker + DockerHubへの移行](#cloud-run-job廃止とsynology-nas-docker--dockerhubへの移行)
 7. [FTPS廃止とローカルファイル配信への移行](#ftps廃止とローカルファイル配信への移行)
 8. [mother.duckdb 統合DBの導入と GraphQL ランキングAPI](#motherduckdb-統合dbの導入と-graphql-ランキングapi)
+9. [J-QuantsAPIの日付指定一括取得とフェッチ優先度の変更](#j-quantsapiの日付指定一括取得とフェッチ優先度の変更)
 
 ---
 
@@ -315,3 +316,32 @@ GraphQL query → cloud-run/main.py → mother.duckdb
 | 修正 | `cloud-run/main.py`（`ALLOWED_PATHS` 更新 + `/graphql` endpoint 追加） |
 
 ---
+
+## J-QuantsAPIの日付指定一括取得とフェッチ優先度の変更
+
+**Date:** 2026-03-01
+**Status:** Implemented
+
+### Context
+
+`update_stocks_price.py` は約4000銘柄に対して個別に J-Quants API や他のソースを呼び出しており、1回の実行で数千リクエストが発生しボトルネックとなっていた。
+同時に、「Tachibana → Stooq（fallback）→ J-Quants（常に取得＆上書き）」という古いフェッチ順序のままであり、精度・安定性から既に主力データソースとなっていた J-Quants の位置付けと合っていなかった。
+
+### Decision
+
+**1. J-Quants の日付指定一括取得（バルクフェッチ）の導入:**
+*   J-Quants API v2 の `/v2/equities/bars/daily` に実装されている `date` パラメータを使用した全銘柄一括取得を `jquants.py` の `get_daily_quotes_bulk_by_date` として実装。
+*   `update_stocks_price.py` のメインループ実行前に、営業日ごとの全銘柄データを取得してメモリ上の辞書（`jq_bulk_dfs`）にキャッシュ。
+*   APIリクエスト数を約4,000回から、取得日数分（5〜7回）へと約99.8%削減。
+
+**2. 取得優先度の変更（J-Quants 先行フロー）:**
+*   現在のフローを「J-Quants (キャッシュ優先・未取得時API) → 失敗時 Tachibana → 失敗時 Stooq」とし、成功したソースのデータを採用するように変更。
+*   複数ソースのマージ処理（`merge_jquants_priority`）を廃止し、よりシンプルで高速なフォールバック設計へ移行。
+
+### Consequences
+
+*   **メリット**:
+    *   APIリクエスト回数が激減し、大幅な処理時間の短縮とレート制限超過リスクの低減を実現。
+    *   コードの構造がよりシンプルに（複雑なマージ処理の排除、フォールバックの明確化）。
+*   **注意点**:
+    *   J-Quants のバルクフェッチAPIが空応答などのエラーを返した場合、自動的に従来通りの個別APIおよび別ソースへのフォールバックに切り替わるため、耐障害性は維持されている。

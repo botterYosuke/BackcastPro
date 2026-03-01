@@ -170,13 +170,6 @@ def main():
         if i % 100 == 0 or i == len(codes):
             logger.info(f"進捗: {i}/{len(codes)} (成功={success}, 失敗={failed})")
 
-    # mother.duckdb → 個別DB 分割
-    logger.info("mother.duckdb → 個別DB 分割開始...")
-    split_result = mother_db.split_to_individual(
-        sp.db, from_date=from_date.strftime("%Y-%m-%d")
-    )
-    logger.info(f"split完了: 成功={split_result['success']}, 失敗={split_result['failed']}")
-
     # サマリー
     logger.info(f"完了: 成功={success}, 失敗={failed}")
     if errors:

@@ -10,7 +10,8 @@ DockerイメージはGitHub Actionsで自動的にDockerHubへpushされ、Synol
 1. GitHub Actionsが `main` ブランチへの push 時に Docker イメージを **DockerHub** (`backcast/cloud-job`) へ push します。
 2. Synology NAS のタスクスケジューラが毎晩定刻に **Dockerコンテナ** をトリガーします。
 3. コンテナ (`update_stocks_price.py`) が実行されます。
-   - J-Quants APIなどから最新の株価データを取得します。
+   - J-Quants APIのバルクフェッチ機能を利用し、全銘柄データを一括取得します。
+   - 未取得や失敗した銘柄に対しては、Tachibana や Stooq にフォールバック取得を行います。
    - 取得したデータをDuckDBファイルとしてマウントされたボリューム（`STOCKDATA_CACHE_DIR`）に直接保存します。
 
 ```mermaid
@@ -18,7 +19,8 @@ graph LR
     G[GitHub Actions] -->|push| H[DockerHub backcast/cloud-job]
     A[NAS タスクスケジューラ] -->|docker run| B[Docker コンテナ]
     H -.->|docker pull| B
-    B -->|データ取得| C[J-Quants / Tachibana / Stooq]
+    B -->|一括取得優先| C[J-Quants API]
+    B -.->|失敗時| F[Tachibana / Stooq]
     B -->|DuckDB保存| D[マウントボリューム /cache]
 ```
 
