@@ -50,7 +50,9 @@ class e_api:
         self.token_expires_at = None
 
         # キャッシュファイルのパス設定
-        env_cache_dir = os.environ.get("STOCKDATA_CACHE_DIR", tempfile.mkdtemp())
+        env_cache_dir = os.environ.get("STOCKDATA_CACHE_DIR")
+        if not env_cache_dir:
+            env_cache_dir = tempfile.mkdtemp()
         self.cache_dir = Path(os.path.abspath(env_cache_dir))
         os.environ["STOCKDATA_CACHE_DIR"] = str(self.cache_dir)
         self.cache_file = self.cache_dir / "e_api_login_cache.json"

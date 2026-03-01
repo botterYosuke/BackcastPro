@@ -21,7 +21,9 @@ class db_manager:
 
     def __init__(self):
         # 1. 環境変数をチェック
-        env_cache_dir = os.environ.get("STOCKDATA_CACHE_DIR", tempfile.mkdtemp())
+        env_cache_dir = os.environ.get("STOCKDATA_CACHE_DIR")
+        if not env_cache_dir:
+            env_cache_dir = tempfile.mkdtemp()
         self.cache_dir = os.path.abspath(env_cache_dir)
         os.environ["STOCKDATA_CACHE_DIR"] = self.cache_dir
 

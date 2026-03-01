@@ -29,7 +29,9 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 # STOCKDATA_CACHE_DIR をそのまま利用
-_base = os.environ.get("STOCKDATA_CACHE_DIR", tempfile.mkdtemp())
+_base = os.environ.get("STOCKDATA_CACHE_DIR")
+if not _base:
+    _base = tempfile.mkdtemp()
 os.environ["STOCKDATA_CACHE_DIR"] = os.path.abspath(_base)
 
 from trading_data.stocks_price import stocks_price
@@ -55,7 +57,6 @@ def parse_arguments() -> argparse.Namespace:
         "--days", type=int, default=7, help="取得する過去日数（デフォルト: 7）"
     )
     return parser.parse_args()
-
 
 
 def main():
