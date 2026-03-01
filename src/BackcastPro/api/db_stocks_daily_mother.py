@@ -61,7 +61,9 @@ class db_stocks_daily_mother(db_stocks_daily):
                         errors.append(code)
                         continue
                     df["Date"] = pd.to_datetime(df["Date"])
-                    individual_db.save_stock_prices(code, df)
+                    code4 = individual_db._normalize_code(code) or code
+                    df["Code"] = code4
+                    individual_db.save_stock_prices(code4, df)
                     success += 1
                 except Exception as e:
                     logger.error(f"{code}: {e}")

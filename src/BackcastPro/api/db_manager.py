@@ -308,9 +308,8 @@ class db_manager:
             # 小さなデータは一括挿入
             db_connection.register("temp_df", df)
             df_columns = ", ".join(df.columns)
-            # DuckDBではINSERT OR REPLACEの代わりにINSERTを使用（重複チェックは呼び出し元で実施）
             db_connection.execute(
-                f"INSERT INTO {table_name} ({df_columns}) SELECT {df_columns} FROM temp_df"
+                f"INSERT INTO {table_name} ({df_columns}) SELECT {df_columns} FROM temp_df ON CONFLICT DO NOTHING"
             )
             logger.debug(f"データを一括挿入しました: {total_rows}件")
         else:
@@ -325,9 +324,8 @@ class db_manager:
 
                 db_connection.register(chunk_name, chunk)
                 df_columns = ", ".join(chunk.columns)
-                # DuckDBではINSERT OR REPLACEの代わりにINSERTを使用（重複チェックは呼び出し元で実施）
                 db_connection.execute(
-                    f"INSERT INTO {table_name} ({df_columns}) SELECT {df_columns} FROM {chunk_name}"
+                    f"INSERT INTO {table_name} ({df_columns}) SELECT {df_columns} FROM {chunk_name} ON CONFLICT DO NOTHING"
                 )
 
                 # 進捗をログ出力

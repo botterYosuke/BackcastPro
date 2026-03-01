@@ -23,6 +23,10 @@ import tempfile
 from datetime import datetime, timedelta
 
 import pandas as pd
+from dotenv import load_dotenv
+
+# .env を読み込む（cloud-job/ の親ディレクトリにある .env を優先）
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 # STOCKDATA_CACHE_DIR をそのまま利用
 _base = os.environ.get("STOCKDATA_CACHE_DIR", tempfile.mkdtemp())
@@ -92,13 +96,16 @@ def main():
             (from_date + timedelta(days=i)).strftime("%Y-%m-%d")
             for i in range((to_date - from_date).days + 1)
         ]
-        for date_str in date_range:
+        total_dates = len(date_range)
+        for idx, date_str in enumerate(date_range, 1):
             try:
                 bulk_df = sp.jq.get_daily_quotes_bulk_by_date(date_str)
                 if bulk_df is not None and not bulk_df.empty:
                     all_bulk.append(bulk_df)
             except Exception as e:
                 logger.warning(f"Bulk fetch 失敗 ({date_str}): {e}")
+            if idx % 50 == 0 or idx == total_dates:
+                logger.info(f"Bulk取得進捗: {idx}/{total_dates} ({date_str})")
 
         if all_bulk:
             combined = pd.concat(all_bulk, ignore_index=True)
