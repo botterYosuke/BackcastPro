@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/</loc>
+         <loc>https://botteryosuke.github.io/BackcastPro/index.html</loc>
          <lastmod>2026-03-01</lastmod>
     </url>
     <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/cloud-run-updater/</loc>
+         <loc>https://botteryosuke.github.io/BackcastPro/cloud-run-updater.html</loc>
          <lastmod>2026-03-01</lastmod>
     </url>
     <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/design-decisions/</loc>
+         <loc>https://botteryosuke.github.io/BackcastPro/design-decisions.html</loc>
          <lastmod>2026-03-01</lastmod>
     </url>
     <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/developer-guide/</loc>
+         <loc>https://botteryosuke.github.io/BackcastPro/developer-guide.html</loc>
          <lastmod>2026-03-01</lastmod>
     </url>
     <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/execution-logic-report/</loc>
+         <loc>https://botteryosuke.github.io/BackcastPro/execution-logic-report.html</loc>
          <lastmod>2026-03-01</lastmod>
     </url>
     <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/graphql-api/</loc>
+         <loc>https://botteryosuke.github.io/BackcastPro/graphql-api.html</loc>
          <lastmod>2026-03-01</lastmod>
     </url>
     <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/how-to-deploy-to-PyPI/</loc>
+         <loc>https://botteryosuke.github.io/BackcastPro/how-to-deploy-to-PyPI.html</loc>
          <lastmod>2026-03-01</lastmod>
     </url>
     <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/privacy/</loc>
+         <loc>https://botteryosuke.github.io/BackcastPro/privacy.html</loc>
          <lastmod>2026-03-01</lastmod>
     </url>
     <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/troubleshooting/</loc>
+         <loc>https://botteryosuke.github.io/BackcastPro/troubleshooting.html</loc>
          <lastmod>2026-03-01</lastmod>
     </url>
     <url>
-         <loc>https://botteryosuke.github.io/BackcastPro/tutorial/</loc>
+         <loc>https://botteryosuke.github.io/BackcastPro/tutorial.html</loc>
          <lastmod>2026-03-01</lastmod>
     </url>
 </urlset>
