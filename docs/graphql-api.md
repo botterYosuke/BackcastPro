@@ -13,8 +13,8 @@
 
 ## メインクエリ：`stockRankingRange`
 
-**「何のランキングか」はクライアント側が `sortBy` + `order` で決定する。**
-バックエンドは汎用的なデータを返すだけで、ランキング種別をクエリ名に埋め込まない。
+**「何のランキングか」はクライアント側が `sortBy` に計算式を直接渡して決定する。**
+バックエンドは式を検証・変換して DuckDB に渡し、汎用的なデータを返す。
 
 ### パラメータ
 
@@ -22,7 +22,7 @@
 |-----------|-----|-----------|------|
 | `fromDate` | `String` | 必須 | 開始日 `YYYY-MM-DD` |
 | `toDate` | `String` | 必須 | 終了日 `YYYY-MM-DD` |
-| `sortBy` | `String` | `"gain_rate"` | ランキング基準（後述） |
+| `sortBy` | `String` | `"(Close - Close[-1]) / Close[-1] * 100"` | ソート計算式（後述） |
 | `order` | `String` | `"desc"` | `"desc"` または `"asc"` |
 | `limit` | `Int` | `20` | 各日のTop-N件数 |
 
@@ -33,63 +33,120 @@
 | `date` | `String` | 日付 `YYYY-MM-DD` |
 | `code` | `String` | 銘柄コード |
 | `close` | `Float` | 終値 |
-| `prevClose` | `Float?` | 前営業日終値（初日など取得できない場合 null） |
-| `gainRate` | `Float?` | 騰落率 `(close - prevClose) / prevClose × 100` |
+| `prevClose` | `Float?` | 常に `null`（廃止済み、後述） |
+| `sortValue` | `Float?` | `sortBy` 式の計算結果（null の行は順位末尾） |
 | `volume` | `Float?` | 出来高 |
 | `rank` | `Int` | 順位（各日 1〜limit） |
 
 ---
 
-## sortBy の種類
+## sortBy の書き方
 
-現在サポートされている `sortBy` 値：
+`sortBy` には **使用可能な列名と四則演算子・括弧・数値** で構成された計算式を文字列で渡す。
 
-| sortBy | ランキング種別 | 計算元 |
-|--------|-------------|--------|
-| `"gain_rate"` | 値上がり率 / 値下がり率 | `(Close - PrevClose) / PrevClose × 100` |
-| `"volume"` | 出来高 | `Volume` |
+### 使用可能な列名
 
-> 追加予定: `"turnover_value"` (売買代金 = Close × Volume)、`"price_range_rate"` (値幅率) など。
+| 列名 | 内容 |
+|------|------|
+| `Close` | 終値 |
+| `Open` | 始値 |
+| `High` | 高値 |
+| `Low` | 安値 |
+| `Volume` | 出来高 |
+
+### ラグ指定（任意の前営業日値）
+
+`ColName[-N]` の形式で **N 営業日前** の値を参照できる。
+
+| 記法 | 内容 |
+|------|------|
+| `Close[-1]` | 前営業日の終値 |
+| `Close[-2]` | 2営業日前の終値 |
+| `Open[-3]` | 3営業日前の始値 |
+| `Volume[-1]` | 前営業日の出来高 |
+
+- N は 1 以上の整数
+- 値が 0 の場合は自動的に `NULL` 扱い（ゼロ除算防止）
+- バックエンドが必要な営業日数分だけ自動でデータを遡って取得する
+
+### 使用可能な演算子・記号
+
+`+` `-` `*` `/` `(` `)` および数値リテラル
+
+### 計算式の例
+
+| sortBy 文字列 | ランキング種別 |
+|--------------|--------------|
+| `"(Close - Close[-1]) / Close[-1] * 100"` | 騰落率（%） ← デフォルト |
+| `"(Close - Close[-2]) / Close[-2] * 100"` | 2日間騰落率（%） |
+| `"Volume"` | 出来高 |
+| `"(High - Low) / Close * 100"` | 値幅率（%） |
+| `"Close * Volume"` | 売買代金 |
+| `"High - Low"` | 値幅（絶対値） |
+| `"Close / High[-3] * 100"` | 3日前高値に対する比率（%） |
+| `"Volume / Volume[-1]"` | 出来高前日比 |
+
+> **注意**: 列名・演算子以外の文字列（関数名・セミコロン等）は検証エラーになります。
 
 ---
 
 ## クエリ例
 
-### 値上がり率ランキング（Top 20、1ヶ月分）
+### 騰落率ランキング（Top 20、1ヶ月分）
 
 ```graphql
 query GainRanking {
   stockRankingRange(
     fromDate: "2025-01-01"
     toDate:   "2025-01-31"
-    sortBy:   "gain_rate"
+    sortBy:   "(Close - Close[-1]) / Close[-1] * 100"
     order:    "desc"
     limit:    20
   ) {
     date
     code
     close
-    gainRate
+    sortValue
     rank
   }
 }
 ```
 
-### 値下がり率ランキング（同じクエリ、order: "asc" のみ変更）
+### 値下がり率ランキング（order: "asc" に変更）
 
 ```graphql
 query DeclineRanking {
   stockRankingRange(
     fromDate: "2025-01-01"
     toDate:   "2025-01-31"
-    sortBy:   "gain_rate"
+    sortBy:   "(Close - Close[-1]) / Close[-1] * 100"
     order:    "asc"
     limit:    20
   ) {
     date
     code
     close
-    gainRate
+    sortValue
+    rank
+  }
+}
+```
+
+### 2日間騰落率ランキング
+
+```graphql
+query TwoDayGainRanking {
+  stockRankingRange(
+    fromDate: "2025-01-01"
+    toDate:   "2025-01-31"
+    sortBy:   "(Close - Close[-2]) / Close[-2] * 100"
+    order:    "desc"
+    limit:    10
+  ) {
+    date
+    code
+    close
+    sortValue
     rank
   }
 }
@@ -102,7 +159,7 @@ query VolumeRanking {
   stockRankingRange(
     fromDate: "2025-01-01"
     toDate:   "2025-01-31"
-    sortBy:   "volume"
+    sortBy:   "Volume"
     order:    "desc"
     limit:    20
   ) {
@@ -110,6 +167,26 @@ query VolumeRanking {
     code
     close
     volume
+    rank
+  }
+}
+```
+
+### 値幅率ランキング（ボラティリティスクリーニング）
+
+```graphql
+query VolatilityRanking {
+  stockRankingRange(
+    fromDate: "2025-01-01"
+    toDate:   "2025-01-31"
+    sortBy:   "(High - Low) / Close * 100"
+    order:    "desc"
+    limit:    10
+  ) {
+    date
+    code
+    close
+    sortValue
     rank
   }
 }
@@ -123,7 +200,7 @@ query VolumeRanking {
 curl -X POST http://localhost:8080/graphql \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "{ stockRankingRange(fromDate: \"2025-01-06\", toDate: \"2025-01-10\", sortBy: \"gain_rate\", order: \"desc\", limit: 5) { date code gainRate rank } }"
+    "query": "{ stockRankingRange(fromDate: \"2025-01-06\", toDate: \"2025-01-10\", sortBy: \"(Close - Close[-1]) / Close[-1] * 100\", order: \"desc\", limit: 5) { date code sortValue rank } }"
   }'
 ```
 
@@ -133,10 +210,10 @@ curl -X POST http://localhost:8080/graphql \
 {
   "data": {
     "stockRankingRange": [
-      {"date": "2025-01-06", "code": "3137", "gainRate": 36.3636, "rank": 1},
-      {"date": "2025-01-06", "code": "3624", "gainRate": 29.8013, "rank": 2},
+      {"date": "2025-01-06", "code": "3137", "sortValue": 36.3636, "rank": 1},
+      {"date": "2025-01-06", "code": "3624", "sortValue": 29.8013, "rank": 2},
       ...
-      {"date": "2025-01-07", "code": "2962", "gainRate": 31.6206, "rank": 1},
+      {"date": "2025-01-07", "code": "2962", "sortValue": 31.6206, "rank": 1},
       ...
     ]
   }
@@ -158,16 +235,40 @@ curl -X POST http://localhost:8080/graphql \
 
 ## セキュリティ
 
-`sortBy` / `order` はホワイトリスト (`_SORT_COL_MAP`, `_ORDER_MAP`) で検証する。
-無効な値を渡すと `KeyError` → GraphQL エラーとして返却され、SQL には渡らない。
+`sortBy` はトークンベースのホワイトリスト検証 (`_parse_formula`) を通過した式のみ DuckDB に渡る。
+許可トークン以外（関数名・セミコロン等）が含まれると `ValueError` → GraphQL エラーとして返却される。
 
 ```python
-# cloud-run/main.py
-_SORT_COL_MAP = {
-    "gain_rate": "GainRate",
-    "volume":    '"Volume"',
+# cloud-run/main.py（抜粋）
+_COL_MAP = {
+    "Close":  '"Close"',
+    "Open":   '"Open"',
+    "High":   '"High"',
+    "Low":    '"Low"',
+    "Volume": '"Volume"',
 }
+# ColName[-N] は LAG("ColName", N) に変換、値 0 は NULLIF で NULL 扱い
 _ORDER_MAP = {"desc": "DESC", "asc": "ASC"}
+```
+
+`order` は `_ORDER_MAP` ホワイトリストで検証する（無効値は `KeyError`）。
+
+---
+
+## `prevClose` フィールドについて（廃止）
+
+旧バージョンでは `PrevClose` という固定の列名をサポートし、レスポンスの `prevClose` フィールドに
+前営業日終値を返していた。現バージョンでは `Close[-1]` 構文に統一されたため、
+`prevClose` は常に `null` を返す（フィールド自体は互換性のために残存）。
+
+移行方法：
+
+```
+# 旧
+sortBy: "(Close - PrevClose) / PrevClose * 100"
+
+# 新
+sortBy: "(Close - Close[-1]) / Close[-1] * 100"
 ```
 
 ---
@@ -187,20 +288,11 @@ python main.py
 
 ## 新しいランキング種別の追加方法
 
-`_SORT_COL_MAP` に追加するだけで対応できる：
+`sortBy` に計算式を直接渡すだけで新種別を追加できる。
+バックエンドの変更は **不要**。
 
-```python
-# 例: 高値ランキングを追加
-_SORT_COL_MAP = {
-    "gain_rate":     "GainRate",
-    "volume":        '"Volume"',
-    "high":          '"High"',       # ← 追加
-    "turnover_value": "TurnoverVal", # ← WITH句への計算列追加も必要
-}
-```
-
-`High` / `Low` / `Open` などは `stocks_daily` に実カラムとして存在するため即追加可能。
-`TurnoverValue`（= `Close × Volume`）のような計算列は `ranked` CTE の `SELECT` にも追加が必要。
+新しい列を使いたい場合（例: `Turnover` など `stocks_daily` にない計算列）は、
+`cloud-run/main.py` の `extended` CTE と `_COL_MAP` / `_TOKEN_RE` への追加が必要。
 
 ---
 

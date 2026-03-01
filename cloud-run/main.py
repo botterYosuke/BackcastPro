@@ -4,6 +4,7 @@ Serves .duckdb files from a local directory, exposed as HTTP GET.
 Deployed on Cloud Run.
 """
 
+import datetime
 import logging
 import os
 import re
@@ -63,20 +64,54 @@ MOTHER_DB_PATH = os.path.join(DATA_DIR, "jp", "stocks_daily", "mother.duckdb")
 
 # SQL injection 対策ホワイトリスト
 _ORDER_MAP = {"desc": "DESC", "asc": "ASC"}
-_SORT_COL_MAP = {
-    "gain_rate": "GainRate",
-    "volume": '"Volume"',  # DuckDB の大文字列名をクォート
+# 使用可能な列名 → DuckDB SQL 表現へのマップ
+_COL_MAP = {
+    "Close": '"Close"',
+    "Open": '"Open"',
+    "High": '"High"',
+    "Low": '"Low"',
+    "Volume": '"Volume"',
 }
+# ColName[-N] トークン（例: Close[-2]）を認識する正規表現
+_LAG_RE = re.compile(r"^(Close|Open|High|Low|Volume)\[-(\d+)\]$")
+# トークナイザ: ColName[-N] を1トークンとして認識（[ ] が単独トークンにならないよう先にマッチ）
+_TOKEN_RE = re.compile(
+    r"(\b(?:Close|Open|High|Low|Volume)\b(?:\[-\d+\])?|[\d.]+|[+\-*/()]|\s+)"
+)
 
 
-@strawberry.type
-class StockRankingItem:
-    code: str
-    close: float
-    prev_close: Optional[float]
-    gain_rate: Optional[float]
-    volume: Optional[float]
-    rank: int
+def _parse_formula(
+    formula: str,
+) -> tuple[str, dict[str, tuple[str, int]]]:
+    """ユーザー指定の計算式を検証し、DuckDB SQL 式と LAG 仕様に変換する。
+
+    Returns:
+        sort_expr: SQL 式文字列
+        lag_specs: {alias: (col_name, lag_n)}
+            例: {"Close__lag2": ("Close", 2)}
+    不正なトークンが含まれる場合は ValueError を送出。
+    """
+    tokens = _TOKEN_RE.findall(formula)
+    if "".join(tokens) != formula:
+        raise ValueError(f"Invalid formula: unsupported tokens in {formula!r}")
+    lag_specs: dict[str, tuple[str, int]] = {}
+    parts = []
+    for tok in tokens:
+        s = tok.strip()
+        if not s:
+            parts.append(" ")
+            continue
+        m = _LAG_RE.match(s)
+        if m:
+            col, n = m.group(1), int(m.group(2))
+            alias = f"{col}__lag{n}"
+            lag_specs[alias] = (col, n)
+            parts.append(f"NULLIF({alias}, 0)")  # ゼロ除算保護
+        elif s in _COL_MAP:
+            parts.append(_COL_MAP[s])
+        else:  # 数値・演算子・括弧
+            parts.append(s)
+    return "".join(parts), lag_specs
 
 
 @strawberry.type
@@ -84,203 +119,101 @@ class DailyRankingItem:
     date: str
     code: str
     close: float
-    prev_close: Optional[float]
-    gain_rate: Optional[float]
+    sort_value: Optional[float]
     volume: Optional[float]
     rank: int
-
-
-def _fetch_gain_ranking(
-    order_key: str, date: str, limit: int
-) -> List[StockRankingItem]:
-    """mother.duckdb から値上がり/値下がり率ランキングを取得"""
-    order = _ORDER_MAP[order_key]
-    sql = f"""
-    WITH target AS (
-        SELECT "Code", "Close", "Volume"
-        FROM stocks_daily WHERE "Date" = ?
-    ),
-    prev AS (
-        SELECT s."Code", s."Close" AS PrevClose
-        FROM stocks_daily s
-        INNER JOIN (
-            SELECT "Code", MAX("Date") AS PrevDate
-            FROM stocks_daily WHERE "Date" < ?
-            GROUP BY "Code"
-        ) p ON s."Code" = p."Code" AND s."Date" = p.PrevDate
-    )
-    SELECT
-        t."Code",
-        t."Close",
-        pr.PrevClose,
-        (t."Close" - pr.PrevClose) / pr.PrevClose * 100 AS GainRate,
-        t."Volume",
-        ROW_NUMBER() OVER (ORDER BY GainRate {order}) AS Rank
-    FROM target t
-    JOIN prev pr ON t."Code" = pr."Code"
-    WHERE pr.PrevClose > 0
-    ORDER BY GainRate {order}
-    LIMIT ?
-    """
-    with _duckdb.connect(MOTHER_DB_PATH, read_only=True) as con:
-        rows = con.execute(sql, [date, date, limit]).fetchall()
-    return [
-        StockRankingItem(
-            code=r[0],
-            close=r[1],
-            prev_close=r[2],
-            gain_rate=round(r[3], 4),
-            volume=r[4],
-            rank=r[5],
-        )
-        for r in rows
-    ]
 
 
 @strawberry.type
 class Query:
     @strawberry.field
-    def gain_ranking(self, date: str, limit: int = 20) -> List[StockRankingItem]:
-        """値上がり率ランキング"""
-        return _fetch_gain_ranking("desc", date, limit)
-
-    @strawberry.field
-    def decline_ranking(self, date: str, limit: int = 20) -> List[StockRankingItem]:
-        """値下がり率ランキング"""
-        return _fetch_gain_ranking("asc", date, limit)
-
-    @strawberry.field
-    def gain_ranking_range(
-        self, from_date: str, to_date: str, limit: int = 20
-    ) -> List[DailyRankingItem]:
-        """期間レンジの値上がり率ランキング（全日分まとめて返す）"""
-        sql = """
-        WITH extended AS (
-            -- PrevClose取得のため from_date より1営業日前から取得
-            SELECT "Code", "Date", "Close"
-            FROM stocks_daily
-            WHERE "Date" >= (
-                SELECT MAX("Date") FROM stocks_daily WHERE "Date" < ?
-            )
-            AND "Date" <= ?
-        ),
-        with_prev AS (
-            SELECT *,
-                LAG("Close") OVER (PARTITION BY "Code" ORDER BY "Date") AS PrevClose
-            FROM extended
-        ),
-        ranked AS (
-            SELECT
-                "Date", "Code", "Close", PrevClose,
-                ("Close" - PrevClose) / PrevClose * 100 AS GainRate,
-                ROW_NUMBER() OVER (
-                    PARTITION BY "Date"
-                    ORDER BY ("Close" - PrevClose) / PrevClose DESC
-                ) AS Rank
-            FROM with_prev
-            WHERE "Date" >= ?
-              AND PrevClose IS NOT NULL
-              AND PrevClose > 0
-        )
-        SELECT "Date", "Code", "Close", PrevClose, GainRate, Rank
-        FROM ranked
-        WHERE Rank <= ?
-        ORDER BY "Date", Rank
-        """
-        with _duckdb.connect(MOTHER_DB_PATH, read_only=True) as con:
-            rows = con.execute(sql, [from_date, to_date, from_date, limit]).fetchall()
-        return [
-            DailyRankingItem(
-                date=str(r[0]),
-                code=r[1],
-                close=r[2],
-                prev_close=r[3],
-                gain_rate=round(r[4], 4),
-                volume=None,
-                rank=r[5],
-            )
-            for r in rows
-        ]
-
-    @strawberry.field
-    def volume_ranking(self, date: str, limit: int = 20) -> List[StockRankingItem]:
-        """出来高ランキング"""
-        sql = """
-        SELECT "Code", "Close", "Volume",
-               ROW_NUMBER() OVER (ORDER BY "Volume" DESC) AS Rank
-        FROM stocks_daily WHERE "Date" = ?
-        ORDER BY "Volume" DESC LIMIT ?
-        """
-        with _duckdb.connect(MOTHER_DB_PATH, read_only=True) as con:
-            rows = con.execute(sql, [date, limit]).fetchall()
-        return [
-            StockRankingItem(
-                code=r[0],
-                close=r[1],
-                prev_close=None,
-                gain_rate=None,
-                volume=r[2],
-                rank=r[3],
-            )
-            for r in rows
-        ]
-
-    @strawberry.field
     def stock_ranking_range(
         self,
         from_date: str,
         to_date: str,
-        sort_by: str = "gain_rate",  # "gain_rate" | "volume"
-        order: str = "desc",         # "desc" | "asc"
+        sort_by: str = "(Close - Close[-1]) / Close[-1] * 100",
+        order: str = "desc",  # "desc" | "asc"
         limit: int = 20,
     ) -> List[DailyRankingItem]:
-        """汎用ランキング（sortBy + order でクライアントがランキング種別を決定）"""
-        sort_col = _SORT_COL_MAP[sort_by]
+        """汎用ランキング（sortBy に DuckDB 計算式を直接指定）
+        式中では Close[-N] / Open[-N] 等で N 営業日前の値を参照できる。
+        例: (Close - Close[-2]) / Close[-2] * 100
+        """
+        sort_expr, lag_specs = _parse_formula(sort_by)
         order_sql = _ORDER_MAP[order]
+        max_lag = max((n for _, n in lag_specs.values()), default=1)
+
+        # with_prev に追加する LAG 列定義
+        extra_lag_cols = "".join(
+            f',\n            LAG("{col}", {n}) OVER (PARTITION BY "Code" ORDER BY "Date") AS {alias}'
+            for alias, (col, n) in lag_specs.items()
+        )
+
+        try:
+            from_dt = datetime.datetime.strptime(from_date, "%Y-%m-%d")
+            to_dt = datetime.datetime.strptime(to_date, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError("from_date and to_date must be in YYYY-MM-DD format")
+
+        safe_from_date = from_dt.strftime("%Y-%m-%d")
+        safe_to_date = to_dt.strftime("%Y-%m-%d")
+        min_date_val = (from_dt - datetime.timedelta(days=60)).strftime("%Y-%m-%d")
+
+        # データが Code 順にクラスタリングされているため、全探索を防ぐ目的で
+        # 時価総額日本一(7203: トヨタ)の営業日カレンダーを利用して遡及日を高速抽出する
+        # 内部で MIN() を取ると DuckDB オプティマイザがサブクエリを展開して
+        # フルテーブルスキャンにフォールバックするため、結果を必ずリストで受け取る
+        boundary_sql = f"""
+            SELECT "Date"
+            FROM stocks_daily
+            WHERE "Code" = '7203' 
+              AND "Date" >= '{min_date_val}' AND "Date" < '{safe_from_date}'
+            ORDER BY "Date" DESC
+            LIMIT {max_lag}
+        """
+        with _duckdb.connect(MOTHER_DB_PATH, read_only=True) as con:
+            boundary_res = con.execute(boundary_sql).fetchall()
+
+        target_min_date = boundary_res[-1][0] if boundary_res else "1970-01-01"
+
         sql = f"""
         WITH extended AS (
-            -- PrevClose取得のため from_date より1営業日前から取得
-            SELECT "Code", "Date", "Close", "Volume"
+            -- target_min_date から to_date までを取得（LAG 計算用バッファ込み）
+            SELECT "Code", "Date", "Open", "High", "Low", "Close", "Volume"
             FROM stocks_daily
-            WHERE "Date" >= (
-                SELECT MAX("Date") FROM stocks_daily WHERE "Date" < ?
-            )
-            AND "Date" <= ?
+            WHERE "Date" >= '{target_min_date}'
+              AND "Date" <= '{safe_to_date}'
         ),
         with_prev AS (
-            SELECT *,
-                LAG("Close") OVER (PARTITION BY "Code" ORDER BY "Date") AS PrevClose
+            SELECT *{extra_lag_cols}
             FROM extended
         ),
         ranked AS (
             SELECT
-                "Date", "Code", "Close", "Volume", PrevClose,
-                ("Close" - PrevClose) / PrevClose * 100 AS GainRate,
+                "Date", "Code", "Close", "Volume",
+                {sort_expr} AS SortValue,
                 ROW_NUMBER() OVER (
                     PARTITION BY "Date"
-                    ORDER BY {sort_col} {order_sql}
+                    ORDER BY SortValue {order_sql} NULLS LAST
                 ) AS Rank
             FROM with_prev
-            WHERE "Date" >= ?
-              AND PrevClose IS NOT NULL
-              AND PrevClose > 0
+            WHERE "Date" >= '{safe_from_date}'
         )
-        SELECT "Date", "Code", "Close", PrevClose, GainRate, "Volume", Rank
+        SELECT "Date", "Code", "Close", SortValue, "Volume", Rank
         FROM ranked
-        WHERE Rank <= ?
+        WHERE Rank <= {limit}
         ORDER BY "Date", Rank
         """
         with _duckdb.connect(MOTHER_DB_PATH, read_only=True) as con:
-            rows = con.execute(sql, [from_date, to_date, from_date, limit]).fetchall()
+            rows = con.execute(sql).fetchall()
         return [
             DailyRankingItem(
                 date=str(r[0]),
                 code=r[1],
                 close=r[2],
-                prev_close=r[3],
-                gain_rate=round(r[4], 4) if r[4] is not None else None,
-                volume=r[5],
-                rank=r[6],
+                sort_value=round(r[3], 4) if r[3] is not None else None,
+                volume=r[4],
+                rank=r[5],
             )
             for r in rows
         ]
