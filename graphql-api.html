@@ -805,8 +805,8 @@
 </table>
 <hr />
 <h2 id="stockrankingrange">メインクエリ：<code>stockRankingRange</code><a class="headerlink" href="#stockrankingrange" title="Permanent link">&para;</a></h2>
-<p><strong>「何のランキングか」はクライアント側が <code>sortBy</code> + <code>order</code> で決定する。</strong>
-バックエンドは汎用的なデータを返すだけで、ランキング種別をクエリ名に埋め込まない。</p>
+<p><strong>「何のランキングか」はクライアント側が <code>sortBy</code> に計算式を直接渡して決定する。</strong>
+バックエンドは式を検証・変換して DuckDB に渡し、汎用的なデータを返す。</p>
 <h3 id="_2">パラメータ<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -833,8 +833,8 @@
 <tr>
 <td><code>sortBy</code></td>
 <td><code>String</code></td>
-<td><code>"gain_rate"</code></td>
-<td>ランキング基準（後述）</td>
+<td><code>"(Close - Close[-1]) / Close[-1] * 100"</code></td>
+<td>ソート計算式（後述）</td>
 </tr>
 <tr>
 <td><code>order</code></td>
@@ -878,12 +878,12 @@
 <tr>
 <td><code>prevClose</code></td>
 <td><code>Float?</code></td>
-<td>前営業日終値（初日など取得できない場合 null）</td>
+<td>常に <code>null</code>（廃止済み、後述）</td>
 </tr>
 <tr>
-<td><code>gainRate</code></td>
+<td><code>sortValue</code></td>
 <td><code>Float?</code></td>
-<td>騰落率 <code>(close - prevClose) / prevClose × 100</code></td>
+<td><code>sortBy</code> 式の計算結果（null の行は順位末尾）</td>
 </tr>
 <tr>
 <td><code>volume</code></td>
@@ -898,108 +898,230 @@
 </tbody>
 </table>
 <hr />
-<h2 id="sortby">sortBy の種類<a class="headerlink" href="#sortby" title="Permanent link">&para;</a></h2>
-<p>現在サポートされている <code>sortBy</code> 値：</p>
+<h2 id="sortby">sortBy の書き方<a class="headerlink" href="#sortby" title="Permanent link">&para;</a></h2>
+<p><code>sortBy</code> には <strong>使用可能な列名と四則演算子・括弧・数値</strong> で構成された計算式を文字列で渡す。</p>
+<h3 id="_3">使用可能な列名<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>sortBy</th>
-<th>ランキング種別</th>
-<th>計算元</th>
+<th>列名</th>
+<th>内容</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>"gain_rate"</code></td>
-<td>値上がり率 / 値下がり率</td>
-<td><code>(Close - PrevClose) / PrevClose × 100</code></td>
+<td><code>Close</code></td>
+<td>終値</td>
 </tr>
 <tr>
-<td><code>"volume"</code></td>
-<td>出来高</td>
+<td><code>Open</code></td>
+<td>始値</td>
+</tr>
+<tr>
+<td><code>High</code></td>
+<td>高値</td>
+</tr>
+<tr>
+<td><code>Low</code></td>
+<td>安値</td>
+</tr>
+<tr>
 <td><code>Volume</code></td>
+<td>出来高</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_4">ラグ指定（任意の前営業日値）<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p><code>ColName[-N]</code> の形式で <strong>N 営業日前</strong> の値を参照できる。</p>
+<table>
+<thead>
+<tr>
+<th>記法</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Close[-1]</code></td>
+<td>前営業日の終値</td>
+</tr>
+<tr>
+<td><code>Close[-2]</code></td>
+<td>2営業日前の終値</td>
+</tr>
+<tr>
+<td><code>Open[-3]</code></td>
+<td>3営業日前の始値</td>
+</tr>
+<tr>
+<td><code>Volume[-1]</code></td>
+<td>前営業日の出来高</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>N は 1 以上の整数</li>
+<li>値が 0 の場合は自動的に <code>NULL</code> 扱い（ゼロ除算防止）</li>
+<li>バックエンドが必要な営業日数分だけ自動でデータを遡って取得する</li>
+</ul>
+<h3 id="_5">使用可能な演算子・記号<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p><code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>(</code> <code>)</code> および数値リテラル</p>
+<h3 id="_6">計算式の例<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>sortBy 文字列</th>
+<th>ランキング種別</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"(Close - Close[-1]) / Close[-1] * 100"</code></td>
+<td>騰落率（%） ← デフォルト</td>
+</tr>
+<tr>
+<td><code>"(Close - Close[-2]) / Close[-2] * 100"</code></td>
+<td>2日間騰落率（%）</td>
+</tr>
+<tr>
+<td><code>"Volume"</code></td>
+<td>出来高</td>
+</tr>
+<tr>
+<td><code>"(High - Low) / Close * 100"</code></td>
+<td>値幅率（%）</td>
+</tr>
+<tr>
+<td><code>"Close * Volume"</code></td>
+<td>売買代金</td>
+</tr>
+<tr>
+<td><code>"High - Low"</code></td>
+<td>値幅（絶対値）</td>
+</tr>
+<tr>
+<td><code>"Close / High[-3] * 100"</code></td>
+<td>3日前高値に対する比率（%）</td>
+</tr>
+<tr>
+<td><code>"Volume / Volume[-1]"</code></td>
+<td>出来高前日比</td>
 </tr>
 </tbody>
 </table>
 <blockquote>
-<p>追加予定: <code>"turnover_value"</code> (売買代金 = Close × Volume)、<code>"price_range_rate"</code> (値幅率) など。</p>
+<p><strong>注意</strong>: 列名・演算子以外の文字列（関数名・セミコロン等）は検証エラーになります。</p>
 </blockquote>
 <hr />
-<h2 id="_3">クエリ例<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<h3 id="top-201">値上がり率ランキング（Top 20、1ヶ月分）<a class="headerlink" href="#top-201" title="Permanent link">&para;</a></h3>
+<h2 id="_7">クエリ例<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h3 id="top-201">騰落率ランキング（Top 20、1ヶ月分）<a class="headerlink" href="#top-201" title="Permanent link">&para;</a></h3>
 <div class="language-graphql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">query</span><span class="w"> </span><span class="nf">GainRanking</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="n">stockRankingRange</span><span class="p">(</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">fromDate</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2025-01-01&quot;</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">toDate</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;2025-01-31&quot;</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;gain_rate&quot;</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;(Close - Close[-1]) / Close[-1] * 100&quot;</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">order</span><span class="p">:</span><span class="w">    </span><span class="s">&quot;desc&quot;</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="n">limit</span><span class="p">:</span><span class="w">    </span><span class="mi">20</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="n">date</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="n">code</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="n">close</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="n">gainRate</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="n">sortValue</span>
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="n">rank</span>
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
 </span></code></pre></div>
-<h3 id="order-asc">値下がり率ランキング（同じクエリ、order: "asc" のみ変更）<a class="headerlink" href="#order-asc" title="Permanent link">&para;</a></h3>
+<h3 id="order-asc">値下がり率ランキング（order: "asc" に変更）<a class="headerlink" href="#order-asc" title="Permanent link">&para;</a></h3>
 <div class="language-graphql highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">query</span><span class="w"> </span><span class="nf">DeclineRanking</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="n">stockRankingRange</span><span class="p">(</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">fromDate</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2025-01-01&quot;</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="n">toDate</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;2025-01-31&quot;</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;gain_rate&quot;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;(Close - Close[-1]) / Close[-1] * 100&quot;</span>
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="n">order</span><span class="p">:</span><span class="w">    </span><span class="s">&quot;asc&quot;</span>
 </span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="n">limit</span><span class="p">:</span><span class="w">    </span><span class="mi">20</span>
 </span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="n">date</span>
 </span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="n">code</span>
 </span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="n">close</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="n">gainRate</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="n">sortValue</span>
 </span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="n">rank</span>
 </span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p">}</span>
 </span></code></pre></div>
-<h3 id="_4">出来高ランキング<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
-<div class="language-graphql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">query</span><span class="w"> </span><span class="nf">VolumeRanking</span><span class="w"> </span><span class="p">{</span>
+<h3 id="2">2日間騰落率ランキング<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<div class="language-graphql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">query</span><span class="w"> </span><span class="nf">TwoDayGainRanking</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="n">stockRankingRange</span><span class="p">(</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="n">fromDate</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2025-01-01&quot;</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="n">toDate</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;2025-01-31&quot;</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;volume&quot;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;(Close - Close[-2]) / Close[-2] * 100&quot;</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="n">order</span><span class="p">:</span><span class="w">    </span><span class="s">&quot;desc&quot;</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="n">limit</span><span class="p">:</span><span class="w">    </span><span class="mi">20</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="n">limit</span><span class="p">:</span><span class="w">    </span><span class="mi">10</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="n">date</span>
 </span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="n">code</span>
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="n">close</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="n">volume</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="n">sortValue</span>
 </span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="n">rank</span>
 </span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="p">}</span>
 </span></code></pre></div>
+<h3 id="_8">出来高ランキング<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<div class="language-graphql highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">query</span><span class="w"> </span><span class="nf">VolumeRanking</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="n">stockRankingRange</span><span class="p">(</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="n">fromDate</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2025-01-01&quot;</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="n">toDate</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;2025-01-31&quot;</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;Volume&quot;</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="n">order</span><span class="p">:</span><span class="w">    </span><span class="s">&quot;desc&quot;</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="n">limit</span><span class="p">:</span><span class="w">    </span><span class="mi">20</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="n">date</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="n">code</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="n">close</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">    </span><span class="n">volume</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">    </span><span class="n">rank</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="_9">値幅率ランキング（ボラティリティスクリーニング）<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<div class="language-graphql highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">query</span><span class="w"> </span><span class="nf">VolatilityRanking</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="n">stockRankingRange</span><span class="p">(</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="n">fromDate</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2025-01-01&quot;</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="n">toDate</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;2025-01-31&quot;</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;(High - Low) / Close * 100&quot;</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="n">order</span><span class="p">:</span><span class="w">    </span><span class="s">&quot;desc&quot;</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="n">limit</span><span class="p">:</span><span class="w">    </span><span class="mi">10</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="n">date</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="n">code</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="n">close</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="n">sortValue</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="n">rank</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="p">}</span>
+</span></code></pre></div>
 <hr />
 <h2 id="curl">curl での呼び出し例<a class="headerlink" href="#curl" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/graphql<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="s1">    &quot;query&quot;: &quot;{ stockRankingRange(fromDate: \&quot;2025-01-06\&quot;, toDate: \&quot;2025-01-10\&quot;, sortBy: \&quot;gain_rate\&quot;, order: \&quot;desc\&quot;, limit: 5) { date code gainRate rank } }&quot;</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="s1">  }&#39;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/graphql<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="s1">    &quot;query&quot;: &quot;{ stockRankingRange(fromDate: \&quot;2025-01-06\&quot;, toDate: \&quot;2025-01-10\&quot;, sortBy: \&quot;(Close - Close[-1]) / Close[-1] * 100\&quot;, order: \&quot;desc\&quot;, limit: 5) { date code sortValue rank } }&quot;</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="s1">  }&#39;</span>
 </span></code></pre></div>
 <p>レスポンス例（抜粋）：</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;stockRankingRange&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-06&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3137&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;gainRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">36.3636</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rank&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-06&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3624&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;gainRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">29.8013</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rank&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">      </span><span class="err">...</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-07&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2962&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;gainRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">31.6206</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rank&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">      </span><span class="err">...</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="p">]</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nt">&quot;stockRankingRange&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-06&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3137&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sortValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">36.3636</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rank&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-06&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3624&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sortValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">29.8013</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rank&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">      </span><span class="err">...</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-07&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2962&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;sortValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">31.6206</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rank&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">      </span><span class="err">...</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="p">}</span>
 </span></code></pre></div>
 <hr />
-<h2 id="_5">レスポンスサイズの目安<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h2 id="_10">レスポンスサイズの目安<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
@@ -1026,39 +1148,49 @@
 </table>
 <p>1リクエストで複数年分をまとめて取得できる設計のため、クライアント側でキャッシュすれば再クエリ不要。</p>
 <hr />
-<h2 id="_6">セキュリティ<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<p><code>sortBy</code> / <code>order</code> はホワイトリスト (<code>_SORT_COL_MAP</code>, <code>_ORDER_MAP</code>) で検証する。
-無効な値を渡すと <code>KeyError</code> → GraphQL エラーとして返却され、SQL には渡らない。</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># cloud-run/main.py</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">_SORT_COL_MAP</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="s2">&quot;gain_rate&quot;</span><span class="p">:</span> <span class="s2">&quot;GainRate&quot;</span><span class="p">,</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="s2">&quot;volume&quot;</span><span class="p">:</span>    <span class="s1">&#39;&quot;Volume&quot;&#39;</span><span class="p">,</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">_ORDER_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;desc&quot;</span><span class="p">:</span> <span class="s2">&quot;DESC&quot;</span><span class="p">,</span> <span class="s2">&quot;asc&quot;</span><span class="p">:</span> <span class="s2">&quot;ASC&quot;</span><span class="p">}</span>
+<h2 id="_11">セキュリティ<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<p><code>sortBy</code> はトークンベースのホワイトリスト検証 (<code>_parse_formula</code>) を通過した式のみ DuckDB に渡る。
+許可トークン以外（関数名・セミコロン等）が含まれると <code>ValueError</code> → GraphQL エラーとして返却される。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># cloud-run/main.py（抜粋）</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">_COL_MAP</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="s2">&quot;Close&quot;</span><span class="p">:</span>  <span class="s1">&#39;&quot;Close&quot;&#39;</span><span class="p">,</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="s2">&quot;Open&quot;</span><span class="p">:</span>   <span class="s1">&#39;&quot;Open&quot;&#39;</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="s2">&quot;High&quot;</span><span class="p">:</span>   <span class="s1">&#39;&quot;High&quot;&#39;</span><span class="p">,</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="s2">&quot;Low&quot;</span><span class="p">:</span>    <span class="s1">&#39;&quot;Low&quot;&#39;</span><span class="p">,</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="s2">&quot;Volume&quot;</span><span class="p">:</span> <span class="s1">&#39;&quot;Volume&quot;&#39;</span><span class="p">,</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">}</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="c1"># ColName[-N] は LAG(&quot;ColName&quot;, N) に変換、値 0 は NULLIF で NULL 扱い</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="n">_ORDER_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;desc&quot;</span><span class="p">:</span> <span class="s2">&quot;DESC&quot;</span><span class="p">,</span> <span class="s2">&quot;asc&quot;</span><span class="p">:</span> <span class="s2">&quot;ASC&quot;</span><span class="p">}</span>
+</span></code></pre></div>
+<p><code>order</code> は <code>_ORDER_MAP</code> ホワイトリストで検証する（無効値は <code>KeyError</code>）。</p>
+<hr />
+<h2 id="prevclose"><code>prevClose</code> フィールドについて（廃止）<a class="headerlink" href="#prevclose" title="Permanent link">&para;</a></h2>
+<p>旧バージョンでは <code>PrevClose</code> という固定の列名をサポートし、レスポンスの <code>prevClose</code> フィールドに
+前営業日終値を返していた。現バージョンでは <code>Close[-1]</code> 構文に統一されたため、
+<code>prevClose</code> は常に <code>null</code> を返す（フィールド自体は互換性のために残存）。</p>
+<p>移行方法：</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a># 旧
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>sortBy: &quot;(Close - PrevClose) / PrevClose * 100&quot;
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a># 新
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>sortBy: &quot;(Close - Close[-1]) / Close[-1] * 100&quot;
 </span></code></pre></div>
 <hr />
-<h2 id="_7">ローカル起動方法<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">cd</span><span class="w"> </span>cloud-run
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># .env に STOCKDATA_CACHE_DIR=S:/ を設定済みであること</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>python<span class="w"> </span>main.py
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># → http://localhost:8080/graphql</span>
+<h2 id="_12">ローカル起動方法<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">cd</span><span class="w"> </span>cloud-run
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="c1"># .env に STOCKDATA_CACHE_DIR=S:/ を設定済みであること</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>python<span class="w"> </span>main.py
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># → http://localhost:8080/graphql</span>
 </span></code></pre></div>
 <p>依存ライブラリは <code>cloud-run/requirements.txt</code>（<code>strawberry-graphql[flask]</code>, <code>duckdb</code> など）。</p>
 <hr />
-<h2 id="_8">新しいランキング種別の追加方法<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
-<p><code>_SORT_COL_MAP</code> に追加するだけで対応できる：</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 例: 高値ランキングを追加</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">_SORT_COL_MAP</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="s2">&quot;gain_rate&quot;</span><span class="p">:</span>     <span class="s2">&quot;GainRate&quot;</span><span class="p">,</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="s2">&quot;volume&quot;</span><span class="p">:</span>        <span class="s1">&#39;&quot;Volume&quot;&#39;</span><span class="p">,</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="s2">&quot;high&quot;</span><span class="p">:</span>          <span class="s1">&#39;&quot;High&quot;&#39;</span><span class="p">,</span>       <span class="c1"># ← 追加</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="s2">&quot;turnover_value&quot;</span><span class="p">:</span> <span class="s2">&quot;TurnoverVal&quot;</span><span class="p">,</span> <span class="c1"># ← WITH句への計算列追加も必要</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="p">}</span>
-</span></code></pre></div>
-<p><code>High</code> / <code>Low</code> / <code>Open</code> などは <code>stocks_daily</code> に実カラムとして存在するため即追加可能。
-<code>TurnoverValue</code>（= <code>Close × Volume</code>）のような計算列は <code>ranked</code> CTE の <code>SELECT</code> にも追加が必要。</p>
+<h2 id="_13">新しいランキング種別の追加方法<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
+<p><code>sortBy</code> に計算式を直接渡すだけで新種別を追加できる。
+バックエンドの変更は <strong>不要</strong>。</p>
+<p>新しい列を使いたい場合（例: <code>Turnover</code> など <code>stocks_daily</code> にない計算列）は、
+<code>cloud-run/main.py</code> の <code>extended</code> CTE と <code>_COL_MAP</code> / <code>_TOKEN_RE</code> への追加が必要。</p>
 <hr />
-<h2 id="_9">関連ドキュメント<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h2 id="_14">関連ドキュメント<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="design-decisions.html#motherduckdb-統合dbの導入と-graphql-ランキングapi">mother.duckdb 統合DBの設計経緯</a></li>
 <li><a href="cloud-run-updater.html">Docker job によるデータ更新</a></li>
