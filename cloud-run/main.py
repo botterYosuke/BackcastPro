@@ -63,10 +63,25 @@ MOTHER_DB_PATH = os.path.join(DATA_DIR, "jp", "stocks_daily", "mother.duckdb")
 
 # SQL injection 対策ホワイトリスト
 _ORDER_MAP = {"desc": "DESC", "asc": "ASC"}
+_SORT_COL_MAP = {
+    "gain_rate": "GainRate",
+    "volume": '"Volume"',  # DuckDB の大文字列名をクォート
+}
 
 
 @strawberry.type
 class StockRankingItem:
+    code: str
+    close: float
+    prev_close: Optional[float]
+    gain_rate: Optional[float]
+    volume: Optional[float]
+    rank: int
+
+
+@strawberry.type
+class DailyRankingItem:
+    date: str
     code: str
     close: float
     prev_close: Optional[float]
@@ -135,6 +150,59 @@ class Query:
         return _fetch_gain_ranking("asc", date, limit)
 
     @strawberry.field
+    def gain_ranking_range(
+        self, from_date: str, to_date: str, limit: int = 20
+    ) -> List[DailyRankingItem]:
+        """期間レンジの値上がり率ランキング（全日分まとめて返す）"""
+        sql = """
+        WITH extended AS (
+            -- PrevClose取得のため from_date より1営業日前から取得
+            SELECT "Code", "Date", "Close"
+            FROM stocks_daily
+            WHERE "Date" >= (
+                SELECT MAX("Date") FROM stocks_daily WHERE "Date" < ?
+            )
+            AND "Date" <= ?
+        ),
+        with_prev AS (
+            SELECT *,
+                LAG("Close") OVER (PARTITION BY "Code" ORDER BY "Date") AS PrevClose
+            FROM extended
+        ),
+        ranked AS (
+            SELECT
+                "Date", "Code", "Close", PrevClose,
+                ("Close" - PrevClose) / PrevClose * 100 AS GainRate,
+                ROW_NUMBER() OVER (
+                    PARTITION BY "Date"
+                    ORDER BY ("Close" - PrevClose) / PrevClose DESC
+                ) AS Rank
+            FROM with_prev
+            WHERE "Date" >= ?
+              AND PrevClose IS NOT NULL
+              AND PrevClose > 0
+        )
+        SELECT "Date", "Code", "Close", PrevClose, GainRate, Rank
+        FROM ranked
+        WHERE Rank <= ?
+        ORDER BY "Date", Rank
+        """
+        with _duckdb.connect(MOTHER_DB_PATH, read_only=True) as con:
+            rows = con.execute(sql, [from_date, to_date, from_date, limit]).fetchall()
+        return [
+            DailyRankingItem(
+                date=str(r[0]),
+                code=r[1],
+                close=r[2],
+                prev_close=r[3],
+                gain_rate=round(r[4], 4),
+                volume=None,
+                rank=r[5],
+            )
+            for r in rows
+        ]
+
+    @strawberry.field
     def volume_ranking(self, date: str, limit: int = 20) -> List[StockRankingItem]:
         """出来高ランキング"""
         sql = """
@@ -153,6 +221,66 @@ class Query:
                 gain_rate=None,
                 volume=r[2],
                 rank=r[3],
+            )
+            for r in rows
+        ]
+
+    @strawberry.field
+    def stock_ranking_range(
+        self,
+        from_date: str,
+        to_date: str,
+        sort_by: str = "gain_rate",  # "gain_rate" | "volume"
+        order: str = "desc",         # "desc" | "asc"
+        limit: int = 20,
+    ) -> List[DailyRankingItem]:
+        """汎用ランキング（sortBy + order でクライアントがランキング種別を決定）"""
+        sort_col = _SORT_COL_MAP[sort_by]
+        order_sql = _ORDER_MAP[order]
+        sql = f"""
+        WITH extended AS (
+            -- PrevClose取得のため from_date より1営業日前から取得
+            SELECT "Code", "Date", "Close", "Volume"
+            FROM stocks_daily
+            WHERE "Date" >= (
+                SELECT MAX("Date") FROM stocks_daily WHERE "Date" < ?
+            )
+            AND "Date" <= ?
+        ),
+        with_prev AS (
+            SELECT *,
+                LAG("Close") OVER (PARTITION BY "Code" ORDER BY "Date") AS PrevClose
+            FROM extended
+        ),
+        ranked AS (
+            SELECT
+                "Date", "Code", "Close", "Volume", PrevClose,
+                ("Close" - PrevClose) / PrevClose * 100 AS GainRate,
+                ROW_NUMBER() OVER (
+                    PARTITION BY "Date"
+                    ORDER BY {sort_col} {order_sql}
+                ) AS Rank
+            FROM with_prev
+            WHERE "Date" >= ?
+              AND PrevClose IS NOT NULL
+              AND PrevClose > 0
+        )
+        SELECT "Date", "Code", "Close", PrevClose, GainRate, "Volume", Rank
+        FROM ranked
+        WHERE Rank <= ?
+        ORDER BY "Date", Rank
+        """
+        with _duckdb.connect(MOTHER_DB_PATH, read_only=True) as con:
+            rows = con.execute(sql, [from_date, to_date, from_date, limit]).fetchall()
+        return [
+            DailyRankingItem(
+                date=str(r[0]),
+                code=r[1],
+                close=r[2],
+                prev_close=r[3],
+                gain_rate=round(r[4], 4) if r[4] is not None else None,
+                volume=r[5],
+                rank=r[6],
             )
             for r in rows
         ]

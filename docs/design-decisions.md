@@ -285,8 +285,11 @@ GraphQL query → cloud-run/main.py → mother.duckdb
 
 - **GraphQL ランキングAPI の追加**（`cloud-run/main.py`）:
   `strawberry-graphql[flask]` を採用。`mother.duckdb` に対して CTE + Window 関数で
-  値上がり率・値下がり率・出来高の各ランキングを on-the-fly で算出する。
-  `_ORDER_MAP` ホワイトリストで SQL injection を防止。
+  ランキングを on-the-fly で算出する。
+  `_ORDER_MAP` / `_SORT_COL_MAP` ホワイトリストで SQL injection を防止。
+  メインクエリ `stock_ranking_range(fromDate, toDate, sortBy, order, limit)` は
+  汎用設計で、「何のランキングか」をクライアント側が `sortBy` + `order` で決定する。
+  詳細は [graphql-api.md](graphql-api.md) 参照。
 
 - **`ALLOWED_PATHS` の更新**: `stocks_daily/mother.duckdb` をホワイトリストに追加。
 
@@ -294,7 +297,8 @@ GraphQL query → cloud-run/main.py → mother.duckdb
 
 *   **メリット**:
     *   値上がり率ランキング等の全銘柄横断クエリが単一DBへの1回のクエリで完結。
-    *   GraphQL の型安全なスキーマで3種のランキング（値上がり・値下がり・出来高）を提供。
+    *   GraphQL の型安全なスキーマで汎用ランキング `stock_ranking_range` を提供。
+        `sortBy` / `order` でクライアントがランキング種別を指定する設計。
     *   `split_to_individual` の1接続ループにより4000回の open/close を回避。
     *   単一銘柄取得（`get_stock_daily`）は個別DBから引き続き読み込むため現状維持。
 *   **注意点**:
