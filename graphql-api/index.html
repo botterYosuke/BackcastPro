@@ -10,13 +10,9 @@
       
       
       
-        <link rel="canonical" href="https://botteryosuke.github.io/BackcastPro/cloud-run-updater/">
+        <link rel="canonical" href="https://botteryosuke.github.io/BackcastPro/graphql-api/">
       
       
-        <link rel="prev" href="../how-to-deploy-to-PyPI/">
-      
-      
-        <link rel="next" href="../design-decisions/">
       
       
         
@@ -27,7 +23,7 @@
     
     
       
-        <title>Cloud Run データ更新 - BackcastPro</title>
+        <title>GraphQL ランキング API - BackcastPro</title>
       
     
     
@@ -80,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#docker-job" class="md-skip">
+        <a href="#graphql-api" class="md-skip">
           コンテンツにスキップ
         </a>
       
@@ -115,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Cloud Run データ更新
+              GraphQL ランキング API
             
           </span>
         </div>
@@ -266,12 +262,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../developer-guide/" class="md-tabs__link">
           
   
@@ -511,10 +505,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -532,22 +524,21 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -565,7 +556,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -664,37 +655,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Cloud Run データ更新
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../cloud-run-updater/" class="md-nav__link">
         
   
   
@@ -710,271 +674,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="目次">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      目次
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        アーキテクチャ
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        構成要素
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="構成要素">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#docker-backcastcloud-job" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker イメージ (backcast/cloud-job)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        必要な環境変数・シークレット
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#docker" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker イメージの取得
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker イメージの取得">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ローカルでビルドする場合
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        実行方法
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="実行方法">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        特定銘柄で動作確認
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        全銘柄を更新
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        CLI引数
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        定期実行の設定
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="定期実行の設定">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#synology-nas" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Synology NAS（タスクスケジューラ）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cronlinuxmac" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        cron（Linux/Mac）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#windows" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        タスクスケジューラ（Windows）
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_9" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        運用・監視
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="運用・監視">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#_10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ログ確認
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_11" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        データ確認
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        トラブルシューティング
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="トラブルシューティング">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#import" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        コンテナがimportエラーで失敗する
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1060,46 +759,6 @@
   
 
 
-  <nav class="md-path" aria-label="ナビゲーション" >
-    <ol class="md-path__list">
-      
-        
-  
-  
-    <li class="md-path__item">
-      <a href=".." class="md-path__link">
-        
-  <span class="md-ellipsis">
-    ホーム
-  </span>
-
-      </a>
-    </li>
-  
-
-      
-      
-        
-  
-  
-    
-    
-      <li class="md-path__item">
-        <a href="../developer-guide/" class="md-path__link">
-          
-  <span class="md-ellipsis">
-    開発者向け
-  </span>
-
-        </a>
-      </li>
-    
-  
-
-      
-    </ol>
-  </nav>
-
               
               <article class="md-content__inner md-typeset">
                 
@@ -1107,7 +766,7 @@
 
 
   
-    <a href="https://github.com/botterYosuke/BackcastPro/edit/main/docs/cloud-run-updater.md" title="編集" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/botterYosuke/BackcastPro/edit/main/docs/graphql-api.md" title="編集" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1116,148 +775,294 @@
     
       
     
-    <a href="https://github.com/botterYosuke/BackcastPro/raw/main/docs/cloud-run-updater.md" title="このページの原文を表示" class="md-content__button md-icon">
+    <a href="https://github.com/botterYosuke/BackcastPro/raw/main/docs/graphql-api.md" title="このページの原文を表示" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-<h1 id="docker-job">Docker Jobによる株価データ更新<a class="headerlink" href="#docker-job" title="Permanent link">&para;</a></h1>
-<p>BackcastProは、夜間にDockerコンテナを使用して株価データを自動更新する仕組みを備えています。
-DockerイメージはGitHub Actionsで自動的にDockerHubへpushされ、Synology NASのDockerで定期実行します。</p>
-<h2 id="_1">アーキテクチャ<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<p>データの更新プロセスは以下の通りです：</p>
-<ol>
-<li>GitHub Actionsが <code>main</code> ブランチへの push 時に Docker イメージを <strong>DockerHub</strong> (<code>backcast/cloud-job</code>) へ push します。</li>
-<li>Synology NAS のタスクスケジューラが毎晩定刻に <strong>Dockerコンテナ</strong> をトリガーします。</li>
-<li>コンテナ (<code>update_stocks_price.py</code>) が実行されます。</li>
-<li>J-Quants APIのバルクフェッチ機能を利用し、全銘柄データを一括取得します。</li>
-<li>未取得や失敗した銘柄に対しては、Tachibana や Stooq にフォールバック取得を行います。</li>
-<li>取得したデータをDuckDBファイルとしてマウントされたボリューム（<code>STOCKDATA_CACHE_DIR</code>）に直接保存します。</li>
-</ol>
-<pre class="mermaid"><code>graph LR
-    G[GitHub Actions] --&gt;|push| H[DockerHub backcast/cloud-job]
-    A[NAS タスクスケジューラ] --&gt;|docker run| B[Docker コンテナ]
-    H -.-&gt;|docker pull| B
-    B --&gt;|一括取得優先| C[J-Quants API]
-    B -.-&gt;|失敗時| F[Tachibana / Stooq]
-    B --&gt;|DuckDB保存| D[マウントボリューム /cache]</code></pre>
-<h2 id="_2">構成要素<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<h3 id="docker-backcastcloud-job">Docker イメージ (<code>backcast/cloud-job</code>)<a class="headerlink" href="#docker-backcastcloud-job" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>DockerHub</strong>: <code>backcast/cloud-job</code></li>
-<li><strong>ソース</strong>: <code>cloud-job/</code></li>
-<li><strong>Dockerfile</strong>: <code>cloud-job/Dockerfile</code></li>
-<li><strong>GitHub Action</strong>: <code>.github/workflows/publish-dockerhub.yml</code></li>
-<li><strong>役割</strong>: データの取得、加工、DuckDBファイルへの保存</li>
-<li><strong>データ保存先</strong>: 環境変数 <code>STOCKDATA_CACHE_DIR</code>（デフォルト: <code>/cache</code>）で指定されたディレクトリ</li>
-</ul>
-<h3 id="_3">必要な環境変数・シークレット<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h1 id="graphql-api">GraphQL ランキング API<a class="headerlink" href="#graphql-api" title="Permanent link">&para;</a></h1>
+<p><code>cloud-run/main.py</code> が提供する GraphQL エンドポイント（<code>/graphql</code>）の使い方ガイド。</p>
+<h2 id="_1">エンドポイント<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>環境変数</th>
-<th>用途</th>
+<th>環境</th>
+<th>URL</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>JQUANTS_API_KEY</code></td>
-<td>J-Quants API認証</td>
+<td>ローカル開発</td>
+<td><code>http://localhost:8080/graphql</code></td>
 </tr>
 <tr>
-<td><code>eAPI_URL</code></td>
-<td>立花証券 e-支店 APIエンドポイント</td>
-</tr>
-<tr>
-<td><code>eAPI_USER_ID</code></td>
-<td>立花証券 ユーザーID</td>
-</tr>
-<tr>
-<td><code>eAPI_PASSWORD</code></td>
-<td>立花証券 パスワード</td>
+<td>Cloud Run</td>
+<td>デプロイ先 URL + <code>/graphql</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="docker">Docker イメージの取得<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h2>
-<p>DockerHub から最新イメージを pull します：</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>backcast/cloud-job:latest
-</span></code></pre></div>
-<h3 id="_4">ローカルでビルドする場合<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>cloud-job/Dockerfile<span class="w"> </span>-t<span class="w"> </span>backcast/cloud-job<span class="w"> </span>.
-</span></code></pre></div>
-<h2 id="_5">実行方法<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<h3 id="_6">特定銘柄で動作確認<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-v<span class="w"> </span>/path/to/duckdb:/cache<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">JQUANTS_API_KEY</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_URL</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_USER_ID</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_PASSWORD</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span>backcast/cloud-job<span class="w"> </span>--codes<span class="w"> </span><span class="m">7203</span><span class="w"> </span>--days<span class="w"> </span><span class="m">3</span>
-</span></code></pre></div>
-<h3 id="_7">全銘柄を更新<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-v<span class="w"> </span>/path/to/duckdb:/cache<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">JQUANTS_API_KEY</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_URL</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_USER_ID</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_PASSWORD</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span>backcast/cloud-job<span class="w"> </span>--days<span class="w"> </span><span class="m">7</span>
-</span></code></pre></div>
-<h3 id="cli">CLI引数<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h3>
+<hr />
+<h2 id="stockrankingrange">メインクエリ：<code>stockRankingRange</code><a class="headerlink" href="#stockrankingrange" title="Permanent link">&para;</a></h2>
+<p><strong>「何のランキングか」はクライアント側が <code>sortBy</code> + <code>order</code> で決定する。</strong>
+バックエンドは汎用的なデータを返すだけで、ランキング種別をクエリ名に埋め込まない。</p>
+<h3 id="_2">パラメータ<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>引数</th>
+<th>パラメータ</th>
+<th>型</th>
 <th>デフォルト</th>
 <th>説明</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>--codes</code></td>
-<td>なし（全銘柄）</td>
-<td>処理対象の銘柄コード（カンマ区切り）</td>
+<td><code>fromDate</code></td>
+<td><code>String</code></td>
+<td>必須</td>
+<td>開始日 <code>YYYY-MM-DD</code></td>
 </tr>
 <tr>
-<td><code>--days</code></td>
-<td>7</td>
-<td>取得する過去日数</td>
+<td><code>toDate</code></td>
+<td><code>String</code></td>
+<td>必須</td>
+<td>終了日 <code>YYYY-MM-DD</code></td>
+</tr>
+<tr>
+<td><code>sortBy</code></td>
+<td><code>String</code></td>
+<td><code>"gain_rate"</code></td>
+<td>ランキング基準（後述）</td>
+</tr>
+<tr>
+<td><code>order</code></td>
+<td><code>String</code></td>
+<td><code>"desc"</code></td>
+<td><code>"desc"</code> または <code>"asc"</code></td>
+</tr>
+<tr>
+<td><code>limit</code></td>
+<td><code>Int</code></td>
+<td><code>20</code></td>
+<td>各日のTop-N件数</td>
 </tr>
 </tbody>
 </table>
-<h2 id="_8">定期実行の設定<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
-<h3 id="synology-nas">Synology NAS（タスクスケジューラ）<a class="headerlink" href="#synology-nas" title="Permanent link">&para;</a></h3>
-<p>Synology DSM の <strong>コントロールパネル &gt; タスクスケジューラ</strong> で以下のスクリプトを登録してください：</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>backcast/cloud-job:latest
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>/volume1/docker/backcast/cache:/cache<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">JQUANTS_API_KEY</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_URL</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_USER_ID</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">eAPI_PASSWORD</span><span class="o">=</span>xxx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span>backcast/cloud-job<span class="w"> </span>--days<span class="w"> </span><span class="m">7</span>
+<h3 id="dailyrankingitem">レスポンス型 <code>DailyRankingItem</code><a class="headerlink" href="#dailyrankingitem" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date</code></td>
+<td><code>String</code></td>
+<td>日付 <code>YYYY-MM-DD</code></td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td><code>String</code></td>
+<td>銘柄コード</td>
+</tr>
+<tr>
+<td><code>close</code></td>
+<td><code>Float</code></td>
+<td>終値</td>
+</tr>
+<tr>
+<td><code>prevClose</code></td>
+<td><code>Float?</code></td>
+<td>前営業日終値（初日など取得できない場合 null）</td>
+</tr>
+<tr>
+<td><code>gainRate</code></td>
+<td><code>Float?</code></td>
+<td>騰落率 <code>(close - prevClose) / prevClose × 100</code></td>
+</tr>
+<tr>
+<td><code>volume</code></td>
+<td><code>Float?</code></td>
+<td>出来高</td>
+</tr>
+<tr>
+<td><code>rank</code></td>
+<td><code>Int</code></td>
+<td>順位（各日 1〜limit）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="sortby">sortBy の種類<a class="headerlink" href="#sortby" title="Permanent link">&para;</a></h2>
+<p>現在サポートされている <code>sortBy</code> 値：</p>
+<table>
+<thead>
+<tr>
+<th>sortBy</th>
+<th>ランキング種別</th>
+<th>計算元</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"gain_rate"</code></td>
+<td>値上がり率 / 値下がり率</td>
+<td><code>(Close - PrevClose) / PrevClose × 100</code></td>
+</tr>
+<tr>
+<td><code>"volume"</code></td>
+<td>出来高</td>
+<td><code>Volume</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>追加予定: <code>"turnover_value"</code> (売買代金 = Close × Volume)、<code>"price_range_rate"</code> (値幅率) など。</p>
+</blockquote>
+<hr />
+<h2 id="_3">クエリ例<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="top-201">値上がり率ランキング（Top 20、1ヶ月分）<a class="headerlink" href="#top-201" title="Permanent link">&para;</a></h3>
+<div class="language-graphql highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">query</span><span class="w"> </span><span class="nf">GainRanking</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="n">stockRankingRange</span><span class="p">(</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">fromDate</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2025-01-01&quot;</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">toDate</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;2025-01-31&quot;</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;gain_rate&quot;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">order</span><span class="p">:</span><span class="w">    </span><span class="s">&quot;desc&quot;</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="n">limit</span><span class="p">:</span><span class="w">    </span><span class="mi">20</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="n">date</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="n">code</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="n">close</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="n">gainRate</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="n">rank</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
 </span></code></pre></div>
-<h3 id="cronlinuxmac">cron（Linux/Mac）<a class="headerlink" href="#cronlinuxmac" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 毎日 19:30 に実行</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="m">30</span><span class="w"> </span><span class="m">19</span><span class="w"> </span>*<span class="w"> </span>*<span class="w"> </span><span class="m">1</span>-5<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>/path/to/duckdb:/cache<span class="w"> </span>-e<span class="w"> </span><span class="nv">JQUANTS_API_KEY</span><span class="o">=</span>xxx<span class="w"> </span>-e<span class="w"> </span><span class="nv">eAPI_URL</span><span class="o">=</span>xxx<span class="w"> </span>-e<span class="w"> </span><span class="nv">eAPI_USER_ID</span><span class="o">=</span>xxx<span class="w"> </span>-e<span class="w"> </span><span class="nv">eAPI_PASSWORD</span><span class="o">=</span>xxx<span class="w"> </span>backcast/cloud-job<span class="w"> </span>--days<span class="w"> </span><span class="m">7</span>
+<h3 id="order-asc">値下がり率ランキング（同じクエリ、order: "asc" のみ変更）<a class="headerlink" href="#order-asc" title="Permanent link">&para;</a></h3>
+<div class="language-graphql highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">query</span><span class="w"> </span><span class="nf">DeclineRanking</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="n">stockRankingRange</span><span class="p">(</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">fromDate</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2025-01-01&quot;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="n">toDate</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;2025-01-31&quot;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;gain_rate&quot;</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="n">order</span><span class="p">:</span><span class="w">    </span><span class="s">&quot;asc&quot;</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="n">limit</span><span class="p">:</span><span class="w">    </span><span class="mi">20</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="n">date</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="n">code</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="n">close</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="n">gainRate</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="n">rank</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p">}</span>
 </span></code></pre></div>
-<h3 id="windows">タスクスケジューラ（Windows）<a class="headerlink" href="#windows" title="Permanent link">&para;</a></h3>
-<p>PowerShellスクリプトを作成し、タスクスケジューラに登録してください。</p>
-<h2 id="_9">運用・監視<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
-<h3 id="_10">ログ確認<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
-<p>ログはコンソール（stdout）に出力されます。</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># コンテナのログを確認</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>docker<span class="w"> </span>logs<span class="w"> </span>&lt;container_id&gt;
+<h3 id="_4">出来高ランキング<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<div class="language-graphql highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">query</span><span class="w"> </span><span class="nf">VolumeRanking</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="n">stockRankingRange</span><span class="p">(</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="n">fromDate</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2025-01-01&quot;</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="n">toDate</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;2025-01-31&quot;</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="n">sortBy</span><span class="p">:</span><span class="w">   </span><span class="s">&quot;volume&quot;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="n">order</span><span class="p">:</span><span class="w">    </span><span class="s">&quot;desc&quot;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="n">limit</span><span class="p">:</span><span class="w">    </span><span class="mi">20</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="n">date</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="n">code</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="n">close</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="n">volume</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="n">rank</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="p">}</span>
 </span></code></pre></div>
-<h3 id="_11">データ確認<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
-<p>更新されたデータは、マウントされたボリューム内のDuckDBファイルを直接確認することで検証できます。</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># ボリューム内のDuckDBファイルを確認</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>ls<span class="w"> </span>/path/to/duckdb/stocks_daily/
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="c1"># 例: 7203.duckdb, 8306.duckdb, ...</span>
+<hr />
+<h2 id="curl">curl での呼び出し例<a class="headerlink" href="#curl" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8080/graphql<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="s1">    &quot;query&quot;: &quot;{ stockRankingRange(fromDate: \&quot;2025-01-06\&quot;, toDate: \&quot;2025-01-10\&quot;, sortBy: \&quot;gain_rate\&quot;, order: \&quot;desc\&quot;, limit: 5) { date code gainRate rank } }&quot;</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="s1">  }&#39;</span>
 </span></code></pre></div>
-<h2 id="_12">トラブルシューティング<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
-<h3 id="import">コンテナがimportエラーで失敗する<a class="headerlink" href="#import" title="Permanent link">&para;</a></h3>
-<p>Dockerfile の <code>PYTHONPATH</code> が <code>/app/src</code> に設定されているか確認してください。<code>trading_data</code> と <code>BackcastPro</code> パッケージは <code>/app/src/</code> 配下にコピーされるため、この設定がないと <code>ModuleNotFoundError</code> になります。</p>
+<p>レスポンス例（抜粋）：</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;stockRankingRange&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-06&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3137&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;gainRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">36.3636</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rank&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-06&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3624&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;gainRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">29.8013</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rank&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">      </span><span class="err">...</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">      </span><span class="p">{</span><span class="nt">&quot;date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-01-07&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2962&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;gainRate&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">31.6206</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rank&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">      </span><span class="err">...</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="p">}</span>
+</span></code></pre></div>
+<hr />
+<h2 id="_5">レスポンスサイズの目安<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>limit</th>
+<th>営業日数（10年）</th>
+<th>JSON目安</th>
+<th>gzip後</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>20</td>
+<td>~2,450日 → ~49,000行</td>
+<td>~5MB</td>
+<td>~0.8MB</td>
+</tr>
+<tr>
+<td>50</td>
+<td>~2,450日 → ~122,500行</td>
+<td>~12MB</td>
+<td>~2MB</td>
+</tr>
+</tbody>
+</table>
+<p>1リクエストで複数年分をまとめて取得できる設計のため、クライアント側でキャッシュすれば再クエリ不要。</p>
+<hr />
+<h2 id="_6">セキュリティ<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<p><code>sortBy</code> / <code>order</code> はホワイトリスト (<code>_SORT_COL_MAP</code>, <code>_ORDER_MAP</code>) で検証する。
+無効な値を渡すと <code>KeyError</code> → GraphQL エラーとして返却され、SQL には渡らない。</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># cloud-run/main.py</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">_SORT_COL_MAP</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="s2">&quot;gain_rate&quot;</span><span class="p">:</span> <span class="s2">&quot;GainRate&quot;</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="s2">&quot;volume&quot;</span><span class="p">:</span>    <span class="s1">&#39;&quot;Volume&quot;&#39;</span><span class="p">,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">_ORDER_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;desc&quot;</span><span class="p">:</span> <span class="s2">&quot;DESC&quot;</span><span class="p">,</span> <span class="s2">&quot;asc&quot;</span><span class="p">:</span> <span class="s2">&quot;ASC&quot;</span><span class="p">}</span>
+</span></code></pre></div>
+<hr />
+<h2 id="_7">ローカル起動方法<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nb">cd</span><span class="w"> </span>cloud-run
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># .env に STOCKDATA_CACHE_DIR=S:/ を設定済みであること</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>python<span class="w"> </span>main.py
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># → http://localhost:8080/graphql</span>
+</span></code></pre></div>
+<p>依存ライブラリは <code>cloud-run/requirements.txt</code>（<code>strawberry-graphql[flask]</code>, <code>duckdb</code> など）。</p>
+<hr />
+<h2 id="_8">新しいランキング種別の追加方法<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<p><code>_SORT_COL_MAP</code> に追加するだけで対応できる：</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># 例: 高値ランキングを追加</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">_SORT_COL_MAP</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="s2">&quot;gain_rate&quot;</span><span class="p">:</span>     <span class="s2">&quot;GainRate&quot;</span><span class="p">,</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="s2">&quot;volume&quot;</span><span class="p">:</span>        <span class="s1">&#39;&quot;Volume&quot;&#39;</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="s2">&quot;high&quot;</span><span class="p">:</span>          <span class="s1">&#39;&quot;High&quot;&#39;</span><span class="p">,</span>       <span class="c1"># ← 追加</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="s2">&quot;turnover_value&quot;</span><span class="p">:</span> <span class="s2">&quot;TurnoverVal&quot;</span><span class="p">,</span> <span class="c1"># ← WITH句への計算列追加も必要</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<p><code>High</code> / <code>Low</code> / <code>Open</code> などは <code>stocks_daily</code> に実カラムとして存在するため即追加可能。
+<code>TurnoverValue</code>（= <code>Close × Volume</code>）のような計算列は <code>ranked</code> CTE の <code>SELECT</code> にも追加が必要。</p>
+<hr />
+<h2 id="_9">関連ドキュメント<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../design-decisions/#motherduckdb-統合dbの導入と-graphql-ランキングapi">mother.duckdb 統合DBの設計経緯</a></li>
+<li><a href="../cloud-run-updater/">Docker job によるデータ更新</a></li>
+</ul>
 
 
 
@@ -1290,44 +1095,6 @@ DockerイメージはGitHub Actionsで自動的にDockerHubへpushされ、Synol
       
         <footer class="md-footer">
   
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="フッター" >
-        
-          
-          <a href="../how-to-deploy-to-PyPI/" class="md-footer__link md-footer__link--prev" aria-label="前: PyPIデプロイ">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                前
-              </span>
-              <div class="md-ellipsis">
-                PyPIデプロイ
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="../design-decisions/" class="md-footer__link md-footer__link--next" aria-label="次: 設計判断記録">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                次
-              </span>
-              <div class="md-ellipsis">
-                設計判断記録
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
     
   
   <div class="md-footer-meta md-typeset">

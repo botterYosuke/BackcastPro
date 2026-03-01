@@ -1187,6 +1187,56 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#j-quantsapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        J-QuantsAPIの日付指定一括取得とフェッチ優先度の変更
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="J-QuantsAPIの日付指定一括取得とフェッチ優先度の変更">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1323,6 +1373,7 @@
 <li><a href="#cloud-run-job廃止とsynology-nas-docker--dockerhubへの移行">Cloud Run Job廃止とSynology NAS Docker + DockerHubへの移行</a></li>
 <li><a href="#ftps廃止とローカルファイル配信への移行">FTPS廃止とローカルファイル配信への移行</a></li>
 <li><a href="#motherduckdb-統合dbの導入と-graphql-ランキングapi">mother.duckdb 統合DBの導入と GraphQL ランキングAPI</a></li>
+<li><a href="#j-quantsapiの日付指定一括取得とフェッチ優先度の変更">J-QuantsAPIの日付指定一括取得とフェッチ優先度の変更</a></li>
 </ol>
 <hr />
 <h2 id="ftpgoogle-drive">FTP廃止とGoogle Driveへの完全移行<a class="headerlink" href="#ftpgoogle-drive" title="Permanent link">&para;</a></h2>
@@ -1570,8 +1621,11 @@
 <li>
 <p><strong>GraphQL ランキングAPI の追加</strong>（<code>cloud-run/main.py</code>）:
   <code>strawberry-graphql[flask]</code> を採用。<code>mother.duckdb</code> に対して CTE + Window 関数で
-  値上がり率・値下がり率・出来高の各ランキングを on-the-fly で算出する。
-  <code>_ORDER_MAP</code> ホワイトリストで SQL injection を防止。</p>
+  ランキングを on-the-fly で算出する。
+  <code>_ORDER_MAP</code> / <code>_SORT_COL_MAP</code> ホワイトリストで SQL injection を防止。
+  メインクエリ <code>stock_ranking_range(fromDate, toDate, sortBy, order, limit)</code> は
+  汎用設計で、「何のランキングか」をクライアント側が <code>sortBy</code> + <code>order</code> で決定する。
+  詳細は <a href="../graphql-api/">graphql-api.md</a> 参照。</p>
 </li>
 <li>
 <p><strong><code>ALLOWED_PATHS</code> の更新</strong>: <code>stocks_daily/mother.duckdb</code> をホワイトリストに追加。</p>
@@ -1581,7 +1635,8 @@
 <ul>
 <li><strong>メリット</strong>:<ul>
 <li>値上がり率ランキング等の全銘柄横断クエリが単一DBへの1回のクエリで完結。</li>
-<li>GraphQL の型安全なスキーマで3種のランキング（値上がり・値下がり・出来高）を提供。</li>
+<li>GraphQL の型安全なスキーマで汎用ランキング <code>stock_ranking_range</code> を提供。
+    <code>sortBy</code> / <code>order</code> でクライアントがランキング種別を指定する設計。</li>
 <li><code>split_to_individual</code> の1接続ループにより4000回の open/close を回避。</li>
 <li>単一銘柄取得（<code>get_stock_daily</code>）は個別DBから引き続き読み込むため現状維持。</li>
 </ul>
@@ -1624,6 +1679,32 @@
 </tbody>
 </table>
 <hr />
+<h2 id="j-quantsapi">J-QuantsAPIの日付指定一括取得とフェッチ優先度の変更<a class="headerlink" href="#j-quantsapi" title="Permanent link">&para;</a></h2>
+<p><strong>Date:</strong> 2026-03-01
+<strong>Status:</strong> Implemented</p>
+<h3 id="context_8">Context<a class="headerlink" href="#context_8" title="Permanent link">&para;</a></h3>
+<p><code>update_stocks_price.py</code> は約4000銘柄に対して個別に J-Quants API や他のソースを呼び出しており、1回の実行で数千リクエストが発生しボトルネックとなっていた。
+同時に、「Tachibana → Stooq（fallback）→ J-Quants（常に取得＆上書き）」という古いフェッチ順序のままであり、精度・安定性から既に主力データソースとなっていた J-Quants の位置付けと合っていなかった。</p>
+<h3 id="decision_8">Decision<a class="headerlink" href="#decision_8" title="Permanent link">&para;</a></h3>
+<p><strong>1. J-Quants の日付指定一括取得（バルクフェッチ）の導入:</strong>
+*   J-Quants API v2 の <code>/v2/equities/bars/daily</code> に実装されている <code>date</code> パラメータを使用した全銘柄一括取得を <code>jquants.py</code> の <code>get_daily_quotes_bulk_by_date</code> として実装。
+*   <code>update_stocks_price.py</code> のメインループ実行前に、営業日ごとの全銘柄データを取得してメモリ上の辞書（<code>jq_bulk_dfs</code>）にキャッシュ。
+*   APIリクエスト数を約4,000回から、取得日数分（5〜7回）へと約99.8%削減。</p>
+<p><strong>2. 取得優先度の変更（J-Quants 先行フロー）:</strong>
+*   現在のフローを「J-Quants (キャッシュ優先・未取得時API) → 失敗時 Tachibana → 失敗時 Stooq」とし、成功したソースのデータを採用するように変更。
+*   複数ソースのマージ処理（<code>merge_jquants_priority</code>）を廃止し、よりシンプルで高速なフォールバック設計へ移行。</p>
+<h3 id="consequences_8">Consequences<a class="headerlink" href="#consequences_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>メリット</strong>:<ul>
+<li>APIリクエスト回数が激減し、大幅な処理時間の短縮とレート制限超過リスクの低減を実現。</li>
+<li>コードの構造がよりシンプルに（複雑なマージ処理の排除、フォールバックの明確化）。</li>
+</ul>
+</li>
+<li><strong>注意点</strong>:<ul>
+<li>J-Quants のバルクフェッチAPIが空応答などのエラーを返した場合、自動的に従来通りの個別APIおよび別ソースへのフォールバックに切り替わるため、耐障害性は維持されている。</li>
+</ul>
+</li>
+</ul>
 
 
 
